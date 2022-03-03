@@ -1,18 +1,35 @@
 databases:
-  - name: mysite
+  - name: mysite-prod
+    databaseName: mysite
+    user: mysite
+  - name: mysite-staging
     databaseName: mysite
     user: mysite
 
 services:
   - type: web
-    name: mysite
+    name: mysite prod
     env: python
     buildCommand: "./build.sh"
     startCommand: "gunicorn mysite.wsgi:application"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: mysite
+          name: mysite-prod
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+  - type: web
+    name: mysite staging
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn mysite.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mysite-staging
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
