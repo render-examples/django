@@ -9,6 +9,7 @@ services:
     env: python
     buildCommand: "./build.sh"
     startCommand: "gunicorn mysite.wsgi:application"
+    autoDeploy: false
     envVars:
       - key: DATABASE_URL
         fromDatabase:
