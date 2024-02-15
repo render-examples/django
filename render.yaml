@@ -1,19 +1,20 @@
 databases:
-  - name: mysite
+  - name: mysitedb
+    plan: free
     databaseName: mysite
     user: mysite
 
 services:
   - type: web
+    plan: free
     name: mysite
-    env: python
+    runtime: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn mysite.wsgi:application"
-    autoDeploy: false
+    startCommand: "python -m gunicorn mysite.asgi:application -k uvicorn.workers.UvicornWorker"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: mysite
+          name: mysitedb
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
