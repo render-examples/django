@@ -1,3 +1,4 @@
+
 """
 Django settings for mysite project.
 
@@ -36,6 +37,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 INSTALLED_APPS = [
     'render.apps.RenderConfig',
+    'digisig.apps.DigisigConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,13 +81,30 @@ WSGI_APPLICATION = 'sealquery.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
+if DEBUG == False:
+
+    DATABASES = {
     'default': dj_database_url.config(
         # TODO update this row to your proper connection string
         default='postgresql://postgres:postgres@localhost:5432/sealquery',
         conn_max_age=600
     )
-}
+    }
+
+else:
+
+    DATABASES = {
+        'default': {
+            'NAME': 'dbs',
+            'ENGINE': 'django.db.backends.postgresql',
+            'USER': 'postgres',
+            'PASSWORD': 'password',
+            'HOST': 'localhost',
+            'PORT': '5433',
+        }
+    }
+
+
 
 
 # Password validation
