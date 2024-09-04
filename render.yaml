@@ -2,7 +2,7 @@ databases:
   - name: dbs_production
     plan: free
     databaseName: dbs_production
-    user: digisig
+    user: postgres
 
 services:
   - type: web
