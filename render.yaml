@@ -1,20 +1,20 @@
 databases:
-  - name: mysitedb
+  - name: dbs_production
     plan: free
-    databaseName: mysite
-    user: mysite
+    databaseName: dbs_production
+    user: digisig
 
 services:
   - type: web
     plan: free
-    name: mysite
+    name: sealquery
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "python -m gunicorn mysite.asgi:application -k uvicorn.workers.UvicornWorker"
+    startCommand: "python -m gunicorn sealquery.asgi:application -k uvicorn.workers.UvicornWorker"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: mysitedb
+          name: dbs_production
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
