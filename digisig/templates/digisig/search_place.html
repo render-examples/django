@@ -1,0 +1,188 @@
+{% extends "sealquery/base.html" %}
+
+{% load static %}
+{% block content %}
+
+
+<!-- Leaflet stuff -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+	<div class="search-catalogue-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title"><h1>{{pagetitle}}</h1></div>
+
+	<div class="mainpage"></div>
+
+	<div class="guidance-bar">
+		<div class="div-caption">
+			Guidance Notes<button id="guidancebutton1" onclick="tbtoggle('guidance', 'guidancebutton1')" class="entity">+</button>
+		</div>
+	</div>
+
+	<div class="guidance" id="guidance" style="display:none;">
+		Under construction
+	</div>
+
+	<div class="results-bar">
+		<div class="div-caption">
+			Results ({{totaldisplay}} of {{totalrows}})<button id="resultsbutton1" onclick="tbtoggle('results', 'resultsbutton1')" class="entity">-</button>
+		</div>
+	</div>
+
+	<div class="results" id="results">
+		<div class="searchfilter">		
+			<div class="filter">
+			<h2>Filter</h2>
+			<form id="form" action="/search/places" method="post">
+		    	{% csrf_token %}
+				{{ form.non_field_errors }}
+				<div class="fieldWrapper">
+				    {{ form.region.errors }}
+				    <label for="{{ form.region.id_for_label }}">Region <a class="help" href="{% url 'entity' digisig_entity_number=10001347 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+				    {{ form.region }}
+				</div>
+				<div class="fieldWrapper">
+				    {{ form.county.errors }}
+				    <label for="{{ form.county.id_for_label }}">County <a class="help" href="{% url 'entity' digisig_entity_number=10001347 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+				    {{ form.county }}
+				</div>
+				<div class="fieldWrapper">
+			    	{{ form.location_name.errors }}
+			    	<label for="{{ form.location_name.id_for_label }}">Place Name <a class="help" href="{% url 'entity' digisig_entity_number=10001487 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+			    	{{ form.location_name }}
+				</div>
+				<div style="display: none" class="fieldWrapper">
+				    {{ form.pagination.errors }}
+				    <label  for="{{ form.pagination.id_for_label }}">Pagination</label>
+				    {{ form.pagination }}
+				</div>
+				<div class="fieldWrapper">
+		    		<input class="submit" type="submit" value="Submit">
+		    	</div>
+			    	<div class="fieldWrapper">
+			    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
+		    	</div>
+			</form>
+			</div>
+		</div>
+
+		<div class="searchresultsb">
+			<div>
+				<table>
+					<tr>
+						<th>Place</th>
+						<th>Seal count</th>
+					</tr>
+					{% for place in placeset %}
+					<tr>
+						<td><a href="{% url 'entity' digisig_entity_number=place.id_location %}">{{place.location}}</a></td>
+						<td>{{place.count}}</td>
+					</tr>
+					{% endfor %}		
+				</table>
+			</div>
+
+			<div class="item_map">
+				<div id="mapid2"> </div>
+			</div>		
+
+			<div class= "pagination" style="float: right;">
+				{% if pagecountercurrent > 1 %}
+				<button id="page_button_previous" onclick="page_button(-1)">Previous</button>
+				{% endif %}
+				<button id="page_button_1" onclick="page_button(1)">{{pagecountercurrent}}</button>
+				<button id="page_button_2" onclick="page_button(2)">{{pagecounternext}}</button>
+				<button id="page_button_2" onclick="page_button(3)">{{pagecounternextnext}}</button>
+				<button id="page_button_next" onclick="page_button(1)">Next</button>
+			</div>
+		</div>
+	</div>
+
+
+	{{ place_dict|json_script:"mapdata" }}
+
+<script>
+	//establishing the map
+	const longitude = '{{ center_long|safe }}';
+	const latitude = '{{ center_lat|safe }}';
+
+	console.log(latitude, longitude)
+
+	var geojsonFeature = JSON.parse(document.getElementById('mapdata').textContent);
+	var map = L.map('mapid2', {scrollWheelZoom:false}).setView([latitude,longitude], 4);
+
+	var layer = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+		subdomains: 'abcd',
+		maxZoom: 20
+	});
+
+
+	map.addLayer(layer);
+
+	L.geoJSON(geojsonFeature, {onEachFeature: onEachFeature}).addTo(map);
+
+function onEachFeature(feature, layer) {
+    // does this feature have a property named popupContent?
+    if (feature.properties && feature.properties.popupContent) {
+        layer.bindPopup(feature.properties.popupContent);
+    }
+	}
+
+function page_button(numberofpages) {
+	var pagevalue = document.getElementById("id_pagination").value;
+	pagevalue = parseInt(pagevalue) + numberofpages;
+	document.getElementById("id_pagination").value = pagevalue;
+	document.getElementById("form").submit(); 
+	}
+
+
+// enable the coroprate options if corporate option is selected
+	document.getElementById("id_region").onchange = function() {
+		//check to see if form has a value
+		var statusregion = document.getElementById('id_region').value;
+
+		if (statusregion == "0") {
+	    	document.getElementById('id_county').style="opacity:1";
+	   		document.getElementById("id_county").disabled = false;	    	
+	    	console.log("hi", statusgroup);
+
+	    } else {
+	    	document.getElementById('id_county').style="opacity:0.6";
+	   		document.getElementById("id_county").disabled = true;
+			document.getElementById("id_county").value = 0;    	
+		}
+	}
+
+	document.getElementById("id_county").onchange = function() {
+		//check to see if form has a value
+		var statusregion = document.getElementById('id_county').value;
+
+		if (statusregion == "0") {
+	    	document.getElementById('id_region').style="opacity:1";
+	   		document.getElementById("id_region").disabled = false;	    	
+	    	console.log("hi", statusgroup);
+
+	    } else {
+	    	document.getElementById('id_region').style="opacity:0.6";
+	   		document.getElementById("id_region").disabled = true;
+			document.getElementById("id_region").value = 0;    	
+		}
+	}
+
+
+
+
+function myFunction() {
+		document.getElementById("form").reset();
+	}
+</script>
+
+
+
+
+{% endblock %}
