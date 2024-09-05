@@ -1,0 +1,118 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<!-- My Javascript -->
+<script src="{% static 'js/main.js' %}"></script>
+
+<!-- jquery for ajax -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- font awesome stuff -->
+<script src="https://kit.fontawesome.com/1bf00dda24.js" crossorigin="anonymous"></script>
+
+<!-- google fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Carrois+Gothic&display=swap" rel="stylesheet">
+
+<title>Digisig</title>
+<meta charset="UTF-8">
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+<link rel="shortcut icon" type="image/png" href="{% static 'digisig/images/favicon.ico' %}"/>
+
+<!-- Django needs to have the background images reference directly, rather than in the CSS file -->
+<style>
+	.colophon {
+	background-image: url({% static "digisig/images/icons/Untitled-1.gif" %});
+	}
+	.home-banner {
+	background-image: url({% static "digisig/images/banner_v3.jpg" %});
+	}
+	.search-banner {
+	background-image: url({% static "digisig/images/IMGP9307_4.jpg" %});
+	}
+	.search-catalogue-banner {
+	background-image: url({% static "digisig/images/IMGP9870_v4.jpg" %}); 
+	}
+	.search-advanced-banner {
+	background-image: url({% static "digisig/images/map_v6.jpg" %}); 
+	}
+	.item-banner {
+	background-image: url({% static "digisig/images/DSC_0359_v2.jpg" %}); 
+	}
+	.seal-banner {
+	background-image: url({% static "digisig/images/base_2.jpg" %}); 		
+	}
+	.exhibit-banner {
+	background-image: url({% static "digisig/images/sbh_978_v3.jpg" %}); 		
+	}
+	.search-people-banner {
+	background-image: url({% static "digisig/images/SBH1266_v2.jpg" %}); 				
+	}
+
+
+#search1 {
+	background-image: url({% static 'digisig/images/IMGP9307_3b.jpg' %});
+}
+
+#search2 {
+  background-image: url({% static 'digisig/images/IMGP9870_v3.jpg' %});
+}
+
+#search3 {
+  background-image: url({% static 'digisig/images/SBH1266_v1.jpg' %});
+}
+
+</style>
+
+</head>
+
+
+<body onload="loadFunction()">
+
+<div class="grid">
+	<div class="colophon">v0.167 8/21/2024 
+</div>
+
+
+<nav class="global-nav" id="global-nav"> 
+  <div class="navbar" id="navbar">
+    <div class="subnav"> <a href="{% url 'index' %}">Home</a> </div>
+
+  </div>
+</nav>
+
+    <div class="donatelink">
+        <div class="donatelink">
+<form action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="business" value="B6V6EZXPFCVV2" />
+<input type="hidden" name="no_recurring" value="0" />
+<input type="hidden" name="item_name" value="Help keep this resource free and accessible by making a donation." />
+<input type="hidden" name="currency_code" value="USD" />
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+</form>
+        </div>
+    </div>
+
+
+  <div class="bannertext"><h1>Digital Sigillography Resource</h1><i>Register of Seal Catalogues, Seal Impressions, and Seal Matrices</i></div>
+
+	{% block content %}
+	{% endblock %}
+
+	<footer class="main-footer">
+	  <p><p xmlns:dct="http://purl.org/dc/terms/" xmlns:cc="http://creativecommons.org/ns#" class="license-text"><a rel="cc:attributionURL" property="dct:title" href="www.digisig.org">The Digital Sigillography Resource</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://orcid.org/0000-0002-9225-4934">John McEwan</a> is licensed under <a rel="license" href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" /><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" /></a></p></p>
+	</footer>
+
+</div>
+
+</body>
+
+</html>

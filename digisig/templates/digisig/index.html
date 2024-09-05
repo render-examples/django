@@ -1,41 +1,37 @@
-<!doctype html>
+{% extends "digisig/base.html" %}
+
 {% load static %}
 
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+{% block content %}
 
-    <title>Hello Django on Render!</title>
+    <div class="home-banner"></div> 
+    <div class="sidepanel-left"></div>
+    <div class="sidepanel-right"></div>
 
-    <link rel="stylesheet"
-            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-            integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
-            crossorigin="anonymous">
-</head>
-<body>
-<header class="container mt-4 mb-4">
-    <a href="https://render.com">
-        <img src="{% static "render/render.png" %}" alt="Render" class="mw-100">
-    </a>
-</header>
-<main class="container">
-    <div class="row text-center justify-content-center">
-        <div class="col">
-            <h1 class="display-4">Hello World and other folks!</h1>
+
+
+    <div id="digisigstats" style="color:black;">
+        <h2>Contents</h2>
+        <div id="digisigstatsbox">
+            <div> <span id="statistic">{{seal_total}}</span><br>Seals</div>
+            <div> <span id="statistic">{{manifestation_total}}</span><br>Impressions, Matrices and Casts</div>
+            <div> <span id="statistic"></span><br>Items</div>
+            <div> <span id="statistic">{{catalogue_total}}</span><br>Seal Descriptions</div>
         </div>
     </div>
 
-<div>
-{{pagetitle}}
-        {{manifestation_total}}
-        {{seal_total}}
-        {{item_total}}
-        {{catalogue_total}}
-</div>
+    <div id="digisigblock1"></div>
+    <div id="digisigtextblock1">
+        <h2>The Digisig Project</h2>
+        <p>Seals</a> are an important part of cultural heritage, but they can be difficult for reseachers to discover and access using the existing reference works, catalogues and finding aids. Digisig helps researchers discover what seals survive, determine where they are located, and find out who has recorded and described them.</p>
+    </div>
+
+    <div id="digisigtextblock2">
+            <h2></h2> 
+        <div class="youtube-container">
+            <iframe class="youtube-iframe" src="https://www.youtube.com/embed/fAmMXzYXaeU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
 
 
-</main>
-</body>
-</html>
+{% endblock %}

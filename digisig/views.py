@@ -22,14 +22,14 @@ def index(request):
 
     manifestation_total = Manifestation.objects.count()
     seal_total = Seal.objects.count()
-    item_total = Manifestation.objects.distinct('fk_support__fk_part__fk_item').count()
+    #item_total = Support.objects.distinct('fk_part__fk_item').count()
     catalogue_total = Sealdescription.objects.count()
 
     context = {
         'pagetitle': pagetitle,
         'manifestation_total': manifestation_total,
         'seal_total': seal_total,
-        'item_total': item_total,
+        #'item_total': item_total,
         'catalogue_total': catalogue_total,
         }
 
