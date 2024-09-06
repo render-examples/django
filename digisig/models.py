@@ -1504,6 +1504,58 @@ class TbIndex(models.Model):
         db_table = 'tb_index'
 
 
+class Terminology(models.Model):
+    term_number = models.IntegerField()
+    term_name = models.TextField(blank=True, null=True)
+    term_notation = models.TextField(blank=True, null=True)
+    term_definition = models.TextField(blank=True, null=True)
+    term_title = models.TextField(blank=True, null=True)
+    level = models.IntegerField(blank=True, null=True)
+    level1 = models.IntegerField(blank=True, null=True)
+    level2 = models.IntegerField(blank=True, null=True)
+    level3 = models.IntegerField(blank=True, null=True)
+    level4 = models.IntegerField(blank=True, null=True)
+    level5 = models.IntegerField(blank=True, null=True)
+    level6 = models.IntegerField(blank=True, null=True)
+    level7 = models.IntegerField(blank=True, null=True)
+    level8 = models.IntegerField(blank=True, null=True)
+    level9 = models.IntegerField(blank=True, null=True)
+    level10 = models.IntegerField(blank=True, null=True)
+    fk_seal_example = models.IntegerField(blank=True, null=True)
+    term_printphrase = models.TextField(blank=True, null=True)
+    printindex = models.TextField(blank=True, null=True)
+    term_sortorder = models.IntegerField(blank=True, null=True)
+    datasetwales = models.BooleanField(blank=True, null=True)
+    datasetlondon = models.BooleanField(blank=True, null=True)
+    stub = models.TextField(blank=True, null=True)
+    fk_face_example = models.IntegerField(blank=True, null=True)
+    fk_representation_example = models.IntegerField(blank=True, null=True)
+    id_term = models.AutoField(primary_key=True)
+    term_deprecated = models.BooleanField(blank=True, null=True)
+    aat = models.IntegerField(blank=True, null=True)
+    cidoc_crm = models.IntegerField(blank=True, null=True)
+    term_type = models.IntegerField(blank=True, null=True)
+    fk_digisig = models.IntegerField(blank=True, null=True)
+    digisig_column = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.term_name
+
+    class Meta:
+        managed = False
+        db_table = 'terminology'
+
+
+class Terminologyexample(models.Model):
+    id_terminologyexample = models.AutoField(primary_key=True)
+    fk_terminology = models.ForeignKey('Terminology', models.DO_NOTHING, related_name="fk_terminology", db_column='fk_terminology', blank=True, null=True)
+    fk_representation = models.ForeignKey('Representation', models.DO_NOTHING, related_name="fk_representation", db_column='fk_representation', blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'terminology_example'
+
+
 class TimegroupC(models.Model):
     pk_timegroup_c = models.AutoField(primary_key=True)
     timegroup_c = models.IntegerField(blank=True, null=True)

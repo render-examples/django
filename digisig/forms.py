@@ -1,6 +1,6 @@
 from django import forms
-from django.db.models import Count
-from django.db.models import Q
+# from django.db.models import Count
+# from django.db.models import Q
 
 from .models import * 
 
@@ -22,14 +22,14 @@ for e in Repository.objects.order_by('repository_fulltitle'):
 	repositories_options.append((e.fk_repository, e.repository_fulltitle))
 
 for e in Series.objects.order_by('series_name').distinct('series_name'):
-	appendvalue = e.repository + " : " + e.series_name
-	series_options.append((e.fk_series, appendvalue))
+	appendvalue = str(e.fk_repository) + " : " + e.series_name
+	series_options.append((e.pk_series, appendvalue))
 
 for e in Region.objects.order_by('region_label').distinct('region_label'):
-	location_options.append((e.fk_region, e.region_label))
+	location_options.append((e.pk_region, e.region_label))
 
 for e in Nature.objects.order_by('nature_name').distinct('nature_name'):
-	nature_options.append((e.fk_nature, e.nature_name))
+	nature_options.append((e.pk_nature, e.nature_name))
 
 for e in RepresentationType.objects.order_by('representation_type').distinct('representation_type').exclude(pk_representation_type=5):
 	representation_options.append((e.pk_representation_type, e.representation_type))
@@ -38,10 +38,10 @@ for e in TimegroupC.objects.order_by('pk_timegroup_c'):
 	timegroup_options.append((e.timegroup_c, e.timegroup_c_range))
 
 for e in Shape.objects.order_by('shape').distinct('shape'):
-	shape_options.append((e.fk_shape, e.shape))
+	shape_options.append((e.pk_shape, e.shape))
 
-for e in Class.objects.order_by('class_name').distinct('class_name'):
-	classname_options.append((e.fk_class, e.class_name))
+for e in Terminology.objects.filter(term_type=1).order_by('term_name').distinct('term_name'):
+	classname_options.append((e.id_term, e.term_name))
 
 class ManifestationForm(forms.Form):
 	repository = forms.ChoiceField(choices=repositories_options, required=False)

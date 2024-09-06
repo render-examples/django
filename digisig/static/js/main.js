@@ -124,9 +124,9 @@ function tbtoggle2(id, button) {
   }
 
 
-function loadFunction() {
-  console.log("start"); 
-}
+// function loadFunction() {
+//   console.log("start"); 
+// }
 
 //Handling the modal images on pages 
 function image(id){
