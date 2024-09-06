@@ -1642,10 +1642,10 @@ def nextdescriptionget(currentsealdescription):
 	return("Nothing returned -- return should actually come from the for loop")
 
 
-def paginatorJM(currentpage, targetobject):
+def paginatorJM(currentpage, totalrows, targetobject):
 
 	# preparing the data for the pagecounter
-	totalrows = len(targetobject)
+	# totalrows = len(targetobject)
 
 	qpaginationend = int(currentpage) * 10
 	qpaginationstart = int(qpaginationend) - 9 
@@ -1667,7 +1667,7 @@ def paginatorJM(currentpage, targetobject):
 	pagecounternext = int(currentpage)+1
 	pagecounternextnext = int(currentpage)+2
 
-	return(pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, targetobject)
+	return(pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay)
 
 
 def rdf_generate(digisig_entity_number):
