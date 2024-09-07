@@ -195,6 +195,8 @@ def search(request, searchtype):
 				'fk_support__fk_attachment').select_related(
 				'fk_support__fk_supportstatus').select_related(
 				'fk_support__fk_nature').select_related(
+				'fk_imagestate').select_related(
+				'fk_position').select_related(
 				'fk_support__fk_part__fk_event').order_by(
 				'id_manifestation')[:10]
 
