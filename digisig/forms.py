@@ -15,6 +15,19 @@ shape_options = [('', 'None')]
 classname_options = [('', 'None')]
 group_options = [('', 'None')]
 
+manifestation_object = Manifestation.objects.all().select_related(
+	'fk_face__fk_seal').select_related(
+	'fk_support__fk_part__fk_item__fk_repository').select_related(
+	'fk_support__fk_number_currentposition').select_related(
+	'fk_support__fk_attachment').select_related(
+	'fk_support__fk_supportstatus').select_related(
+	'fk_support__fk_nature').select_related(
+	'fk_imagestate').select_related(
+	'fk_position').select_related(
+	'fk_support__fk_part__fk_event')
+
+
+
 for e in Printgroup.objects.order_by('printgroup_order'):
 	group_options.append((e.pk_printgroup, e.printgroup))
 
