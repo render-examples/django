@@ -25,7 +25,8 @@ def index(request):
 
 	manifestation_total = Manifestation.objects.count()
 	seal_total = Seal.objects.count()
-	item_total = Support.objects.distinct('fk_part__fk_item').count()
+	#item_total = Support.objects.distinct('fk_part__fk_item').count()
+	item_total = 53408
 	catalogue_total = Sealdescription.objects.count()
 
 	context = {

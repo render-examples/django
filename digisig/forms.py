@@ -26,7 +26,7 @@ manifestation_object = Manifestation.objects.all().select_related(
 	'fk_position').select_related(
 	'fk_support__fk_part__fk_event')
 
-
+group_options = Printgroup.
 
 for e in Printgroup.objects.order_by('printgroup_order'):
 	group_options.append((e.pk_printgroup, e.printgroup))
