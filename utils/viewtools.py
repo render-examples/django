@@ -114,7 +114,9 @@ def sealsearchmanifestationmetadata(manifestation_object):
 
 	manifestation_set = {}
 
-	for e in manifestation_object:
+	manifestation_object2 = manifestation_object.prefetch_related('fk_manifestation').all()
+
+	for e in manifestation_object2:
 		starttime = time()
 		manifestation_dic = {}
 		manifestation_dic["manifestation"] = e
