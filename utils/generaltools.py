@@ -31,10 +31,10 @@ import shutil
 
 def seriesset():
 	# code prepares the array of series and repositories to pass to the frontend
-	series_set = Series.objects.all()
-	series_object = []
-	for g in series_set:
-		series_object.append((g.pk_series, g.fk_repository))
+	# series_set = Series.objects.all()
+	# series_object = []
+	# for g in series_set:
+	# 	series_object.append((g.pk_series, g.fk_repository))
 
 	series_object = serializers.serialize('json', Series.objects.all(), fields=('pk_series','fk_repository'))
 

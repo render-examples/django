@@ -208,7 +208,7 @@ def search(request, searchtype):
 		pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay = paginatorJM(qpagination, totalrows, manifestation_object)
 
 		## prepare the data for each displayed seal manifestation
-		manifestation_set = manifestationmetadata(manifestation_object)
+		manifestation_set = sealsearchmanifestationmetadata(manifestation_object)
 
 	# code prepares the array of series and repositories to pass to the frontend
 		series_object= seriesset()
