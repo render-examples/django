@@ -5,6 +5,8 @@ from django.urls import reverse
 from datetime import datetime
 from time import time
 # from django.core.paginator import Paginator
+from django.db.models import Prefetch
+
 
 from .models import *
 from .forms import * 
@@ -199,7 +201,8 @@ def search(request, searchtype):
 				'fk_imagestate').select_related(
 				'fk_position').select_related(
 				'fk_support__fk_part__fk_event').order_by(
-				'id_manifestation')[:10]
+				'id_manifestation').prefetch_related(
+				Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1)))[:10]
 
 			totalrows = Manifestation.objects.count()			
 			form = ManifestationForm()

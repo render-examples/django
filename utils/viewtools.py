@@ -1,5 +1,6 @@
 from digisig.models import * 
 from django.shortcuts import get_object_or_404
+from django.db.models import Prefetch
 
 from time import time
 
@@ -114,9 +115,10 @@ def sealsearchmanifestationmetadata(manifestation_object):
 
 	manifestation_set = {}
 
-	manifestation_object2 = manifestation_object.prefetch_related('fk_manifestation').all()
+	#https://medium.com/codeptivesolutions/prefetch-related-and-select-related-in-django-90f07a2379c0
+	#manifestation_object2 = manifestation_object.prefetch_related(Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1))).all()
 
-	for e in manifestation_object2:
+	for e in manifestation_object:
 		starttime = time()
 		manifestation_dic = {}
 		manifestation_dic["manifestation"] = e
