@@ -181,7 +181,7 @@
 
 
 		<div class="figure">
-			{% if m.representation_thumbnail != null %}
+			{% if m.representation_thumbnail_hash != null %}
 			<figure>
 				<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{m.thumb}}{{m.representation_thumbnail_hash}}" alt="{{m.id_representation}}" onclick="image({{forloop.counter}})">
 			</figure>
