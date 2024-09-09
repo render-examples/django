@@ -202,7 +202,8 @@ def search(request, searchtype):
 				'fk_position').select_related(
 				'fk_support__fk_part__fk_event').order_by(
 				'id_manifestation').prefetch_related(
-				Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1)))[:10]
+				Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1))).prefetch_related(
+				Prefetch('sealdescription', queryset=Sealdescription.objects.select_related('fk_seal')))[:10]
 
 			totalrows = Manifestation.objects.count()			
 			form = ManifestationForm()
