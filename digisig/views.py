@@ -585,62 +585,91 @@ def item_page(request, digisig_entity_number):
 	starttime = time()
 	authenticationstatus = "public"
 
-	item_object = get_object_or_404(Item, id_item=digisig_entity_number)
-	repository = item_object.fk_repository
-	pagetitle = repository.repository_fulltitle + " " + item_object.shelfmark
+	manifestation_object = Manifestation.objects.filter(fk_support__fk_part__fk_item=digisig_entity_number).select_related(
+		'fk_face__fk_seal').select_related(
+		'fk_support__fk_part__fk_item__fk_repository').select_related(
+		'fk_support__fk_number_currentposition').select_related(
+		'fk_support__fk_attachment').select_related(
+		'fk_support__fk_supportstatus').select_related(
+		'fk_support__fk_nature').select_related(
+		'fk_imagestate').select_related(
+		'fk_position').select_related(
+		'fk_support__fk_part__fk_event').order_by(
+		'id_manifestation').prefetch_related(
+		Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1))).order_by(
+		"fk_support__fk_number_currentposition")
 
-	if request.user.is_authenticated:
-		authenticationstatus = "authenticated"
+	firstmanifestation = manifestation_object.first()
+	item_object = firstmanifestation.fk_support.fk_part.fk_item
+	part_object = firstmanifestation.fk_support.fk_part
+	event_object = firstmanifestation.fk_support.fk_part.fk_event
 
-		location, location_dict, event_dic = eventset_data(item_object.id_item)
+	pagetitle = item_object.fk_repository.repository_fulltitle + " " + item_object.shelfmark
 
-		place_object = event_dic["location"]
-		mapdic = mapgenerator(place_object, 0)
-		externallinkset = externallinkgenerator(digisig_entity_number)
+	location, location_dict, event_dic = eventset_data(event_object, part_object)
 
-		#for part images (code to show images not implemented yet)
-		representationset = []
-		part_object = Part.objects.filter(fk_item=item_object.id_item).values("id_part")
-		representation_part = Representation.objects.filter(fk_digisig__in=part_object)
+	place_object = event_dic["location"]
+	mapdic = mapgenerator(place_object, 0)
+	externallinkset = externallinkgenerator(digisig_entity_number)
+
+	#for part images (code to show images not implemented yet)
+	representationset = []
+
+	try: 
+		representation_part = Representation.objects.filter(fk_digisig__in=part_object).select_related
 		representationset = representation_photographs(representation_part)
 
-		#find manifestations associated with item
-		manifestation_object = Manifestation.objects.filter(fk_support__fk_item=digisig_entity_number).order_by("fk_support__fk_number_currentposition")
 
-		## prepare the data for each displayed seal manifestation
-		manifestationset = manifestationmetadata(manifestation_object)
-		#print (manifestationset)
-		totalrows = len(manifestationset)
-		totaldisplay = len(manifestationset)
 
-		print("Compute Time:", time()-starttime)
 
-		template = loader.get_template('digisig/item.html')
-		context = {
-			'pagetitle': pagetitle,
-			'authenticationstatus': authenticationstatus,
-			'item_object': item_object,
-			'event_dic': event_dic,
-			'mapdic': mapdic,
-			'representationset': representationset,
-			'manifestation_set': manifestationset,
-			'totalrows': totalrows,
-			'totaldisplay': totaldisplay,
-			'externallink_object': externallinkset,
-			'location': location,
-			'location_dict': location_dict,
-			}
 
-	else:
 
-		print("Compute Time:", time()-starttime)
 
-		template = loader.get_template('digisig/item_simple.html')
-		context = {
-			'pagetitle': pagetitle,
-			'authenticationstatus': authenticationstatus,
-			'item_object': item_object,
-			}
+
+
+
+
+
+
+
+
+
+	#find manifestations associated with item
+	#manifestation_object = Manifestation.objects.filter(fk_support__fk_item=digisig_entity_number).order_by("fk_support__fk_number_currentposition")
+
+	## prepare the data for each displayed seal manifestation
+	manifestationset = manifestationmetadata(manifestation_object)
+	totalrows = len(manifestationset)
+	totaldisplay = len(manifestationset)
+
+	print("Compute Time:", time()-starttime)
+
+	template = loader.get_template('digisig/item.html')
+	context = {
+		'pagetitle': pagetitle,
+		'authenticationstatus': authenticationstatus,
+		'item_object': item_object,
+		'event_dic': event_dic,
+		'mapdic': mapdic,
+		'representationset': representationset,
+		'manifestation_set': manifestationset,
+		'totalrows': totalrows,
+		'totaldisplay': totaldisplay,
+		'externallink_object': externallinkset,
+		'location': location,
+		'location_dict': location_dict,
+		}
+
+	# else:
+
+	# 	print("Compute Time:", time()-starttime)
+
+	# 	template = loader.get_template('digisig/item_simple.html')
+	# 	context = {
+	# 		'pagetitle': pagetitle,
+	# 		'authenticationstatus': authenticationstatus,
+	# 		'item_object': item_object,
+	# 		}
 
 	return HttpResponse(template.render(context, request))
 
