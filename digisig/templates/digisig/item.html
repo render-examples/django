@@ -129,11 +129,6 @@
 		{% for m in manifestation_set.values %}
 			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
 				<th colspan="2"><h4><a class="headingbtn"  href="{% url 'entity' m.id_manifestation %}">{{m.imagestate_term}} details</a></h4></th>
-				<td>
-					{% if authenticationstatus == "authenticated" %}
-					<button class="permalink"><a href=><a href="{% url 'edit_manifestation' digisig_entity_number=m.id_manifestation %}" target="_blank">Edit</a></button>
-					{% endif %} 
-				</td>
  			</tr>
 
 
@@ -165,7 +160,6 @@
 						{% endif %}
 					</div>
 				</td>
-
 			</tr>
 
 			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}

@@ -613,33 +613,97 @@ def item_page(request, digisig_entity_number):
 	externallinkset = externallinkgenerator(digisig_entity_number)
 
 	#for part images (code to show images not implemented yet)
-	representationset = []
+	representationset = {}
 
 	try: 
-		representation_part = Representation.objects.filter(fk_digisig__in=part_object).select_related
-		representationset = representation_photographs(representation_part)
+		representation_part = Representation.objects.filter(fk_digisig=part_object.id_part).select_related('fk_connection')
 
+		for t in representation_part:
+			#Holder for representation info
+			representation_dic = {}
 
+			#for all images
+			connection = t.fk_connection
+			representation_dic["connection"] = t.fk_connection
+			representation_dic["connection_thumb"] = t.fk_connection.thumb
+			representation_dic["connection_medium"] = t.fk_connection.medium
+			representation_dic["representation_filename"] = t.representation_filename_hash
+			representation_dic["representation_thumbnail"] = t.representation_thumbnail_hash
+			representation_dic["id_representation"] = t.id_representation 
+			representation_dic["fk_digisig"] = t.fk_digisig
+			representation_dic["repository_fulltitle"] = item_object.fk_repository.repository_fulltitle
+			representation_dic["shelfmark"] = item_object.shelfmark
+			representation_dic["fk_item"] = item_object.id_item
+			representationset[t.id_representation] = representation_dic
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-	#find manifestations associated with item
-	#manifestation_object = Manifestation.objects.filter(fk_support__fk_item=digisig_entity_number).order_by("fk_support__fk_number_currentposition")
+	except:
+		print ('no image of document available')
 
 	## prepare the data for each displayed seal manifestation
-	manifestationset = manifestationmetadata(manifestation_object)
-	totalrows = len(manifestationset)
+
+	manifestationset = {}
+
+	for e in manifestation_object:
+		manifestation_dic = {}
+		facevalue = e.fk_face
+		sealvalue = facevalue.fk_seal
+		supportvalue = e.fk_support
+		numbervalue = supportvalue.fk_number_currentposition
+		partvalue = supportvalue.fk_part
+		eventvalue = partvalue.fk_event
+		itemvalue = partvalue.fk_item
+		repositoryvalue = itemvalue.fk_repository
+		representation_set = Representation.objects.filter(fk_manifestation=e.id_manifestation).filter(primacy=1)[:1]
+
+		print ("len rep set:", representation_set.count())
+		if representation_set.count() == 0:
+			print ("no image available for:", e.id_manifestation)
+			representation_set = Representation.objects.filter(id_representation=12204474)
+
+		sealdescription_set = Sealdescription.objects.filter(fk_seal=facevalue.fk_seal)
+
+		manifestation_dic["manifestation"] = e
+		manifestation_dic["id_manifestation"] = e.id_manifestation
+		manifestation_dic["fk_position"] = e.fk_position
+
+		manifestation_dic["id_seal"] = sealvalue.id_seal
+		manifestation_dic["id_item"] = itemvalue.id_item
+		manifestation_dic["repository_fulltitle"] = repositoryvalue.repository_fulltitle
+		manifestation_dic["shelfmark"] = itemvalue.shelfmark
+		manifestation_dic["fk_supportstatus"] = supportvalue.fk_supportstatus
+		manifestation_dic["fk_attachment"] = supportvalue.fk_attachment		
+		manifestation_dic["number"] = numbervalue.number
+		manifestation_dic["support_type"] = supportvalue.fk_nature
+		manifestation_dic["label_manifestation_repository"] = e.label_manifestation_repository
+		manifestation_dic["imagestate_term"] = e.fk_imagestate
+		manifestation_dic["partvalue"] = partvalue.id_part
+
+		#take the repository submitted date in preference to the Digisig date
+		if eventvalue.repository_startdate:
+			manifestation_dic["repository_startdate"] = eventvalue.repository_startdate
+		else:
+			manifestation_dic["repository_startdate"] = eventvalue.startdate 
+
+		if eventvalue.repository_enddate:
+			manifestation_dic["repository_enddate"] = eventvalue.repository_enddate
+		else:
+			manifestation_dic["repository_enddate"] = eventvalue.enddate
+
+		for r in representation_set:
+			connection = r.fk_connection
+			manifestation_dic["thumb"] = connection.thumb
+			manifestation_dic["medium"] = connection.medium
+			manifestation_dic["representation_thumbnail_hash"] = r.representation_thumbnail_hash
+			manifestation_dic["representation_filename_hash"] = r.representation_filename_hash 
+			manifestation_dic["representation_thumbnail"] = r.representation_thumbnail
+			manifestation_dic["representation_filename"] = r.representation_filename
+			manifestation_dic["id_representation"] = r.id_representation
+
+		manifestation_dic["sealdescriptions"] = sealdescription_set
+
+		manifestationset[e.id_manifestation] = manifestation_dic
+
+	totalrows = len(manifestation_object)
 	totaldisplay = len(manifestationset)
 
 	print("Compute Time:", time()-starttime)
@@ -652,7 +716,7 @@ def item_page(request, digisig_entity_number):
 		'event_dic': event_dic,
 		'mapdic': mapdic,
 		'representationset': representationset,
-		'manifestation_set': manifestationset,
+		'manifestationset': manifestationset,
 		'totalrows': totalrows,
 		'totaldisplay': totaldisplay,
 		'externallink_object': externallinkset,

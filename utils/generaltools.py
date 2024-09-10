@@ -1276,7 +1276,6 @@ def externallinkgenerator(digisig_entity_number):
 def eventset_data(event_object, part_object):
 	event_dic = {}
 
-	# part_object = Part.objects.filter(fk_item = item_object).first()
 	event_dic["part_object"] = part_object
 
 	if event_object.repository_startdate is not None: 
@@ -1313,11 +1312,13 @@ def eventset_data(event_object, part_object):
 	event_dic["location_latitude"] = location_latitude 
 
 	reference_dict = {}
-	referenceset = Referenceindividual.objects.filter(fk_event=part_object.fk_event).order_by("fk_referencerole__role_order", "pk_referenceindividual")
+	referenceset = Referenceindividual.objects.filter(
+		fk_event=part_object.fk_event).order_by(
+		"fk_referencerole__role_order", "pk_referenceindividual").select_related(
+		'fk_individual').select_related(
+		'fk_referencerole')
 
 	event_dic["referenceset"] = referenceset
-
-	print (event_dic)
 
 	return(location, location_dict, event_dic)
 
