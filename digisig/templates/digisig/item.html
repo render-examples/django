@@ -126,7 +126,7 @@
 
 		<div>
 		<table id="entity1" style="display:none;">
-		{% for m in manifestation_set.values %}
+		{% for m in manifestationset.values %}
 			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
 				<th colspan="2"><h4><a class="headingbtn"  href="{% url 'entity' m.id_manifestation %}">{{m.imagestate_term}} details</a></h4></th>
  			</tr>

@@ -56,3 +56,6 @@ class ManifestationForm(forms.Form):
 	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
 	group = forms.ChoiceField(choices=group_options, required=False, initial={'': 'None'})
 
+
+class PageCycleForm(forms.Form):
+	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)

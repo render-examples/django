@@ -1,0 +1,209 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+{% block content %}
+
+
+<!-- Leaflet stuff -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+
+	<div class="main-title">
+		<h1>{{pagetitle}}</h1>
+	</div>
+
+	<div class="mainpage"></div>
+
+	<div class="entity_detail" id="entity_detail">
+		<h3>Place details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3>
+		<table>
+			<tr>
+				<th>Place</th>
+				<td>{{place_object.location}}</td>
+			</tr>
+			<tr>
+				<th>Coordinates </th>
+				<td>{{place_object.longitude}}, {{place_object.latitude}}</td>
+			</tr>
+		</table>
+		<div class="item_map">
+			<div id="mapid"></div>
+		</div>	
+	</div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{place_object.id_location}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+
+
+	<div class="entity_seals" id="entity_seals">
+		<!-- Code taken verbatim from search seal page -->
+		<div class="div-caption">
+			Impressions, matrices, casts ({{totalrows}})
+			<button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">
+			{% if displaystatus == 1 %} 
+			+
+			{% else %}
+			-
+			{% endif %}
+			</button>
+		</div>
+		<div> 
+			{% if displaystatus == 1 %} 
+				<table id="entity1" style="display:none;">
+			{% else %}
+				<table id="entity1">
+			{% endif %}
+	
+				<tr class="info">
+					<td class="totalrows" colspan="3">Showing {{totaldisplay}} of {{totalrows}}</td>
+				</tr>
+
+		{% for m in manifestation_set.values %}
+
+			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+				<th class="indent">Held by </th>
+				<td>{{m.repository_fulltitle}}</td>
+				<td rowspan="5" style="text-align:center;">
+					<div class="figure">
+						{% if m.representation_thumbnail_hash != null %}
+						<figure>
+							<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{m.thumb}}{{m.representation_thumbnail_hash}}" alt="{{m.id_representation}}" onclick="image({{forloop.counter}})">
+						</figure>
+
+						<!-- The Modal -->
+						<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
+						  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
+						  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{m.medium}}{{m.representation_filename_hash}}" alt="{{m.id_representation}}">
+						  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' m.id_representation %}">Representation details</a></div>
+						</div>
+
+						{% endif %}
+					</div>
+				</td>				
+			</tr>
+
+			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+				<th class="indent">Part of item</th>
+				<td><a href="{% url 'item_page' digisig_entity_number=m.id_item %}">{{m.shelfmark}}</a>
+				{% if m.number != 'Undetermined'%}(seal {{m.number}}){% endif %}
+				</td>
+			</tr>
+
+			{% if m.label_manifestation_repository != null %}
+							{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+				<th class="indent">Reference<a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+				<td>{{m.label_manifestation_repository}}
+				</td>
+			</tr>
+			{% endif %}
+
+			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+				{% if m.repository_location != null %}
+				<th class="indent">Place </th>
+				<td><a href="{% url 'place_page' digisig_entity_number=m.id_location %}">{{m.repository_location}}</a></td>
+				{% endif %}
+			</tr>
+
+							{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+				{% if m.repository_startdate != null %}
+				<th class="indent">Date</th>
+				<td>{{m.repository_startdate}}
+				{% if m.repository_enddate != null %}- {{m.repository_enddate}}{% endif %}</td>
+				{% endif %}
+			</tr>
+
+							{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+				<th class="finalrow indent">Example of </th>
+				<td><a href="{% url 'seal_page' digisig_entity_number=m.id_seal %}">Seal details</a></td>
+			</tr>
+
+
+		{% endfor %}
+
+				{% if totalrows > 9 %}
+				<tr>
+					<th></th>
+					<td colspan="2" style="text-align:right;">
+						<div class= "pagination">
+								{% if pagecountercurrent > 1 %}
+							<button id="page_button_previous" onclick="page_button(-1)">Previous</button>
+								{% endif %}
+							<button id="page_button_1" onclick="page_button(1)">{{pagecountercurrent}}</button>
+							<button id="page_button_2" onclick="page_button(2)">{{pagecounternext}}</button>
+							<button id="page_button_2" onclick="page_button(3)">{{pagecounternextnext}}</button>
+							<button id="page_button_next" onclick="page_button(1)">Next</button>
+						</div>
+					</td>
+				</tr>
+				{% endif %}
+
+			</table>	
+		</div>
+	</div>
+
+	<div style="display: none">
+		<form id="form" action="/page/place/{{place_object.id_location}}" method="post">
+	    	{% csrf_token %}
+	    	{{ form.non_field_errors }}
+			<div style="display: none" class="fieldWrapper">
+			    {{ form.pagination.errors }}
+			    <label  for="{{ form.pagination.id_for_label }}">Pagination</label>
+			    {{ form.pagination }}
+			</div>
+		</form>
+	</div>
+
+	{{ mapdic|json_script:"mapdata" }}
+
+<script>
+function onEachFeature(feature, layer) {
+    // does this feature have a property named popupContent?
+    if (feature.properties && feature.properties.popupContent) {
+        layer.bindPopup(feature.properties.popupContent);
+    }
+}
+
+	const longitude = '{{ place_object.longitude|safe }}';
+	const latitude = '{{ place_object.latitude|safe }}';
+
+	var geojsonFeature = JSON.parse(document.getElementById('mapdata').textContent);
+	var mymap = L.map('mapid', {scrollWheelZoom:false}).setView([latitude,longitude], 4);	
+
+	var layer = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+		subdomains: 'abcd',
+		maxZoom: 20
+	});
+	mymap.addLayer(layer);
+	
+	L.geoJSON(geojsonFeature, {onEachFeature: onEachFeature}).addTo(mymap);
+
+
+
+// allow the user to select a new set of pages 
+function page_button(numberofpages) {
+	var pagevalue = document.getElementById("id_pagination").value;
+	pagevalue = parseInt(pagevalue) + numberofpages;
+	document.getElementById("id_pagination").value = pagevalue;
+	document.getElementById("form").submit(); 
+}
+
+</script>
+
+
+{% endblock %}

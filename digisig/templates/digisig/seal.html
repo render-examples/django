@@ -1,0 +1,164 @@
+{% extends "sealquery/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="seal-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+
+	<div class="main-title">
+		<h1>Seal</h1>
+	</div>
+
+	<div class="mainpage" id="mainpage"></div>
+
+	<div class="entity_detail" id="entity_detail">
+		<h3>Seal details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3>
+		<table>
+			<tr>
+				<th>Date <a class="help" href="{% url 'entity' digisig_entity_number=10001357 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+				<td>
+					{% if seal_info.seal.date_origin < 1 %} Not Available						
+					{% else %} c.{{seal_info.seal.date_origin}}
+					{% endif %}</td>
+			</tr>
+			<tr>
+				<th>Actor</th>
+				<td>
+					{% if seal_info.seal.fk_individual_realizer != 10000019 %}
+						<a href="{% url 'entity' digisig_entity_number=seal_info.seal.fk_individual_realizer.id_individual %}">{{seal_info.actor_label}}</a>
+					{% endif %}
+				</td>
+			</tr>
+
+			<tr>
+				<th>Class (obverse)</th>
+				<td>
+					{% for c, value in seal_info.obverse.items %} 
+						{% if forloop.first %}<a href="" target="_blank">{{value}}</a>
+						{% else %}, <a href="" target="_blank">{{value}}</a>{% endif %}
+					{% endfor %}
+				</td>
+			</tr>
+			
+			{% if seal_info.reverse != null %}
+			<tr>
+				<th>Class (reverse)</th>
+				<td>
+					{% for c, value in seal_info.reverse.items %} 
+						{% if forloop.first %}<a href="" target="_blank">{{value}}</a>
+						{% else %}, <a href="" target="_blank">{{value}}</a>{% endif %}
+					{% endfor %}
+				</td>
+			</tr>
+			{% endif %}
+
+			{% for description in seal_info.sealdescription_set %}
+			<tr>
+				{% if forloop.first %}<th>Described in <a class="help" href="{% url 'entity' digisig_entity_number=10001527 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+{% else %}<th></th>{% endif %}
+				<td> 
+					<a href="{% url 'entity' description.id_sealdescription %}">{{description.fk_collection.collection_shorttitle}}
+						{% if description.sealdescription_identifier != null %} ({{description.sealdescription_identifier}}){% endif %}
+					</a>
+				</td>
+			</tr>
+			{% endfor%}
+		</table>
+	</div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{seal_info.seal.id_seal}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+		
+	<div class="entity_seals" id="entity_seals">
+		<div class="div-caption">
+			Impressions, Matrices and Casts <button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity1" style="display:none;">
+				<tr class="info">
+					<td class="totalrows" colspan="3">Showing {{seal_info.totalrows}} of {{seal_info.totalrows}}</td>
+				</tr>
+
+				{% for manifestation in seal_info.manifestation_set.values %}
+
+					{% ifchanged manifestation.manifestation.fk_support %}
+
+					{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+						<th colspan="2"><h4><a class="headingbtn" href="{% url 'entity' digisig_entity_number=manifestation.id_manifestation %}">Manifestation details</a></h4></th>
+													<td rowspan="4" style="text-align:center;">
+								{% if manifestation.representation_filename != null %}
+								<figure>
+									<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{manifestation.thumb}}{{manifestation.representation_thumbnail_hash}}" alt="{{manifestation.id_representation}}" onclick="image({{forloop.counter}})">
+								</figure>
+
+								<!-- The Modal -->
+								<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
+								  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
+								  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{manifestation.medium}}{{manifestation.representation_filename_hash}}" alt="{{manifestation.id_representation}}">
+								  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' manifestation.id_representation %}">Representation details</a></div>
+								</div>
+								{% endif %}
+							</td>
+					</tr>
+
+
+						{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+							<th class="indent">Held by</th>
+							<td>{{manifestation.repository_fulltitle}}</td>						
+						</tr>
+					
+
+					{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+						<th class="indent">Part of item</th>
+						<td><a href="{% url 'entity' digisig_entity_number=manifestation.id_item %}">{{manifestation.shelfmark}}</a>
+							{% if manifestation.number != null %}
+								{% if fk_number_currentposition < 100 %}, support {{manifestation.number}} {% endif %}{% endif %}
+						</td>
+					</tr>
+				
+					{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+						<th class="finalrow indent">Support Type</th>
+						<td>{% if manifestation.support_type != null %}{{manifestation.support_type}}{% endif %}</td>
+					</tr>
+
+					{% endifchanged %}
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+
+	<div class="entity_rdf">
+		<div hidden id="rdfajax">{% url 'ajax' digisig_entity_number=seal_info.seal.id_seal %}</div>
+		<div class="div-caption">
+			RDF 
+			<button id="entitybutton2" onclick="tbtoggle2('entity2', 'entitybutton2')" class="entity">+</button>
+			<button class="RDF-download"><a href="{% url 'data' digisig_entity_number=seal_info.seal.id_seal %}">Download</a></button> 
+		</div>
+		
+		<div>
+			<table id="entity2" style="display:none;">
+			<tr>
+				<th id="rdfelement">
+<!-- 					{% for line in rdftext %}
+					{{line}}<br>
+					{% endfor %}
+ -->				</th>
+			</tr>
+		</table>
+		</div>
+	</div>
+
+{% endblock %}

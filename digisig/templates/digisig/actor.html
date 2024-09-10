@@ -1,0 +1,200 @@
+{% extends "sealquery/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="search-people-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title"><h1>{{pagetitle}}</h1></div>
+
+	<div class="mainpage" id="maingpage"></div>
+
+	<div class="entity_detail" id="entity_detail">
+		<h3>Actor details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
+		<table>
+			{% if individual_object.fk_group.fk_group_class != null %}
+			<tr>
+				<th>Class</th>
+				<td>{{individual_object.fk_group.fk_group_class}}</td>
+			<tr>
+			{% endif %}
+	
+			{% if individual_object.fk_group.fk_group_order != null %}
+			<tr>
+				<th>Order</th>
+				<td>{{individual_object.fk_group.fk_group_order}}</td>
+			</tr>
+			{% endif %}				 
+		</table>
+	</div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{individual_object.id_individual}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+			
+	<div class="entity_seals" id="entity_seals"> 
+		{% if sealnumber > 0 %}
+
+		<div class="div-caption">
+			Seal details <button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity1" style="display:none;">
+			{% for seal in seal_object %}
+				<tr>
+					<th colspan="2"><h3><a class="headingbtn" href="{% url 'entity' digisig_entity_number=seal.0 %}">Seal details</a></h3></th>
+					<td rowspan="3">
+						{% if seal.2 != "Null" %}
+						<img class="modalimage" id="modalimagebase{{forloop.counter}}" loading="lazy" src="{{seal.1}}{{seal.2}}" alt="{{seal.3}}" onclick="image({{forloop.counter}})">
+
+					<!-- The Modal -->
+						<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
+						  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
+						  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{seal.4}}{{seal.5}}" alt="{{seal.3}}">
+						  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' seal.3 %}">Representation details</a></div>
+						</div>
+						{% endif %}						
+					</td>
+				</tr>
+
+				{% if seal.6 != individual_object.id_individual %}
+				<tr>
+					<th class="indent">Actor</th>
+					<td>
+						{% if seal.9 != null %}{{seal.9}}, {% endif %}
+						{{seal.6}}
+					</td>
+				</tr>
+				{% endif %}
+
+				<tr>
+					<th class="indent">Date</th>
+					<td>c.{{seal.7}} {% if seal.8 > seal.7 %} to {{seal.8}} {% endif %}</td>
+				</tr>
+
+	 			{% for key1, val1, val2, val3 in sealdescriptionset %}
+					{% if key1 == seal.0 %}
+						<tr>
+							<th class="indent">{% cycle 'Described in' '' '' '' '' '' '' '' '' %}</th>
+							<td><a href="{% url 'entity' digisig_entity_number=val1 %}">{{val2}} ({{val3}})</a></td>
+						</tr>
+					{% endif %}
+				{% endfor %}
+				{% resetcycle %}
+
+			{% endfor %}
+			</table>
+		</div>
+
+		{% endif %}
+	</div>
+
+	{% if relationshipnumber > 0 %}
+	<div class="entity_relationship" id="entity_relationship">
+		<div class="div-caption">
+			Relationships <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
+		</div>
+
+		<div >
+			<table id="entity2" style="display:none;">
+			{% for relationship in relationship_object %}
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+					<td>{{relationship.relationship_role}} of 
+						<a href="{% url 'actor_page' digisig_entity_number=relationship.person2 %}">
+							{% if relationship.group_name != null %}{{relationship.group_name}}{% endif %}
+							{% if relationship.groupclass != null %} ({{relationship.groupclass}}){% endif %}
+							{% if relationship.grouporder != null %}: {{relationship.grouporder}}{% endif %}
+							{% if relationship.descriptor_title != null %}{{relationship.descriptor_title}}{% endif %}
+							{% if relationship.descriptor_name != null %}{{relationship.descriptor_name}}{% endif %}
+							{% if relationship.prefix1 != null %}{{relationship.prefix1}}{% endif %}
+							{% if relationship.descriptor1 != null %}{{relationship.descriptor1}}{% endif %}
+							{% if relationship.prefix2 != null %}{{relationship.prefix2}}{% endif %}
+							{% if relationship.descriptor2 != null %}{{relationship.descriptor2}}{% endif %}
+							{% if relationship.prefix3 != null %}{{relationship.prefix3}}{% endif %}
+							{% if relationship.descriptor3 != null %}{{relationship.descriptor3}}{% endif %}
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+
+	</div>
+	{% endif %}
+
+	<div class="entity_event" id="entity_event">
+		<div class="div-caption">
+			References <button id="entitybutton3" onclick="tbtoggle('entity3', 'entitybutton3')" class="entity">+</button>
+		</div>
+
+		<div >
+			<table id="entity3" style="display:none;">
+				<tr>
+					<th>Item</th>
+					<th>Date</th>
+					<th>Location</th>
+					<th>Role</th>
+				</tr>
+
+			{% for r in references_set %}
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
+					<td><a href="{% url 'entity' r.1.fk_item.id_item %}">{{r.1.reference_full}}</a></td>
+
+					<td> 
+					{% if r.1.fk_event.startdate != null %}
+					{{r.1.fk_event.startdate}}
+
+						{% if r.1.fk_event.enddate > r.1.fk_event.startdate %}
+					 	-{{r.1.fk_event.enddate}}
+					 	{% endif %}
+
+					{% else %}
+					{{r.1.fk_event.repository_startdate}} {{r.1.fk_event.repository_enddate}}
+					{% endif %}
+					</td>
+
+					<td><a href="{% url 'entity' r.2.fk_locationname.fk_location.id_location %}">{{r.2.fk_locationname.fk_location}}</a> ({{r.2.fk_locationname.fk_location.fk_region}})</td>
+					<td>{{r.0.fk_referencerole}}</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+	</div>
+
+
+	<div class="entity_rdf">
+		<div hidden id="rdfajax">{% url 'ajax' digisig_entity_number=individual_object.id_individual %}</div>
+		<div class="div-caption">
+			RDF 
+			<button id="entitybutton3" onclick="tbtoggle2('entity3', 'entitybutton3')" class="entity">+</button>
+			<button class="RDF-download"><a href="{% url 'data' digisig_entity_number=individual_object.id_individual %}">Download</button> 
+		</div>
+
+		<div>
+			<table id="entity3" style="display:none;">
+			<tr>
+				<th id="rdfelement"></th>
+			</tr>
+		</table>
+		</div>
+	</div>
+
+
+
+<script>
+
+</script>
+
+
+{% endblock %}

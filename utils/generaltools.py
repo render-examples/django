@@ -383,7 +383,6 @@ def manifestationmetadata(manifestation_object):
 		repositoryvalue = itemvalue.fk_repository
 		representation_set = Representation.objects.filter(fk_manifestation=e.id_manifestation).filter(primacy=1)[:1]
 
-		print ("len rep set:", representation_set.count())
 		if representation_set.count() == 0:
 			print ("no image available for:", e.id_manifestation)
 			representation_set = Representation.objects.filter(id_representation=12204474)
@@ -1645,9 +1644,6 @@ def nextdescriptionget(currentsealdescription):
 
 def paginatorJM(currentpage, totalrows, targetobject):
 
-	# preparing the data for the pagecounter
-	# totalrows = len(targetobject)
-
 	qpaginationend = int(currentpage) * 10
 	qpaginationstart = int(qpaginationend) - 9 
 
@@ -1668,8 +1664,7 @@ def paginatorJM(currentpage, totalrows, targetobject):
 	pagecounternext = int(currentpage)+1
 	pagecounternextnext = int(currentpage)+2
 
-	return(pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay)
-
+	return(pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, qpaginationstart, qpaginationend)
 
 def rdf_generate(digisig_entity_number):
 	#Establishing the RDF data
