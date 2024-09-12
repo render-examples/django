@@ -7,8 +7,8 @@ from .models import *
 #Form for querying seal impressions
 repositories_options = [('','None')]
 series_options = [('', 'None')]
-location_options = []
-nature_options = []
+location_options = [('', 'None')]
+nature_options = [('', 'None')]
 representation_options = [('', 'None')]
 timegroup_options = [('', 'None')]
 shape_options = [('', 'None')]
@@ -46,7 +46,7 @@ for e in Terminology.objects.filter(term_type=1).order_by('term_name').distinct(
 class ManifestationForm(forms.Form):
 	repository = forms.ChoiceField(choices=repositories_options, required=False)
 	series = forms.ChoiceField(choices=series_options, required=False, initial={'': 'None'})	
-	location = forms.ChoiceField(choices=location_options, required=False)
+	location = forms.ChoiceField(choices=location_options, required=False, initial={'':'None'})
 	nature = forms.ChoiceField(label='Object', choices=nature_options, required=False)
 	representation = forms.ChoiceField(choices=representation_options, required=False, initial={'': 'None'})
 	timegroup = forms.ChoiceField(label='Period', choices=timegroup_options, required=False)

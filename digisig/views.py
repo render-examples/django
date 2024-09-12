@@ -203,23 +203,31 @@ def search(request, searchtype):
 
 		if request.method == 'POST':
 			form = ManifestationForm(request.POST)
-			manifestation_object, totalrows, qpagination = sealsearch(form)
 
+				if form.is_valid(): 
+					manifestation_object = sealsearch(form)
+
+				else:
+					manifestation_object = sealsearchten()					
+
+			manifestation_object, totalrows, qpagination = sealsearch(form)
 			pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, qpaginationstart, qpaginationend = paginatorJM(qpagination, totalrows, manifestation_object)
 
+
 		else:
-			manifestation_object = Manifestation.objects.all().select_related(
-				'fk_face__fk_seal').select_related(
-				'fk_support__fk_part__fk_item__fk_repository').select_related(
-				'fk_support__fk_number_currentposition').select_related(
-				'fk_support__fk_attachment').select_related(
-				'fk_support__fk_supportstatus').select_related(
-				'fk_support__fk_nature').select_related(
-				'fk_imagestate').select_related(
-				'fk_position').select_related(
-				'fk_support__fk_part__fk_event').order_by(
-				'id_manifestation').prefetch_related(
-				Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1)))[:10]
+			manifestation_object = sealsearchten()
+			# manifestation_object = Manifestation.objects.all().select_related(
+			# 	'fk_face__fk_seal').select_related(
+			# 	'fk_support__fk_part__fk_item__fk_repository').select_related(
+			# 	'fk_support__fk_number_currentposition').select_related(
+			# 	'fk_support__fk_attachment').select_related(
+			# 	'fk_support__fk_supportstatus').select_related(
+			# 	'fk_support__fk_nature').select_related(
+			# 	'fk_imagestate').select_related(
+			# 	'fk_position').select_related(
+			# 	'fk_support__fk_part__fk_event').order_by(
+			# 	'id_manifestation').prefetch_related(
+			# 	Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1)))[:10]
 
 			totalrows = Manifestation.objects.count()
 			pagecountercurrent = 1
