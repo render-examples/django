@@ -199,3 +199,93 @@ def sealsearchmanifestationmetadata(manifestation_object):
 		manifestation_set[e.id_manifestation] = manifestation_dic
 
 	return (manifestation_set)
+
+
+#information for presenting a seal
+def sealmetadata(digisig_entity_number):
+	seal_selected = Seal.objects.select_related(
+		'fk_individual_realizer__fk_group').select_related(
+		'fk_individual_realizer__fk_descriptor_title').select_related(
+		'fk_individual_realizer__fk_descriptor_name').select_related(
+		'fk_individual_realizer__fk_descriptor_prefix1').select_related(
+		'fk_individual_realizer__fk_descriptor_descriptor1').select_related(
+		'fk_individual_realizer__fk_separator_1').select_related(
+		'fk_individual_realizer__fk_descriptor_prefix2').select_related(
+		'fk_individual_realizer__fk_descriptor_descriptor2').select_related(
+		'fk_individual_realizer__fk_descriptor_prefix3').select_related(
+		'fk_individual_realizer__fk_descriptor_descriptor3').get(id_seal=digisig_entity_number)
+
+	seal_info = {}
+	seal_info["seal"] = seal_selected
+	seal_info["sealdescription_set"]= Sealdescription.objects.filter(fk_seal=seal_selected)
+	seal_info["actor"] = seal_selected.fk_individual_realizer
+	seal_info["actor_label"] = namecompiler(seal_selected.fk_individual_realizer)
+
+	face_set = Face.objects.filter(fk_seal=seal_selected)
+
+	for f in face_set:
+		classvalue = {}
+
+		try:
+			classvalue["level1"] = Classification.objects.get(class_number=f.fk_class.level1)
+		except: 
+			print("level1 unassigned")
+
+		try:
+			if f.fk_class.level2 > 0:
+				faceclass2 = Classification.objects.get(class_number=f.fk_class.level2)
+				classvalue["level2"] = faceclass2			
+		except: 
+			print("level2 unassigned")
+	
+		try:
+			if f.fk_class.level3 > 0:
+				faceclass3 = Classification.objects.get(class_number=f.fk_class.level3)
+				classvalue["level3"] = faceclass3 			
+		except: 
+			print("level3 unassigned")
+	
+		try:
+			if f.fk_class.level4 > 0:
+				faceclass4 = Classification.objects.get(class_number=f.fk_class.level4)
+				classvalue["level4"] = faceclass4
+		except: 
+			print("level4 unassigned")
+	
+		try:
+			if f.fk_class.level5 > 0:
+				faceclass5 = Classification.objects.get(class_number=f.fk_class.level5)
+				classvalue["level5"] = faceclass5			
+		except: 
+			print("level5 unassigned")
+
+		if f.fk_faceterm.faceterm == "Obverse":
+			seal_info["obverse"] = classvalue
+		if f.fk_faceterm.faceterm == "Reverse":
+			seal_info["reverse"] = classvalue
+
+		seal_info["manifestation_set"] = sealsearchmanifestationmetadata(Manifestation.objects.filter(fk_face__fk_seal=seal_selected))
+
+		seal_info["totalrows"] = len(seal_info["manifestation_set"])
+
+	return (seal_info)
+
+
+
+def namecompiler(individual):
+	print (individual)
+	individual_object = individual
+
+	namevariable = ''
+	if (individual_object.fk_group != None): namevariable = individual_object.fk_group.group_name
+	if (individual_object.fk_descriptor_title != None): namevariable = namevariable + " " + individual_object.fk_descriptor_title.descriptor_modern
+	if (individual_object.fk_descriptor_name != None): namevariable = namevariable + " " + individual_object.fk_descriptor_name.descriptor_modern
+	if (individual_object.fk_descriptor_prefix1 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_prefix1.prefix_english
+	if (individual_object.fk_descriptor_descriptor1 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_descriptor1.descriptor_modern
+	if (individual_object.fk_descriptor_prefix2 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_prefix2.prefix_english
+	if (individual_object.fk_descriptor_descriptor2 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_descriptor2.descriptor_modern
+	if (individual_object.fk_descriptor_prefix3 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_prefix3.prefix_english
+	if (individual_object.fk_descriptor_descriptor3 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_descriptor3.descriptor_modern
+	nameout = namevariable.strip()
+
+	return(nameout)

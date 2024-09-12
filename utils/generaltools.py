@@ -439,68 +439,6 @@ def manifestationmetadata(manifestation_object):
 
 	return (manifestation_set)
 
-#information for presenting a seal
-def sealmetadata(seal_selected, authenticationstatus):
-	seal_id = seal_selected.id_seal
-
-	seal_info = {}
-
-	seal_info["seal"] = seal_selected
-
-	if authenticationstatus == "authenticated":
-		seal_info["sealdescription_set"]= Sealdescription.objects.filter(fk_seal=seal_selected)
-		seal_info["actor"] = seal_selected.fk_individual_realizer
-		seal_info["actor_label"] = namecompiler(seal_selected.fk_individual_realizer)
-
-		face_set = Face.objects.filter(fk_seal=seal_selected)
-
-		for f in face_set:
-			classvalue = {}
-
-			try:
-				classvalue["level1"] = Classification.objects.get(class_number=f.fk_class.level1)
-			except: 
-				print("level1 unassigned")
-
-			try:
-				if f.fk_class.level2 > 0:
-					faceclass2 = Classification.objects.get(class_number=f.fk_class.level2)
-					classvalue["level2"] = faceclass2			
-			except: 
-				print("level2 unassigned")
-		
-			try:
-				if f.fk_class.level3 > 0:
-					faceclass3 = Classification.objects.get(class_number=f.fk_class.level3)
-					classvalue["level3"] = faceclass3 			
-			except: 
-				print("level3 unassigned")
-		
-			try:
-				if f.fk_class.level4 > 0:
-					faceclass4 = Classification.objects.get(class_number=f.fk_class.level4)
-					classvalue["level4"] = faceclass4
-			except: 
-				print("level4 unassigned")
-		
-			try:
-				if f.fk_class.level5 > 0:
-					faceclass5 = Classification.objects.get(class_number=f.fk_class.level5)
-					classvalue["level5"] = faceclass5			
-			except: 
-				print("level5 unassigned")
-
-			if f.fk_faceterm.faceterm == "Obverse":
-				seal_info["obverse"] = classvalue
-			if f.fk_faceterm.faceterm == "Reverse":
-				seal_info["reverse"] = classvalue
-
-		seal_info["manifestation_set"] = manifestationmetadata(Manifestation.objects.filter(fk_face__fk_seal=seal_selected))
-
-		seal_info["totalrows"] = len(seal_info["manifestation_set"])
-
-	return (seal_info)
-
 def representation_photographs(representation_select):
 
 	representationset = {}
