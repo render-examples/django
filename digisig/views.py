@@ -209,6 +209,7 @@ def search(request, searchtype):
 
 			if form.is_valid(): 
 				manifestation_object, qpagination = sealsearchfilter(manifestation_object, form)
+				manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)
 
 			else:
 				manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)			
@@ -216,7 +217,6 @@ def search(request, searchtype):
 		else:
 			form = ManifestationForm()
 			manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)			
-
 
 		pagecountercurrent = qpagination 
 		pagecounternext = qpagination + 1
