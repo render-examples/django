@@ -202,8 +202,8 @@ def search(request, searchtype):
 		pagetitle = 'Impressions, Matrices and Casts'
 
 		if request.method == 'POST':
-			manifestation_object, form = sealsearch()
-			totalrows = manifestation_object.count()
+			form = ManifestationForm(request.POST)
+			manifestation_object, totalrows, qpagination = sealsearch(form)
 
 			pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, qpaginationstart, qpaginationend = paginatorJM(qpagination, totalrows, manifestation_object)
 
