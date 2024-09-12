@@ -119,14 +119,7 @@ def sealsearchmanifestationmetadata(manifestation_object):
 	#manifestation_object2 = manifestation_object.prefetch_related(Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1))).all()
 
 	for e in manifestation_object:
-		starttime = time()
 		manifestation_dic = {}
-		manifestation_dic["manifestation"] = e
-		manifestation_dic["id_manifestation"] = e.id_manifestation
-		manifestation_dic["fk_position"] = e.fk_position
-		manifestation_dic["label_manifestation_repository"] = e.label_manifestation_repository
-		manifestation_dic["imagestate_term"] = e.fk_imagestate
-
 		facevalue = e.fk_face
 		sealvalue = facevalue.fk_seal
 		supportvalue = e.fk_support
@@ -135,25 +128,40 @@ def sealsearchmanifestationmetadata(manifestation_object):
 		eventvalue = partvalue.fk_event
 		itemvalue = partvalue.fk_item
 		repositoryvalue = itemvalue.fk_repository
-		representation_set = Representation.objects.filter(fk_manifestation=e.id_manifestation).filter(primacy=1)[:1]
 
-		if representation_set.count() == 0:
+		try:
+			representation_set = Representation.objects.select_related('fk_connection').get(fk_manifestation=e.id_manifestation, primacy=1)
+
+		except:
 			print ("no image available for:", e.id_manifestation)
-			representation_set = Representation.objects.filter(id_representation=12204474)
+			representation_set = Representation.objects.select_related('fk_connection').get(id_representation=12204474)
 
-		sealdescription_set = Sealdescription.objects.filter(fk_seal=facevalue.fk_seal)
-		locationreference_set = Locationreference.objects.filter(fk_event=eventvalue.pk_event).filter(fk_locationstatus=1)[:1]
+		connection = representation_set.fk_connection
+		manifestation_dic["thumb"] = connection.thumb
+		manifestation_dic["medium"] = connection.medium
+		manifestation_dic["representation_thumbnail_hash"] = representation_set.representation_thumbnail_hash
+		manifestation_dic["representation_filename_hash"] = representation_set.representation_filename_hash 
+		#manifestation_dic["representation_thumbnail"] = representation_set.representation_thumbnail
+		#manifestation_dic["representation_filename"] = representation_set.representation_filename
+		manifestation_dic["id_representation"] = representation_set.id_representation
+
+		sealdescription_set = Sealdescription.objects.filter(fk_seal=facevalue.fk_seal).select_related('fk_collection')
+		manifestation_dic["sealdescriptions"] = sealdescription_set
+
+		manifestation_dic["manifestation"] = e
+		manifestation_dic["id_manifestation"] = e.id_manifestation
+		manifestation_dic["fk_position"] = e.fk_position
 
 		manifestation_dic["id_seal"] = sealvalue.id_seal
 		manifestation_dic["id_item"] = itemvalue.id_item
-
 		manifestation_dic["repository_fulltitle"] = repositoryvalue.repository_fulltitle
 		manifestation_dic["shelfmark"] = itemvalue.shelfmark
 		# manifestation_dic["fk_supportstatus"] = supportvalue.fk_supportstatus
 		# manifestation_dic["fk_attachment"] = supportvalue.fk_attachment		
 		manifestation_dic["number"] = numbervalue.number
 		# manifestation_dic["support_type"] = supportvalue.fk_nature
-
+		manifestation_dic["label_manifestation_repository"] = e.label_manifestation_repository
+		manifestation_dic["imagestate_term"] = e.fk_imagestate
 		manifestation_dic["partvalue"] = partvalue.id_part
 
 		#take the repository submitted date in preference to the Digisig date
@@ -167,24 +175,13 @@ def sealsearchmanifestationmetadata(manifestation_object):
 		else:
 			manifestation_dic["repository_enddate"] = eventvalue.enddate
 
-		for l in locationreference_set:
-			locationname= l.fk_locationname
-			location = locationname.fk_location
-			manifestation_dic["repository_location"] = location.location
-			manifestation_dic["id_location"] = location.id_location
+		locationreference = Locationreference.objects.select_related('fk_locationname__fk_location').get(fk_event=eventvalue.pk_event,fk_locationstatus=1)
 
-		for r in representation_set:
-			connection = r.fk_connection
-			manifestation_dic["thumb"] = connection.thumb
-			manifestation_dic["medium"] = connection.medium
-			manifestation_dic["representation_thumbnail_hash"] = r.representation_thumbnail_hash
-			manifestation_dic["representation_filename_hash"] = r.representation_filename_hash 
-			# manifestation_dic["representation_thumbnail"] = r.representation_thumbnail
-			# manifestation_dic["representation_filename"] = r.representation_filename
-			manifestation_dic["id_representation"] = r.id_representation
-
-		manifestation_dic["sealdescriptions"] = sealdescription_set
+		locationname= locationreference.fk_locationname
+		location = locationreference.fk_locationname.fk_location
+		manifestation_dic["repository_location"] = locationreference.fk_locationname.fk_location.location
+		manifestation_dic["id_location"] = locationreference.fk_locationname.fk_location.id_location
 
 		manifestation_set[e.id_manifestation] = manifestation_dic
-		print("Compute Time:", time()-starttime)
+
 	return (manifestation_set)
