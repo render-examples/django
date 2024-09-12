@@ -200,43 +200,27 @@ def search(request, searchtype):
 	if searchtype == "seals":
 
 		pagetitle = 'Impressions, Matrices and Casts'
+		manifestation_object = sealsearch()
+
+		qpagination = 1
 
 		if request.method == 'POST':
 			form = ManifestationForm(request.POST)
 
-				if form.is_valid(): 
-					manifestation_object = sealsearch(form)
+			if form.is_valid(): 
+				manifestation_object, qpagination = sealsearchfilter(manifestation_object, form)
 
-				else:
-					manifestation_object = sealsearchten()					
-
-			manifestation_object, totalrows, qpagination = sealsearch(form)
-			pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, qpaginationstart, qpaginationend = paginatorJM(qpagination, totalrows, manifestation_object)
-
+			else:
+				manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)			
 
 		else:
-			manifestation_object = sealsearchten()
-			# manifestation_object = Manifestation.objects.all().select_related(
-			# 	'fk_face__fk_seal').select_related(
-			# 	'fk_support__fk_part__fk_item__fk_repository').select_related(
-			# 	'fk_support__fk_number_currentposition').select_related(
-			# 	'fk_support__fk_attachment').select_related(
-			# 	'fk_support__fk_supportstatus').select_related(
-			# 	'fk_support__fk_nature').select_related(
-			# 	'fk_imagestate').select_related(
-			# 	'fk_position').select_related(
-			# 	'fk_support__fk_part__fk_event').order_by(
-			# 	'id_manifestation').prefetch_related(
-			# 	Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1)))[:10]
-
-			totalrows = Manifestation.objects.count()
-			pagecountercurrent = 1
-			pagecounternext =2
-			pagecounternextnext = 3
-			totaldisplay = 10
-
 			form = ManifestationForm()
-			qpagination = 1
+			manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)			
+
+
+		pagecountercurrent = qpagination 
+		pagecounternext = qpagination + 1
+		pagecounternextnext = qpagination +2
 
 		## prepare the data for each displayed seal manifestation
 		manifestation_set = sealsearchmanifestationmetadata(manifestation_object)
