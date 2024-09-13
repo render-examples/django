@@ -1186,7 +1186,36 @@ def seal_page(request, digisig_entity_number):
 	pagetitle = 'title'
 	template = loader.get_template('digisig/seal.html')
 
-	seal_info = sealmetadata(digisig_entity_number)
+	seal_info, face_set, face_obverse = sealmetadata(digisig_entity_number)
+
+	seal_info["actor_label"] = namecompiler(face_obverse.fk_seal.fk_individual_realizer)
+	seal_info["obverse"] = sealinfo_classvalue(face_obverse)
+
+	try: 
+		face_reverse = face_set.get(fk_faceterm=2)
+		seal_info["reverse"] = sealinfo_classvalue(face_reverse)
+
+	except:
+		print ("no reverse")
+
+	# manifestation_object = Manifestation.objects.filter(fk_face__fk_seal=digisig_entity_number).select_related(
+	# 	'fk_face__fk_seal').select_related(
+	# 	'fk_support__fk_part__fk_item__fk_repository').select_related(
+	# 	'fk_support__fk_number_currentposition').select_related(
+	# 	'fk_support__fk_attachment').select_related(
+	# 	'fk_support__fk_supportstatus').select_related(
+	# 	'fk_support__fk_nature').select_related(
+	# 	'fk_imagestate').select_related(
+	# 	'fk_position').select_related(
+	# 	'fk_support__fk_part__fk_event').order_by(
+	# 	'id_manifestation').prefetch_related(
+	# 	Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1)))
+
+	manifestation_object = sealsearch()
+
+	seal_info["manifestation_set"] = sealsearchmanifestationmetadata(manifestation_object.filter(fk_face__fk_seal=digisig_entity_number))
+
+	seal_info["totalrows"] = len(seal_info["manifestation_set"])
 
 	context = {
 		'pagetitle': pagetitle,

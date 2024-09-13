@@ -92,14 +92,16 @@
 					<td class="totalrows" colspan="3">Showing {{seal_info.totalrows}} of {{seal_info.totalrows}}</td>
 				</tr>
 
+
 				{% for manifestation in seal_info.manifestation_set.values %}
 
 					{% ifchanged manifestation.manifestation.fk_support %}
-
+	
 					{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+
 						<th colspan="2"><h4><a class="headingbtn" href="{% url 'entity' digisig_entity_number=manifestation.id_manifestation %}">Manifestation details</a></h4></th>
-													<td rowspan="4" style="text-align:center;">
-								{% if manifestation.representation_filename != null %}
+							<td rowspan="4" style="text-align:center;">
+								{% if manifestation.representation_filename_hash != null %}
 								<figure>
 									<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{manifestation.thumb}}{{manifestation.representation_thumbnail_hash}}" alt="{{manifestation.id_representation}}" onclick="image({{forloop.counter}})">
 								</figure>
@@ -112,13 +114,13 @@
 								</div>
 								{% endif %}
 							</td>
-					</tr>
-
-
-						{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-							<th class="indent">Held by</th>
-							<td>{{manifestation.repository_fulltitle}}</td>						
 						</tr>
+
+
+					{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+						<th class="indent">Held by</th>
+						<td>{{manifestation.repository_fulltitle}}</td>						
+					</tr>
 					
 
 					{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
