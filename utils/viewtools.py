@@ -218,13 +218,26 @@ def	manifestation_fetchrepresentations(e, manifestation_dic):
 
 
 def manifestation_fetchsealdescriptions(e, manifestation_dic):
-	sealdescription_set = Sealdescription.objects.filter(fk_seal=facevalue.fk_seal).select_related('fk_collection')
-	manifestation_dic["sealdescriptions"] = sealdescription_set
+	sealdescription_set = Sealdescription.objects.filter(fk_seal=e.fk_face.fk_seal).select_related('fk_collection')
+
+	description_set = {}
+
+	for s in sealdescription_set:
+		description = {}
+		description["sealdescription_id"] = s.id_sealdescription
+		description["collection"] = s.fk_collection
+		description["identifier"] = s.sealdescription_identifier
+
+		description_set[s.id_sealdescription] = description
+
+	manifestation_dic["sealdescriptions"] = description_set
 	
 	return(manifestation_dic)
 
 def manifestation_fetchlocations(e, manifestation_dic):
-	locationreference = Locationreference.objects.select_related('fk_locationname__fk_location').get(fk_event=eventvalue.pk_event,fk_locationstatus=1)
+	locationreference = Locationreference.objects.select_related(
+		'fk_locationname__fk_location').get(
+		fk_event=e.fk_support.fk_part.fk_event,fk_locationstatus=1)
 	locationname= locationreference.fk_locationname
 	location = locationreference.fk_locationname.fk_location
 	manifestation_dic["repository_location"] = locationreference.fk_locationname.fk_location.location

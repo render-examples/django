@@ -223,7 +223,22 @@ def search(request, searchtype):
 		pagecounternextnext = qpagination +2
 
 		## prepare the data for each displayed seal manifestation
-		manifestation_set = sealsearchmanifestationmetadata(manifestation_object)
+
+		manifestation_set = {}
+
+		for e in manifestation_object:
+			manifestation_dic = {}
+
+			manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+
+			manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+
+			manifestation_dic = manifestation_fetchlocations(e, manifestation_dic)
+
+			manifestation_dic = manifestation_fetchstandardvalues(e, manifestation_dic)
+
+			manifestation_set[e.id_manifestation] = manifestation_dic
+
 
 	# code prepares the array of series and repositories to pass to the frontend
 		series_object= seriesset()

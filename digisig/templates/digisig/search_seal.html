@@ -168,12 +168,12 @@
 				<td><a href="{% url 'seal_page' digisig_entity_number=m.id_seal %}">Seal details</a></td>
 			</tr>
 
-			{% for sd in m.sealdescriptions %}
+			{% for key, value in m.sealdescriptions.items %}
 			<tr>
 				<th class="indent">
 					{% if forloop.first %} Described in {% endif %}
 				</th>
-				<td><a href="{% url 'sealdescription_page' digisig_entity_number=sd.id_sealdescription %}">{{sd.fk_collection}} ({{sd.sealdescription_identifier}})</a></td>
+				<td><a href="{% url 'sealdescription_page' digisig_entity_number=value.sealdescription_id %}">{{value.collection}} ({{value.identifier}})</a></td>
 			</tr>
 			{% endfor %}
 			</table>
