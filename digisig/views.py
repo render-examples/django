@@ -544,7 +544,7 @@ def entity_fail(request, entity_phrase):
 
 
 
-############################## actor #############################
+############################## Actor #############################
 
 def actor_page(request, digisig_entity_number):
 
@@ -1122,57 +1122,66 @@ def place_page(request, digisig_entity_number):
 	place_object = get_object_or_404(Location, id_location=digisig_entity_number)
 	pagetitle = place_object.location
 	mapdic = mapgenerator(place_object, 0)
+	template = loader.get_template('digisig/place.html')  
 
-	if request.user.is_authenticated:
-		authenticationstatus = "authenticated"
-		template = loader.get_template('digisig/place.html')  
+	displaystatus = 1
 
-		displaystatus = 1
+	manifestation_object = sealsearch()
 
-		#note that is should pick up cases where manifestations are associated with secondary places?
-		manifestation_object = Manifestation.objects.filter(
-				fk_support__fk_part__fk_event__locationreference__fk_locationname__fk_location__id_location=digisig_entity_number).distinct()
+	#note that is should pick up cases where manifestations are associated with secondary places?
+	manifestation_object = manifestation_object.filter(
+			fk_support__fk_part__fk_event__locationreference__fk_locationname__fk_location__id_location=digisig_entity_number).distinct()
 
-		if request.method == 'POST':
+	qpagination = 1
+
+	if request.method == 'POST':
+		form = PageCycleForm(request.POST)
+
+		if form.is_valid():
+			qpagination = form.cleaned_data['pagination']
 			form = PageCycleForm(request.POST)
-			print ('form received')
-			if form.is_valid():
-				qpagination = form.cleaned_data['pagination']
-				rows = len(manifestation_object)
-				form = PageCycleForm(request.POST)
-				displaystatus = 0
-
-		else:
-			form = PageCycleForm()
-			qpagination = 1
-
-		pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, manifestation_object = paginatorJM(qpagination, manifestation_object)
-
-		manifestation_set = manifestationmetadata(manifestation_object)
-
-		context = {
-			'pagetitle': pagetitle,
-			'place_object': place_object,
-			'mapdic': mapdic, 
-			'manifestation_set': manifestation_set,
-			'displaystatus': displaystatus,
-			'totalrows': totalrows,
-			'totaldisplay': totaldisplay,
-			'form': form,
-			'pagecountercurrent': pagecountercurrent,
-			'pagecounternext': pagecounternext,
-			'pagecounternextnext': pagecounternextnext,
-			}
+			displaystatus = 0		
 
 	else:
-		authenticationstatus = "public"
-		template = loader.get_template('digisig/place_simple.html')   
+		form = PageCycleForm()
 
-		context = {
-			'pagetitle': pagetitle,
-			'place_object': place_object,
-			'mapdic': mapdic, 
-			}
+	## these pagecounters are going to break on pages that are small lists
+	manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)
+	pagecountercurrent = qpagination 
+	pagecounternext = qpagination + 1
+	pagecounternextnext = qpagination +2
+
+	manifestation_set = {}
+
+	for e in manifestation_object:
+		manifestation_dic = {}
+
+		manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+
+		# manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+		# sealdescription_set = Sealdescription.objects.filter(fk_seal=facevalue.fk_seal).select_related('fk_collection')
+		# manifestation_dic["sealdescriptions"] = sealdescription_set
+
+		manifestation_dic["repository_location"] = place_object.location
+		manifestation_dic["id_location"] = place_object.id_location
+
+		manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
+
+		manifestation_set[e.id_manifestation] = manifestation_dic
+
+	context = {
+		'pagetitle': pagetitle,
+		'place_object': place_object,
+		'mapdic': mapdic, 
+		'manifestation_set': manifestation_set,
+		'displaystatus': displaystatus,
+		'totalrows': totalrows,
+		'totaldisplay': totaldisplay,
+		'form': form,
+		'pagecountercurrent': pagecountercurrent,
+		'pagecounternext': pagecounternext,
+		'pagecounternextnext': pagecounternextnext,
+		}
 
 	print("Compute Time:", time()-starttime)
 
@@ -1197,19 +1206,6 @@ def seal_page(request, digisig_entity_number):
 
 	except:
 		print ("no reverse")
-
-	# manifestation_object = Manifestation.objects.filter(fk_face__fk_seal=digisig_entity_number).select_related(
-	# 	'fk_face__fk_seal').select_related(
-	# 	'fk_support__fk_part__fk_item__fk_repository').select_related(
-	# 	'fk_support__fk_number_currentposition').select_related(
-	# 	'fk_support__fk_attachment').select_related(
-	# 	'fk_support__fk_supportstatus').select_related(
-	# 	'fk_support__fk_nature').select_related(
-	# 	'fk_imagestate').select_related(
-	# 	'fk_position').select_related(
-	# 	'fk_support__fk_part__fk_event').order_by(
-	# 	'id_manifestation').prefetch_related(
-	# 	Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1)))
 
 	manifestation_object = sealsearch()
 

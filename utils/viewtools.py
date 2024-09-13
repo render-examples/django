@@ -199,6 +199,79 @@ def sealsearchmanifestationmetadata(manifestation_object):
 	return (manifestation_set)
 
 
+def	manifestation_fetchrepresentations(e, manifestation_dic):
+
+	try:
+		representation_set = Representation.objects.select_related('fk_connection').get(fk_manifestation=e.id_manifestation, primacy=1)
+
+	except:
+		print ("no image available for:", e.id_manifestation)
+		representation_set = Representation.objects.select_related('fk_connection').get(id_representation=12204474)
+
+	manifestation_dic["thumb"] = representation_set.fk_connection.thumb
+	manifestation_dic["medium"] = representation_set.fk_connection.medium
+	manifestation_dic["representation_thumbnail_hash"] = representation_set.representation_thumbnail_hash
+	manifestation_dic["representation_filename_hash"] = representation_set.representation_filename_hash 
+	manifestation_dic["id_representation"] = representation_set.id_representation
+
+	return(manifestation_dic)
+
+
+def manifestation_fetchsealdescriptions(e, manifestation_dic):
+	sealdescription_set = Sealdescription.objects.filter(fk_seal=facevalue.fk_seal).select_related('fk_collection')
+	manifestation_dic["sealdescriptions"] = sealdescription_set
+	
+	return(manifestation_dic)
+
+def manifestation_fetchlocations(e, manifestation_dic):
+	locationreference = Locationreference.objects.select_related('fk_locationname__fk_location').get(fk_event=eventvalue.pk_event,fk_locationstatus=1)
+	locationname= locationreference.fk_locationname
+	location = locationreference.fk_locationname.fk_location
+	manifestation_dic["repository_location"] = locationreference.fk_locationname.fk_location.location
+	manifestation_dic["id_location"] = locationreference.fk_locationname.fk_location.id_location
+
+	return (manifestation_dic)
+
+def manifestation_fetchstandardvalues (e, manifestation_dic):
+	facevalue = e.fk_face
+	sealvalue = facevalue.fk_seal
+	supportvalue = e.fk_support
+	numbervalue = supportvalue.fk_number_currentposition
+	partvalue = supportvalue.fk_part
+	eventvalue = partvalue.fk_event
+	itemvalue = partvalue.fk_item
+	repositoryvalue = itemvalue.fk_repository
+	manifestation_dic["manifestation"] = e
+	manifestation_dic["id_manifestation"] = e.id_manifestation
+	manifestation_dic["fk_position"] = e.fk_position
+
+	manifestation_dic["id_seal"] = sealvalue.id_seal
+	manifestation_dic["id_item"] = itemvalue.id_item
+	manifestation_dic["repository_fulltitle"] = repositoryvalue.repository_fulltitle
+	manifestation_dic["shelfmark"] = itemvalue.shelfmark
+	manifestation_dic["fk_supportstatus"] = supportvalue.fk_supportstatus
+	manifestation_dic["fk_attachment"] = supportvalue.fk_attachment		
+	manifestation_dic["number"] = numbervalue.number
+	manifestation_dic["support_type"] = supportvalue.fk_nature
+	manifestation_dic["label_manifestation_repository"] = e.label_manifestation_repository
+	manifestation_dic["imagestate_term"] = e.fk_imagestate
+	manifestation_dic["partvalue"] = partvalue.id_part
+
+	#take the repository submitted date in preference to the Digisig date
+	if eventvalue.repository_startdate:
+		manifestation_dic["repository_startdate"] = eventvalue.repository_startdate
+	else:
+		manifestation_dic["repository_startdate"] = eventvalue.startdate 
+
+	if eventvalue.repository_enddate:
+		manifestation_dic["repository_enddate"] = eventvalue.repository_enddate
+	else:
+		manifestation_dic["repository_enddate"] = eventvalue.enddate
+
+	return (manifestation_dic)
+
+
+
 #information for presenting a seal
 def sealmetadata(digisig_entity_number):
 	seal_info = {}
