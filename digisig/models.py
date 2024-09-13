@@ -431,7 +431,7 @@ class Externallink(models.Model):
 
 class Face(models.Model):
     pk_face = models.IntegerField()
-    fk_seal = models.ForeignKey('Seal', models.DO_NOTHING, db_column='fk_seal', blank=True, null=True)
+    fk_seal = models.ForeignKey('Seal', models.DO_NOTHING, db_column='fk_seal', related_name='fk_seal_face', blank=True, null=True)
     fk_faceterm = models.ForeignKey('Faceterm', models.DO_NOTHING, db_column='fk_faceterm', blank=True, null=True)
     fk_shape = models.ForeignKey('Shape', models.DO_NOTHING, db_column='fk_shape', blank=True, null=True)
     fk_approx_vertical = models.IntegerField(blank=True, null=True)
