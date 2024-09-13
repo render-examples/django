@@ -155,8 +155,6 @@ def sealsearchmanifestationmetadata(manifestation_object):
 		manifestation_dic["medium"] = connection.medium
 		manifestation_dic["representation_thumbnail_hash"] = representation_set.representation_thumbnail_hash
 		manifestation_dic["representation_filename_hash"] = representation_set.representation_filename_hash 
-		#manifestation_dic["representation_thumbnail"] = representation_set.representation_thumbnail
-		#manifestation_dic["representation_filename"] = representation_set.representation_filename
 		manifestation_dic["id_representation"] = representation_set.id_representation
 
 		sealdescription_set = Sealdescription.objects.filter(fk_seal=facevalue.fk_seal).select_related('fk_collection')
