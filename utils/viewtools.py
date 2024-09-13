@@ -213,7 +213,8 @@ def sealmetadata(digisig_entity_number):
 		'fk_individual_realizer__fk_descriptor_prefix2').select_related(
 		'fk_individual_realizer__fk_descriptor_descriptor2').select_related(
 		'fk_individual_realizer__fk_descriptor_prefix3').select_related(
-		'fk_individual_realizer__fk_descriptor_descriptor3').get(id_seal=digisig_entity_number)
+		'fk_individual_realizer__fk_descriptor_descriptor3').prefetch_related(
+		Prefetch('fk_seal', queryset=Face.objects.all())).get(id_seal=digisig_entity_number)
 
 	seal_info = {}
 	seal_info["seal"] = seal_selected
