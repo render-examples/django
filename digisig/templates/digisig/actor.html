@@ -42,62 +42,84 @@
 		</div>
 	</div>
 			
-	<div class="entity_seals" id="entity_seals"> 
-		{% if sealnumber > 0 %}
-
+	<div class="entity_seals" id="entity_seals">
 		<div class="div-caption">
 			Seal details <button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
 		</div>
 
 		<div>
 			<table id="entity1" style="display:none;">
-			{% for seal in seal_object %}
-				<tr>
-					<th colspan="2"><h3><a class="headingbtn" href="{% url 'entity' digisig_entity_number=seal.0 %}">Seal details</a></h3></th>
-					<td rowspan="3">
-						{% if seal.2 != "Null" %}
-						<img class="modalimage" id="modalimagebase{{forloop.counter}}" loading="lazy" src="{{seal.1}}{{seal.2}}" alt="{{seal.3}}" onclick="image({{forloop.counter}})">
 
-					<!-- The Modal -->
-						<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
-						  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
-						  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{seal.4}}{{seal.5}}" alt="{{seal.3}}">
-						  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' seal.3 %}">Representation details</a></div>
-						</div>
-						{% endif %}						
-					</td>
-				</tr>
+		{% for m in manifestation_set.values %}
+			<tr>
+				<th class="indent">Held by </th>
+				<td>{{m.repository_fulltitle}}</td>
 
-				{% if seal.6 != individual_object.id_individual %}
-				<tr>
-					<th class="indent">Actor</th>
-					<td>
-						{% if seal.9 != null %}{{seal.9}}, {% endif %}
-						{{seal.6}}
-					</td>
-				</tr>
+			{% if m.representation_thumbnail_hash != null %}
+				<td rowspan="6">
+
+			<figure>
+				<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{m.thumb}}{{m.representation_thumbnail_hash}}" alt="{{m.id_representation}}" onclick="image({{forloop.counter}})">
+			</figure>
+
+			<!-- The Modal -->
+			<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
+			  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
+			  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{m.medium}}{{m.representation_filename_hash}}" alt="{{m.id_representation}}">
+			  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' m.id_representation %}">Representation details</a></div>
+			</div>
+
+				</td>
+			{% endif %}	
+			</tr>
+
+			<tr>
+				<th class="indent">Part of item</th>
+				<td><a href="{% url 'item_page' digisig_entity_number=m.id_item %}">{{m.shelfmark}}</a>
+				{% if m.number != 'Undetermined'%}(seal {{m.number}}){% endif %}
+				</td>
+			</tr>
+
+			{% if m.label_manifestation_repository != null %}
+			<tr>
+				<th class="indent">Reference<a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+				<td>{{m.label_manifestation_repository}}
+				</td>
+			</tr>
+			{% endif %}
+
+			<tr>
+				{% if m.repository_location != null %}
+				<th class="indent">Place </th>
+				<td><a href="{% url 'place_page' digisig_entity_number=m.id_location %}">{{m.repository_location}}</a></td>
 				{% endif %}
+			</tr>
 
-				<tr>
-					<th class="indent">Date</th>
-					<td>c.{{seal.7}} {% if seal.8 > seal.7 %} to {{seal.8}} {% endif %}</td>
-				</tr>
+			<tr>
+				{% if m.repository_startdate != null %}
+				<th class="indent">Date</th>
+				<td>{{m.repository_startdate}}
+				{% if m.repository_enddate != null %}- {{m.repository_enddate}}{% endif %}</td>
+				{% endif %}
+			</tr>
 
-	 			{% for key1, val1, val2, val3 in sealdescriptionset %}
-					{% if key1 == seal.0 %}
-						<tr>
-							<th class="indent">{% cycle 'Described in' '' '' '' '' '' '' '' '' %}</th>
-							<td><a href="{% url 'entity' digisig_entity_number=val1 %}">{{val2}} ({{val3}})</a></td>
-						</tr>
-					{% endif %}
-				{% endfor %}
-				{% resetcycle %}
+			<tr>
+				<th class="indent">Example of </th>
+				<td><a href="{% url 'seal_page' digisig_entity_number=m.id_seal %}">Seal details</a></td>
+			</tr>
+
+			{% for key, value in m.sealdescriptions.items %}
+			<tr>
+				<th class="indent">
+					{% if forloop.first %} Described in {% endif %}
+				</th>
+				<td><a href="{% url 'sealdescription_page' digisig_entity_number=value.sealdescription_id %}">{{value.collection}} ({{value.identifier}})</a></td>
+			</tr>
+			{% endfor %}
 
 			{% endfor %}
 			</table>
 		</div>
-
-		{% endif %}
 	</div>
 
 	{% if relationshipnumber > 0 %}
@@ -106,7 +128,7 @@
 			Relationships <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
 		</div>
 
-		<div >
+		<div>
 			<table id="entity2" style="display:none;">
 			{% for relationship in relationship_object %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
@@ -129,9 +151,9 @@
 			{% endfor %}
 			</table>
 		</div>
-
 	</div>
 	{% endif %}
+
 
 	<div class="entity_event" id="entity_event">
 		<div class="div-caption">

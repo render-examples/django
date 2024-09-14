@@ -575,11 +575,6 @@ def actor_page(request, digisig_entity_number):
 	# 	Q(fk_individual_realizer=individual_object.id_individual) | Q(fk_actor_group=individual_object.id_individual)
 	# ). order_by('fk_individual_office', 'fk_individual_realizer')
 
-	sealnumber = manifestation_object.count()
-
-	seal_object = []
-	sealdescriptionset = []
-
 	# if (sealnumber > 0):
 	# 	for s in seal_objectset:
 	# 		current_id_seal = s.id_seal
@@ -612,6 +607,12 @@ def actor_page(request, digisig_entity_number):
 	totalrows = manifestation_object.count
 	totaldisplay = len(manifestation_set)
 
+	# sealnumber = manifestation_object.count()
+
+	# seal_object = []
+	# sealdescriptionset = []
+
+
 	relationship_object = []			
 	# # list of relationships for each individual
 	# relationship_object = Digisigrelationshipview.objects.filter(fk_individual = digisig_entity_number)
@@ -631,10 +632,11 @@ def actor_page(request, digisig_entity_number):
 		'pagetitle': pagetitle,
 		'individual_object': individual_object,
 		#'seal_object': seal_object,
-		'sealnumber': sealnumber,
+		#'sealnumber': sealnumber,
 		'relationship_object': relationship_object,
 		#'relationshipnumber' : relationshipnumber,
-		'sealdescriptionset': sealdescriptionset,
+		#'sealdescriptionset': sealdescriptionset,
+		'manifestation_set': manifestation_set,
 		'references_set': references_set,
 		}
 
