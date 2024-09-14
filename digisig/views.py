@@ -561,28 +561,14 @@ def actor_page(request, digisig_entity_number):
 
 	starttime = time()
 
-	# individual_object = get_object_or_404(Individual, id_individual=digisig_entity_number)
-
-	individual_object = Individual.objects.select_related(
-		'fk_group').select_related(
-		'fk_descriptor_title').select_related(
-		'fk_descriptor_name').select_related(
-		'fk_descriptor_prefix1').select_related(
-		'fk_descriptor_descriptor1').select_related(
-		'fk_separator_1').select_related(
-		'fk_descriptor_prefix2').select_related(
-		'fk_descriptor_descriptor2').select_related(
-		'fk_descriptor_prefix3').select_related(
-		'fk_descriptor_descriptor3').select_related(
-		'fk_group__fk_group_order').select_related(
-		'fk_group__fk_group_class').get(id_individual=digisig_entity_number)
+	individual_object = individualsearch(digisig_entity_number)
 
 	pagetitle= namecompiler(individual_object)
 
 	template = loader.get_template('digisig/actor.html')
 
 	manifestation_object = sealsearch().filter(
-		Q(fk_face__fk_seal__fk_individual_realizer=individual_object.id_individual) | Q(fk_face__fk_seal__fk_actor_group=individual_object.id_individual)
+		Q(fk_face__fk_seal__fk_individual_realizer=digisig_entity_number) | Q(fk_face__fk_seal__fk_actor_group=digisig_entity_number)
 	). order_by('fk_face__fk_seal__fk_individual_realizer')
 
 	print (manifestation_object)

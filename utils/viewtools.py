@@ -6,6 +6,25 @@ from django.core.paginator import Paginator
 from time import time
 
 
+def individualsearch(digisig_entity_number):
+
+	individual_object = Individual.objects.select_related(
+	'fk_group').select_related(
+	'fk_descriptor_title').select_related(
+	'fk_descriptor_name').select_related(
+	'fk_descriptor_prefix1').select_related(
+	'fk_descriptor_descriptor1').select_related(
+	'fk_separator_1').select_related(
+	'fk_descriptor_prefix2').select_related(
+	'fk_descriptor_descriptor2').select_related(
+	'fk_descriptor_prefix3').select_related(
+	'fk_descriptor_descriptor3').select_related(
+	'fk_group__fk_group_order').select_related(
+	'fk_group__fk_group_class').get(id_individual=digisig_entity_number)
+
+	return(individual_object)
+
+
 def sealsearch():
 	manifestation_object = Manifestation.objects.all().select_related(
 	'fk_face__fk_seal').select_related(
