@@ -284,7 +284,6 @@ def manifestation_fetchstandardvalues (e, manifestation_dic):
 	return (manifestation_dic)
 
 
-
 #information for presenting a seal
 def sealmetadata(digisig_entity_number):
 	seal_info = {}
@@ -350,9 +349,7 @@ def sealinfo_classvalue (face_case):
 
 	return(classvalue)
 
-def namecompiler(individual):
-	print (individual)
-	individual_object = individual
+def namecompiler(individual_object):
 
 	namevariable = ''
 	if (individual_object.fk_group != None): namevariable = individual_object.fk_group.group_name
