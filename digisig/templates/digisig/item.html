@@ -146,7 +146,7 @@
 
 				<td rowspan="5">
 					<div class="figure">
-						{% if m.representation_thumbnail != null %}
+						{% if m.representation_thumbnail_hash != null %}
 						<figure>
 							<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{m.thumb}}{{m.representation_thumbnail_hash}}" alt="{{m.id_representation}}" onclick="image({{forloop.counter}})">
 						</figure>
@@ -154,7 +154,7 @@
 						<!-- The Modal -->
 						<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
 						  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
-						  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{m.medium}}{{m.representation_filename}}" alt="{{m.id_representation}}">
+						  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{m.medium}}{{m.representation_filename_hash}}" alt="{{m.id_representation}}">
 						  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' m.id_representation %}">Representation details</a></div>
 						</div>
 						{% endif %}
@@ -187,12 +187,13 @@
 				<td><a href="{% url 'entity' digisig_entity_number=m.id_seal %}">Seal details</a></td>
 			</tr>
 
-			{% for sd in m.sealdescriptions %}
-				{% if forloop.parentloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-					<th class="indent">
-						{% if forloop.first %} Described in {% endif %}
-					</th>
-					<td><a href="{% url 'sealdescription_page' digisig_entity_number=sd.id_sealdescription %}">{{sd.fk_collection}} ({{sd.sealdescription_identifier}})</a></td>
+			{% for key, value in m.sealdescriptions.items %}
+			{% if forloop.parentloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+			<tr>
+				<th class="indent">
+					{% if forloop.first %} Described in {% endif %}
+				</th>
+				<td><a href="{% url 'sealdescription_page' digisig_entity_number=value.sealdescription_id %}">{{value.collection}} ({{value.identifier}})</a></td>
 			</tr>
 			{% endfor %}
 
