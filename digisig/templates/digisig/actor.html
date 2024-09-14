@@ -1,4 +1,4 @@
-{% extends "sealquery/base.html" %}
+{% extends "digisig/base.html" %}
 
 {% load static %}
 
@@ -171,25 +171,6 @@
 			</table>
 		</div>
 	</div>
-
-
-	<div class="entity_rdf">
-		<div hidden id="rdfajax">{% url 'ajax' digisig_entity_number=individual_object.id_individual %}</div>
-		<div class="div-caption">
-			RDF 
-			<button id="entitybutton3" onclick="tbtoggle2('entity3', 'entitybutton3')" class="entity">+</button>
-			<button class="RDF-download"><a href="{% url 'data' digisig_entity_number=individual_object.id_individual %}">Download</button> 
-		</div>
-
-		<div>
-			<table id="entity3" style="display:none;">
-			<tr>
-				<th id="rdfelement"></th>
-			</tr>
-		</table>
-		</div>
-	</div>
-
 
 
 <script>

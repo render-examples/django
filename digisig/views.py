@@ -573,7 +573,9 @@ def actor_page(request, digisig_entity_number):
 		'fk_descriptor_prefix2').select_related(
 		'fk_descriptor_descriptor2').select_related(
 		'fk_descriptor_prefix3').select_related(
-		'fk_descriptor_descriptor3').get(id_individual=digisig_entity_number)
+		'fk_descriptor_descriptor3').select_related(
+		'fk_group__fk_group_order').select_related(
+		'fk_group__fk_group_class').get(id_individual=digisig_entity_number)
 
 	pagetitle= namecompiler(individual_object)
 
@@ -581,13 +583,15 @@ def actor_page(request, digisig_entity_number):
 
 	manifestation_object = Manifestation.objects.filter(
 		Q(fk_face__fk_seal__fk_individual_realizer=individual_object.id_individual) | Q(fk_face__fk_seal__fk_actor_group=individual_object.id_individual)
-	). order_by('fk_face__fk_seal__fk_individual_realizer__fk_individual_office', 'fk_face__fk_seal__fk_individual_realizer')
+	). order_by('fk_face__fk_seal__fk_individual_realizer')
+
+	print (manifestation_object)
 
 	# seal_objectset = Seal.objects.filter(
 	# 	Q(fk_individual_realizer=individual_object.id_individual) | Q(fk_actor_group=individual_object.id_individual)
 	# ). order_by('fk_individual_office', 'fk_individual_realizer')
 
-	sealnumber = manifestation_object.distinct('fk_face__fk_seal').count()
+	#sealnumber = manifestation_object.distinct('fk_face__fk_seal').count()
 
 	seal_object = []
 	sealdescriptionset = []
@@ -611,6 +615,7 @@ def actor_page(request, digisig_entity_number):
 			# sealdescription_object = Digisigsealdescriptionview.objects.filter(fk_seal=current_id_seal)
 			# for g in sealdescription_object:
 			# 	sealdescriptionset.append((current_id_seal, g.id_sealdescription, g.collection_shorttitle, g.sealdescription_identifier))   
+	manifestation_set={}
 
 	for e in manifestation_object:
 		manifestation_dic = {}
@@ -640,10 +645,10 @@ def actor_page(request, digisig_entity_number):
 	context = {
 		'pagetitle': pagetitle,
 		'individual_object': individual_object,
-		'seal_object': seal_object,
-		'sealnumber': sealnumber,
+		#'seal_object': seal_object,
+		#'sealnumber': sealnumber,
 		'relationship_object': relationship_object,
-		'relationshipnumber' : relationshipnumber,
+		#'relationshipnumber' : relationshipnumber,
 		'sealdescriptionset': sealdescriptionset,
 		'references_set': references_set,
 		}
