@@ -581,7 +581,7 @@ def actor_page(request, digisig_entity_number):
 
 	template = loader.get_template('digisig/actor.html')
 
-	manifestation_object = Manifestation.objects.filter(
+	manifestation_object = sealsearch().filter(
 		Q(fk_face__fk_seal__fk_individual_realizer=individual_object.id_individual) | Q(fk_face__fk_seal__fk_actor_group=individual_object.id_individual)
 	). order_by('fk_face__fk_seal__fk_individual_realizer')
 
@@ -591,7 +591,7 @@ def actor_page(request, digisig_entity_number):
 	# 	Q(fk_individual_realizer=individual_object.id_individual) | Q(fk_actor_group=individual_object.id_individual)
 	# ). order_by('fk_individual_office', 'fk_individual_realizer')
 
-	#sealnumber = manifestation_object.distinct('fk_face__fk_seal').count()
+	sealnumber = manifestation_object.count()
 
 	seal_object = []
 	sealdescriptionset = []
@@ -646,7 +646,7 @@ def actor_page(request, digisig_entity_number):
 		'pagetitle': pagetitle,
 		'individual_object': individual_object,
 		#'seal_object': seal_object,
-		#'sealnumber': sealnumber,
+		'sealnumber': sealnumber,
 		'relationship_object': relationship_object,
 		#'relationshipnumber' : relationshipnumber,
 		'sealdescriptionset': sealdescriptionset,
@@ -925,21 +925,10 @@ def collection_page(request, digisig_entity_number):
 
 def item_page(request, digisig_entity_number):
 	starttime = time()
-	authenticationstatus = "public"
 
 	try:
-		manifestation_object = Manifestation.objects.filter(fk_support__fk_part__fk_item=digisig_entity_number).select_related(
-			'fk_face__fk_seal').select_related(
-			'fk_support__fk_part__fk_item__fk_repository').select_related(
-			'fk_support__fk_number_currentposition').select_related(
-			'fk_support__fk_attachment').select_related(
-			'fk_support__fk_supportstatus').select_related(
-			'fk_support__fk_nature').select_related(
-			'fk_imagestate').select_related(
-			'fk_position').select_related(
-			'fk_support__fk_part__fk_event').order_by(
-			'id_manifestation').prefetch_related(
-			Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1))).order_by(
+		manifestation_object = searchseal()
+		manifestation_object = manifestation_object.order_by(
 			"fk_support__fk_number_currentposition")
 
 		firstmanifestation = manifestation_object.first()

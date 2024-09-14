@@ -124,7 +124,7 @@ def sealsearchpagination(manifestation_object, qpagination):
 
 	return(manifestation_object, totalrows, totaldisplay, qpagination)
 
-# information for presenting a seal manifestation
+# information for presenting a seal manifestation {{should be defunct?}}
 def sealsearchmanifestationmetadata(manifestation_object):
 
 	manifestation_set = {}
