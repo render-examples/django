@@ -571,8 +571,6 @@ def actor_page(request, digisig_entity_number):
 		Q(fk_face__fk_seal__fk_individual_realizer=digisig_entity_number) | Q(fk_face__fk_seal__fk_actor_group=digisig_entity_number)
 	). order_by('fk_face__fk_seal__fk_individual_realizer')
 
-	print (manifestation_object)
-
 	# seal_objectset = Seal.objects.filter(
 	# 	Q(fk_individual_realizer=individual_object.id_individual) | Q(fk_actor_group=individual_object.id_individual)
 	# ). order_by('fk_individual_office', 'fk_individual_realizer')
@@ -601,6 +599,7 @@ def actor_page(request, digisig_entity_number):
 			# sealdescription_object = Digisigsealdescriptionview.objects.filter(fk_seal=current_id_seal)
 			# for g in sealdescription_object:
 			# 	sealdescriptionset.append((current_id_seal, g.id_sealdescription, g.collection_shorttitle, g.sealdescription_identifier))   
+
 	manifestation_set={}
 
 	for e in manifestation_object:
