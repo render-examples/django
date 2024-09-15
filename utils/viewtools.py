@@ -438,37 +438,41 @@ def eventset_references(event_object, event_dic):
 
 	return(event_dic)
 
-def referenceset_references(event_object, reference_dic):
+def referenceset_references(individual_object, reference_set):
 
-	reference_set = Referenceindividual.objects.filter(
-		fk_event=event_object).select_related(
+	reference_dic = Referenceindividual.objects.filter(
+		fk_individual=individual_object).select_related(
 		'fk_event').select_related(
 		'fk_referencerole').order_by(
-		"fk_event__startdate", "fk_event__enddate").prefetch_related(
-	Prefetch('fk_event', queryset=Part.objects.filter(fk_event=event_object).select_related('fk_item'))).prefetch_related(
-	Prefetch('fk_event', queryset=Locationreference.objects.filter(
-		primacy=1).filter(
-		fk_event=event_object).select_related(
-		'fk_locationname__fk_location__fk_region')))
+		"fk_event__startdate", "fk_event__enddate")
 
-	for r in reference_set:
+	for r in reference_dic:
 
 		reference_row = {}
 
 		#date
 		if r.fk_event.startdate != None:
-			reference_row['date'] = str(r.fk_event.startdate) + "-" str(r.fk_event.enddate)
+			reference_row['date'] = str(r.fk_event.startdate) + "-" + str(r.fk_event.enddate)
 		else:
 			if r.fk_event.repository_startdate != None:
-				reference_row['date'] = str(r.fk_event.repository_startdate) + "-" str(r.fk_event.repository_enddate)
+				reference_row['date'] = str(r.fk_event.repository_startdate) + " - " + str(r.fk_event.repository_enddate)
 		#role
-		refeence_row["role"] = r.fk_referencerole.referencerole
+		reference_row["role"] = r.fk_referencerole.referencerole
 
 		#item
-		reference_row["item"] = 
+		part_object = Part.objects.select_related('fk_item').get(fk_event=r.fk_event)
+		reference_row["item_shelfmark"] = part_object.fk_item.shelfmark
+		reference_row["item_id"] = part_object.fk_item
+
 		#location
-		reference_row["location"] = 
+		locationreference_object = Locationreference.objects.filter(
+			location_reference_primary=0).select_related(
+			'fk_locationname__fk_location__fk_region').get(
+			fk_event=r.fk_event)
+		reference_row["region"] = locationreference_object.fk_locationname.fk_location.fk_region
+		reference_row["location_id"] = locationreference_object.fk_locationname.fk_location.id_location
+		reference_row["location"] = locationreference_object.fk_locationname.fk_location.location
 
-		reference_dic['r.pk_referenceindividual'] = reference_row
+		reference_set[r.pk_referenceindividual] = reference_row
 
-	return(reference_dic)
+	return(reference_set)

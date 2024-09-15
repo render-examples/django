@@ -616,15 +616,20 @@ def actor_page(request, digisig_entity_number):
 	# relationship_object = Digisigrelationshipview.objects.filter(fk_individual = digisig_entity_number)
 	# relationshipnumber = len(relationship_object)
 
-	references_object = Referenceindividual.objects.filter(fk_individual= digisig_entity_number).order_by("fk_event_id__startdate", "fk_event_id__enddate")
+	reference_set = {}
 
-	references_set = []
+	reference_set = referenceset_references(individual_object, reference_set)
 
-	for r in references_object:
-		locationref = Locationreference.objects.get(fk_event=r.fk_event, fk_locationstatus=1)
-		relatedparts = Part.objects.filter(fk_event=r.fk_event)
-		for e in relatedparts:
-			references_set.append([r, e, locationref])
+	print (reference_set)
+	# references_object = Referenceindividual.objects.filter(fk_individual= digisig_entity_number).order_by("fk_event_id__startdate", "fk_event_id__enddate")
+
+	# references_set = []
+
+	# for r in references_object:
+	# 	locationref = Locationreference.objects.get(fk_event=r.fk_event, fk_locationstatus=1)
+	# 	relatedparts = Part.objects.filter(fk_event=r.fk_event)
+	# 	for e in relatedparts:
+	# 		references_set.append([r, e, locationref])
 
 	context = {
 		'pagetitle': pagetitle,
@@ -635,7 +640,7 @@ def actor_page(request, digisig_entity_number):
 		#'relationshipnumber' : relationshipnumber,
 		#'sealdescriptionset': sealdescriptionset,
 		'manifestation_set': manifestation_set,
-		'references_set': references_set,
+		'reference_set': reference_set,
 		}
 
 	print("Compute Time:", time()-starttime)

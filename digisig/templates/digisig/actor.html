@@ -169,26 +169,14 @@
 					<th>Role</th>
 				</tr>
 
-			{% for r in references_set %}
+			{% for r in reference_set %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
-					<td><a href="{% url 'entity' r.1.fk_item.id_item %}">{{r.1.reference_full}}</a></td>
-
-					<td> 
-					{% if r.1.fk_event.startdate != null %}
-					{{r.1.fk_event.startdate}}
-
-						{% if r.1.fk_event.enddate > r.1.fk_event.startdate %}
-					 	-{{r.1.fk_event.enddate}}
-					 	{% endif %}
-
-					{% else %}
-					{{r.1.fk_event.repository_startdate}} {{r.1.fk_event.repository_enddate}}
-					{% endif %}
-					</td>
-
-					<td><a href="{% url 'entity' r.2.fk_locationname.fk_location.id_location %}">{{r.2.fk_locationname.fk_location}}</a> ({{r.2.fk_locationname.fk_location.fk_region}})</td>
-					<td>{{r.0.fk_referencerole}}</td>
+					<td><a href="{% url 'entity' r.item_id %}">{{r.item_shelfmark}}</a></td>
+					<td>{{r.date}}</td>
+					<td><a href="{% url 'entity' r.location_id %}">{{r.location}}]]</a> ({{r.region}})</td>
+					<td>{{r.role}}</td>
 				</tr>
+
 			{% endfor %}
 			</table>
 		</div>
