@@ -451,25 +451,24 @@ def referenceset_references(event_object, reference_dic):
 		fk_event=event_object).select_related(
 		'fk_locationname__fk_location__fk_region')))
 
-	reference
-
 	for r in reference_set:
+
+		reference_row = {}
+
+		#date
 		if r.fk_event.startdate != None:
-			reference_dic['date'] = str(r.fk_event.startdate) + "-" str(r.fk_event.enddate)
+			reference_row['date'] = str(r.fk_event.startdate) + "-" str(r.fk_event.enddate)
 		else:
 			if r.fk_event.repository_startdate != None:
-				reference_dic['date'] = str(r.fk_event.repository_startdate) + "-" str(r.fk_event.repository_enddate)
+				reference_row['date'] = str(r.fk_event.repository_startdate) + "-" str(r.fk_event.repository_enddate)
+		#role
+		refeence_row["role"] = r.fk_referencerole.referencerole
 
-	reference_set['date']
+		#item
+		reference_row["item"] = 
+		#location
+		reference_row["location"] = 
 
+		reference_dic['r.pk_referenceindividual'] = reference_row
 
-	<td><a href="{% url 'entity' r.2.fk_locationname.fk_location.id_location %}">{{r.2.fk_locationname.fk_location}}</a> ({{r.2.fk_locationname.fk_location.fk_region}})</td>
-					<td>{{r.0.fk_referencerole}}</td>
-
-				# 	<th>Item</th>
-				# 	<th>Date</th>
-				# 	<th>Location</th>
-				# 	<th>Role</th>
-
-
-	return(reference_dic):
+	return(reference_dic)
