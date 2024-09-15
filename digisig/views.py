@@ -608,10 +608,8 @@ def actor_page(request, digisig_entity_number):
 	totaldisplay = len(manifestation_set)
 
 	# sealnumber = manifestation_object.count()
-
 	# seal_object = []
 	# sealdescriptionset = []
-
 
 	relationship_object = []			
 	# # list of relationships for each individual
@@ -913,19 +911,30 @@ def collection_page(request, digisig_entity_number):
 def item_page(request, digisig_entity_number):
 	starttime = time()
 
-	try:
-		manifestation_object = searchseal()
-		manifestation_object = manifestation_object.order_by(
-			"fk_support__fk_number_currentposition")
+	manifestation_object = sealsearch()
+	manifestation_object = manifestation_object.order_by(
+		"fk_support__fk_number_currentposition")
 
-		firstmanifestation = manifestation_object.first()
-		item_object = firstmanifestation.fk_support.fk_part.fk_item
-		part_object = firstmanifestation.fk_support.fk_part
-		event_object = firstmanifestation.fk_support.fk_part.fk_event
+	firstmanifestation = manifestation_object.first()
+	item_object = firstmanifestation.fk_support.fk_part.fk_item
+	part_object = firstmanifestation.fk_support.fk_part
+	event_object = firstmanifestation.fk_support.fk_part.fk_event
 
-	except:
-		part_object = Part.objects.get(fk_item=digisig_entity_number).first()
-		event_object = part_object.fk_event
+
+	# try:
+	# 	manifestation_object = searchseal()
+	# 	manifestation_object = manifestation_object.order_by(
+	# 		"fk_support__fk_number_currentposition")
+
+	# 	firstmanifestation = manifestation_object.first()
+	# 	item_object = firstmanifestation.fk_support.fk_part.fk_item
+	# 	part_object = firstmanifestation.fk_support.fk_part
+	# 	event_object = firstmanifestation.fk_support.fk_part.fk_event
+
+	# except:
+	# 	part_object = Part.objects.get(fk_item=digisig_entity_number)
+	# 	event_object = part_object.fk_event
+	# 	item_object = part_object.fk_item
 
 	pagetitle = item_object.fk_repository.repository_fulltitle + " " + item_object.shelfmark
 
@@ -966,22 +975,27 @@ def item_page(request, digisig_entity_number):
 
 	manifestation_set = {}
 
-	for e in manifestation_object:
-		manifestation_dic = {}
-		manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-		manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-		manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
-		manifestation_set[e.id_manifestation] = manifestation_dic
+	try:
+		for e in manifestation_object:
+			manifestation_dic = {}
+			manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+			manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+			manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
+			manifestation_set[e.id_manifestation] = manifestation_dic
 
-	totalrows = manifestation_object.count
-	totaldisplay = len(manifestation_set)
+		totalrows = manifestation_object.count
+		totaldisplay = len(manifestation_set)
+
+	except:
+		totalrows = 0
+		totaldisplay = 0
+
 
 	print("Compute Time:", time()-starttime)
 
 	template = loader.get_template('digisig/item.html')
 	context = {
 		'pagetitle': pagetitle,
-		'authenticationstatus': authenticationstatus,
 		'item_object': item_object,
 		'event_dic': event_dic,
 		'mapdic': mapdic,

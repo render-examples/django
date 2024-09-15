@@ -14,6 +14,35 @@ from django.contrib.auth.models import User
 from .models import *
 
 
+### specials
+class Digisigrelationshipview(models.Model):
+    pk_branch = models.AutoField(primary_key=True)
+    fk_individual = models.IntegerField(blank=True, null=True)
+    fk_relationshiprole = models.IntegerField(blank=True, null=True)
+    person2 = models.IntegerField(blank=True, null=True)
+    fk_relationshipnode = models.IntegerField(blank=True, null=True)
+    date_start = models.DateField(blank=True, null=True)
+    date_end = models.DateField(blank=True, null=True)
+    relationship_role = models.IntegerField(blank=True, null=True)
+    group_name = models.TextField(blank=True, null=True)
+    groupclass = models.TextField(blank=True, null=True)
+    grouporder = models.TextField(blank=True, null=True)
+    descriptor_title = models.TextField(blank=True, null=True)
+    descriptor_name = models.TextField(blank=True, null=True)
+    descriptor1 = models.TextField(blank=True, null=True)
+    descriptor2 = models.TextField(blank=True, null=True)
+    descriptor3 = models.TextField(blank=True, null=True)
+    prefix1 = models.TextField(blank=True, null=True)
+    prefix2 = models.TextField(blank=True, null=True)
+    prefix3 = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'digisig_relationship_view'
+
+
+### normal tables
+
 class Access(models.Model):
     pk_access = models.IntegerField(primary_key=True)
     access_level = models.TextField(blank=True, null=True)
