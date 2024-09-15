@@ -571,29 +571,9 @@ def actor_page(request, digisig_entity_number):
 		Q(fk_face__fk_seal__fk_individual_realizer=digisig_entity_number) | Q(fk_face__fk_seal__fk_actor_group=digisig_entity_number)
 	). order_by('fk_face__fk_seal__fk_individual_realizer')
 
-	# seal_objectset = Seal.objects.filter(
-	# 	Q(fk_individual_realizer=individual_object.id_individual) | Q(fk_actor_group=individual_object.id_individual)
-	# ). order_by('fk_individual_office', 'fk_individual_realizer')
-
-	# if (sealnumber > 0):
-	# 	for s in seal_objectset:
-	# 		current_id_seal = s.id_seal
-	# 		current_id_actor = s.fk_individual_realizer
-			# manifestation_instance = Manifestation.objects.filter(fk_face__fk_seal = current_id_seal).order_by('id_representation')[:1]
-			# manifestation_instance = Manifestation.objects.filter(fk_face__fk_seal = current_id_seal)[:1]
-
-			# for c in manifestation_instance:
-			# 	representationid = c.id_representation
-			# 	if representationid is None:
-			# 		seal_object.append((s.id_seal, 'Null', 'Null', 'Null', 'Null', 'Null', s.fk_individual_realizer, s.datestart_seal, s.dateend_seal, s.fk_individual_office))
-			# 	else:
-			# 		seal_object.append((s.id_seal, c.thumb, c.representation_thumbnail, c.id_representation, c.medium, c.representation_filename, s.fk_individual_realizer, s.datestart_seal, s.dateend_seal, s.fk_individual_office))
-
-			# this code prepares the list of descriptions associated to each seal
-
-			# sealdescription_object = Digisigsealdescriptionview.objects.filter(fk_seal=current_id_seal)
-			# for g in sealdescription_object:
-			# 	sealdescriptionset.append((current_id_seal, g.id_sealdescription, g.collection_shorttitle, g.sealdescription_identifier))   
+	#hack to deal with cases where there are too many seals for the form to handle
+	qpagination = 1
+	manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)
 
 	manifestation_set={}
 
@@ -607,39 +587,23 @@ def actor_page(request, digisig_entity_number):
 	totalrows = manifestation_object.count
 	totaldisplay = len(manifestation_set)
 
-	# sealnumber = manifestation_object.count()
-	# seal_object = []
-	# sealdescriptionset = []
-
+	# list of relationships for each individual
 	relationship_object = []			
-	# # list of relationships for each individual
-	# relationship_object = Digisigrelationshipview.objects.filter(fk_individual = digisig_entity_number)
-	# relationshipnumber = len(relationship_object)
+	relationship_object = Digisigrelationshipview.objects.filter(fk_individual = digisig_entity_number)
+	relationshipnumber = len(relationship_object)
 
 	reference_set = {}
 
 	reference_set = referenceset_references(individual_object, reference_set)
 
-	print (reference_set)
-	# references_object = Referenceindividual.objects.filter(fk_individual= digisig_entity_number).order_by("fk_event_id__startdate", "fk_event_id__enddate")
-
-	# references_set = []
-
-	# for r in references_object:
-	# 	locationref = Locationreference.objects.get(fk_event=r.fk_event, fk_locationstatus=1)
-	# 	relatedparts = Part.objects.filter(fk_event=r.fk_event)
-	# 	for e in relatedparts:
-	# 		references_set.append([r, e, locationref])
-
 	context = {
 		'pagetitle': pagetitle,
 		'individual_object': individual_object,
-		#'seal_object': seal_object,
-		#'sealnumber': sealnumber,
 		'relationship_object': relationship_object,
-		#'relationshipnumber' : relationshipnumber,
-		#'sealdescriptionset': sealdescriptionset,
+		'relationshipnumber' : relationshipnumber,
 		'manifestation_set': manifestation_set,
+		'totalrows': totalrows,
+		'totaldisplay': totaldisplay,
 		'reference_set': reference_set,
 		}
 

@@ -462,7 +462,7 @@ def referenceset_references(individual_object, reference_set):
 		#item
 		part_object = Part.objects.select_related('fk_item').get(fk_event=r.fk_event)
 		reference_row["item_shelfmark"] = part_object.fk_item.shelfmark
-		reference_row["item_id"] = part_object.fk_item
+		reference_row["item_id"] = part_object.fk_item.id_item
 
 		#location
 		locationreference_object = Locationreference.objects.filter(

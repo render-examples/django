@@ -44,7 +44,7 @@
 			
 	<div class="entity_seals" id="entity_seals">
 		<div class="div-caption">
-			Seal details <button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
+			Seal details ({{totaldisplay}} of {{totalrows}})<button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
 		</div>
 
 		<div>
@@ -169,14 +169,13 @@
 					<th>Role</th>
 				</tr>
 
-			{% for r in reference_set %}
+			{% for key, r in reference_set.items %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
-					<td><a href="{% url 'entity' r.item_id %}">{{r.item_shelfmark}}</a></td>
+					<td><a href="{% url 'entity' digisig_entity_number=r.item_id %}">{{r.item_shelfmark}}</a></td>
 					<td>{{r.date}}</td>
-					<td><a href="{% url 'entity' r.location_id %}">{{r.location}}]]</a> ({{r.region}})</td>
+					<td><a href="{% url 'entity' digisig_entity_number=r.location_id %}">{{r.location}}]]</a> ({{r.region}})</td>
 					<td>{{r.role}}</td>
 				</tr>
-
 			{% endfor %}
 			</table>
 		</div>
