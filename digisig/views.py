@@ -911,34 +911,29 @@ def collection_page(request, digisig_entity_number):
 def item_page(request, digisig_entity_number):
 	starttime = time()
 
-	manifestation_object = sealsearch()
-	manifestation_object = manifestation_object.order_by(
-		"fk_support__fk_number_currentposition")
+	try:
+		manifestation_object = sealsearch()
+		manifestation_object = manifestation_object.filter(
+			fk_support__fk_part__fk_item=digisig_entity_number).order_by(
+			"fk_support__fk_number_currentposition")
 
-	firstmanifestation = manifestation_object.first()
-	item_object = firstmanifestation.fk_support.fk_part.fk_item
-	part_object = firstmanifestation.fk_support.fk_part
-	event_object = firstmanifestation.fk_support.fk_part.fk_event
+		firstmanifestation = manifestation_object.first()
+		item_object = firstmanifestation.fk_support.fk_part.fk_item
+		part_object = firstmanifestation.fk_support.fk_part
+		event_object = firstmanifestation.fk_support.fk_part.fk_event
 
-
-	# try:
-	# 	manifestation_object = searchseal()
-	# 	manifestation_object = manifestation_object.order_by(
-	# 		"fk_support__fk_number_currentposition")
-
-	# 	firstmanifestation = manifestation_object.first()
-	# 	item_object = firstmanifestation.fk_support.fk_part.fk_item
-	# 	part_object = firstmanifestation.fk_support.fk_part
-	# 	event_object = firstmanifestation.fk_support.fk_part.fk_event
-
-	# except:
-	# 	part_object = Part.objects.get(fk_item=digisig_entity_number)
-	# 	event_object = part_object.fk_event
-	# 	item_object = part_object.fk_item
+	except:
+		part_object = Part.objects.get(fk_item=digisig_entity_number)
+		event_object = part_object.fk_event
+		item_object = part_object.fk_item
 
 	pagetitle = item_object.fk_repository.repository_fulltitle + " " + item_object.shelfmark
 
-	location, location_dict, event_dic = eventset_data(event_object, part_object)
+	event_dic = {}
+	event_dic["part_object"] = part_object
+	event_dic = eventset_datedata(event_object, event_dic)
+	event_dic = eventset_locationdata(event_object, event_dic)
+	event_dic = eventset_references(event_object, event_dic)
 
 	place_object = event_dic["location"]
 	mapdic = mapgenerator(place_object, 0)
@@ -1004,20 +999,9 @@ def item_page(request, digisig_entity_number):
 		'totalrows': totalrows,
 		'totaldisplay': totaldisplay,
 		'externallink_object': externallinkset,
-		'location': location,
-		'location_dict': location_dict,
+		#'location': location,
+		#'location_dict': location_dict,
 		}
-
-	# else:
-
-	# 	print("Compute Time:", time()-starttime)
-
-	# 	template = loader.get_template('digisig/item_simple.html')
-	# 	context = {
-	# 		'pagetitle': pagetitle,
-	# 		'authenticationstatus': authenticationstatus,
-	# 		'item_object': item_object,
-	# 		}
 
 	return HttpResponse(template.render(context, request))
 

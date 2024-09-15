@@ -1209,58 +1209,6 @@ def externallinkgenerator(digisig_entity_number):
 
 	return (externallinkset)	
 
-#gets event set
-def eventset_data(event_object, part_object):
-	event_dic = {}
-
-	event_dic["part_object"] = part_object
-
-	if event_object.repository_startdate is not None: 
-		yeartemp = event_object.repository_startdate
-		event_dic["year1"] = yeartemp.year
-		if event_object.repository_enddate is not None: 
-			yeartemp = event_object.repository_enddate
-			event_dic["year2"] = yeartemp.year
-
-	if event_object.startdate is not None:
-		yeartemp = event_object.startdate
-		event_dic["year3"] = yeartemp.year
-		if event_object.enddate is not None: 
-			yeartemp = event_object.enddate
-			event_dic["year4"] = yeartemp.year
-
-	if event_object is not None:
-		targetlocation = event_object.pk_event
-		location_object = Location.objects.filter(locationname__locationreference__fk_event=targetlocation, locationname__locationreference__location_reference_primary = False).first()
-
-		location_name = location_object.location
-		location_id = location_object.id_location
-		location_longitude = str(location_object.longitude)
-		location_latitude = str(location_object.latitude)
-
-	location= {"type": "Point", "coordinates":[location_longitude, location_latitude]}
-	location_dict = {'location': location_name, 'latitude': location_latitude, 'longitude': location_longitude} 
-
-	event_dic["repository_location"] = event_object.repository_location 
-	event_dic["location"] = location_object
-	event_dic["location_name"] = location_name 
-	event_dic["location_id"] = location_id 
-	event_dic["location_latitude"] = location_longitude 
-	event_dic["location_latitude"] = location_latitude 
-
-	reference_dict = {}
-	referenceset = Referenceindividual.objects.filter(
-		fk_event=part_object.fk_event).order_by(
-		"fk_referencerole__role_order", "pk_referenceindividual").select_related(
-		'fk_individual').select_related(
-		'fk_referencerole')
-
-	event_dic["referenceset"] = referenceset
-
-	return(location, location_dict, event_dic)
-
-
-
 # def eventset_data(itemnumber):
 # 	part_object = Part.objects.filter(fk_item = itemnumber)
 		
