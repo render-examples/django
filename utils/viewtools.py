@@ -438,3 +438,38 @@ def eventset_references(event_object, event_dic):
 
 	return(event_dic)
 
+def referenceset_references(event_object, reference_dic):
+
+	reference_set = Referenceindividual.objects.filter(
+		fk_event=event_object).select_related(
+		'fk_event').select_related(
+		'fk_referencerole').order_by(
+		"fk_event__startdate", "fk_event__enddate").prefetch_related(
+	Prefetch('fk_event', queryset=Part.objects.filter(fk_event=event_object).select_related('fk_item'))).prefetch_related(
+	Prefetch('fk_event', queryset=Locationreference.objects.filter(
+		primacy=1).filter(
+		fk_event=event_object).select_related(
+		'fk_locationname__fk_location__fk_region')))
+
+	reference
+
+	for r in reference_set:
+		if r.fk_event.startdate != None:
+			reference_dic['date'] = str(r.fk_event.startdate) + "-" str(r.fk_event.enddate)
+		else:
+			if r.fk_event.repository_startdate != None:
+				reference_dic['date'] = str(r.fk_event.repository_startdate) + "-" str(r.fk_event.repository_enddate)
+
+	reference_set['date']
+
+
+	<td><a href="{% url 'entity' r.2.fk_locationname.fk_location.id_location %}">{{r.2.fk_locationname.fk_location}}</a> ({{r.2.fk_locationname.fk_location.fk_region}})</td>
+					<td>{{r.0.fk_referencerole}}</td>
+
+				# 	<th>Item</th>
+				# 	<th>Date</th>
+				# 	<th>Location</th>
+				# 	<th>Role</th>
+
+
+	return(reference_dic):
