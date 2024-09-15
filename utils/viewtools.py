@@ -476,3 +476,11 @@ def referenceset_references(individual_object, reference_set):
 		reference_set[r.pk_referenceindividual] = reference_row
 
 	return(reference_set)
+
+
+#gets externallinks for object
+def externallinkgenerator(digisig_entity_number):
+	externallinkset = []
+	externallinkset = Externallink.objects.filter(internal_entity=digisig_entity_number)
+
+	return (externallinkset)	

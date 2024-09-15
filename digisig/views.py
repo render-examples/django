@@ -554,7 +554,6 @@ def entity_fail(request, entity_phrase):
 	return HttpResponse("%s is not an entity I know about." % entity_phrase)
 
 
-
 ############################## Actor #############################
 
 def actor_page(request, digisig_entity_number):
@@ -584,16 +583,13 @@ def actor_page(request, digisig_entity_number):
 		manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
 		manifestation_set[e.id_manifestation] = manifestation_dic
 
-	totalrows = manifestation_object.count
-	totaldisplay = len(manifestation_set)
-
-	# list of relationships for each individual
+	# list of relationships for each actor
 	relationship_object = []			
 	relationship_object = Digisigrelationshipview.objects.filter(fk_individual = digisig_entity_number)
 	relationshipnumber = len(relationship_object)
 
+	# list of references to the actor
 	reference_set = {}
-
 	reference_set = referenceset_references(individual_object, reference_set)
 
 	context = {
@@ -1153,33 +1149,23 @@ def seal_page(request, digisig_entity_number):
 def sealdescription_page(request, digisig_entity_number):
 
 	starttime = time()
-	sealdescription_object = get_object_or_404(Digisigsealdescriptionview, id_sealdescription=digisig_entity_number)
+
+	template = loader.get_template('digisig/sealdescription.html')
+
+	sealdescription_object = Sealdescription.objects.select_related('fk_collection').get(id_sealdescription=digisig_entity_number)
 	pagetitle = sealdescription_object.collection_title
 
-	if request.user.is_authenticated:
-		authenticationstatus = "authenticated"
-		template = loader.get_template('digisig/sealdescription.html')
+	collectioncontributors = Collectioncontributor.objects.filter(fk_collection=sealdescription_object.fk_collection)
+	contributorset = contributorgenerate(collectioncontributors)
 
-		collectioncontributors = Collectioncontributor.objects.filter(fk_collection=sealdescription_object.fk_collection)
-		contributorset = contributorgenerate(collectioncontributors)
+	externallinkset = externallinkgenerator(digisig_entity_number)
 
-		externallinkset = externallinkgenerator(digisig_entity_number)
-
-		context = {
-			'pagetitle': pagetitle,
-			'sealdescription_object': sealdescription_object,
-			'contributorset': contributorset,
-			'externallinkset': externallinkset, 
-			}
-
-	else:
-		authenticationstatus = "public"
-		template = loader.get_template('digisig/sealdescription_simple.html')
-
-		context = {
-			'pagetitle': pagetitle,
-			'sealdescription_object': sealdescription_object,
-			}
+	context = {
+		'pagetitle': pagetitle,
+		'sealdescription_object': sealdescription_object,
+		'contributorset': contributorset,
+		'externallinkset': externallinkset, 
+		}
 
 	print("Compute Time:", time()-starttime)
 	return HttpResponse(template.render(context, request))
