@@ -221,19 +221,24 @@ def sealsearchmanifestationmetadata(manifestation_object):
 #assembles the list of people credited with a work
 def sealdescription_contributorgenerate(sealdescription_object, sealdescription_dic):
 
-	collectioncontributors = Collectioncontributor.objects.filter(fk_collection=sealdescription_object.fk_collection)
+	collectioncontributions = Collectioncontributor.objects.filter(
+		fk_collection=sealdescription_object.fk_collection).select_related(
+		'fk_contributor').select_related(
+		'fk_collectioncontribution')
 
-	contributor_set = {}
-	for c in collectioncontributors:
-		contributor_person = {}
-		contributor_person['id_contributor'] = c.fk_contributor
-		contributor_person['id_contributor'] = c.fk_collectioncontribution, 
-		contributor_person['id_contributor'] = c.name_first,
-		contributor_person['id_contributor'] = c.contributorindividual.name_last, 
-		contributor_person['id_contributor'] = c.contributorindividual.name_middle, 
-		contributor_person['id_contributor'] = c.contributorindividual.uricontributor
+	contribution_set = {}
+
+	for c in collectioncontributions:
+		contribution = {}
+		contribution['contribution'] = c.fk_collectioncontribution.collectioncontribution 
+		contribution['name_first'] = c.fk_contributor.name_first
+		contribution['name_last'] = c.fk_contributor.name_last
+		contribution['name_middle'] = c.fk_contributor.name_middle
+		contribution['uricontributor'] = c.fk_contributor.uricontributor
 		
-		contributor_set['c.sealdescrption_person['']
+		contribution_set[c.sealdescription_person] = contribution
+
+	sealdescription_dic["contributors"] = contribution_set
 
 	return(sealdescription_dic)
 
