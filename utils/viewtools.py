@@ -218,6 +218,46 @@ def sealsearchmanifestationmetadata(manifestation_object):
 	return (manifestation_set)
 
 
+#assembles the list of people credited with a work
+def sealdescription_contributorgenerate(sealdescription_object, sealdescription_dic):
+
+	collectioncontributors = Collectioncontributor.objects.filter(fk_collection=sealdescription_object.fk_collection)
+
+	contributor_set = {}
+	for c in collectioncontributors:
+		contributor_person = {}
+		contributor_person['id_contributor'] = c.fk_contributor
+		contributor_person['id_contributor'] = c.fk_collectioncontribution, 
+		contributor_person['id_contributor'] = c.name_first,
+		contributor_person['id_contributor'] = c.contributorindividual.name_last, 
+		contributor_person['id_contributor'] = c.contributorindividual.name_middle, 
+		contributor_person['id_contributor'] = c.contributorindividual.uricontributor
+		
+		contributor_set['c.sealdescrption_person['']
+
+	return(sealdescription_dic)
+
+
+def	sealdescription_fetchrepresentation(sealdescription_object, sealdescription_dic):
+
+	try:
+		representation_set = Representation.objects.select_related(
+			'fk_connection').get(
+			fk_digisig=sealdescription_object.id_sealdescription, primacy=1)
+
+	except:
+		print ("no image available for:", sealdescription_object)
+		representation_set = Representation.objects.select_related('fk_connection').get(id_representation=12204474)
+
+	sealdescription_dic["thumb"] = representation_set.fk_connection.thumb
+	sealdescription_dic["medium"] = representation_set.fk_connection.medium
+	sealdescription_dic["representation_thumbnail_hash"] = representation_set.representation_thumbnail_hash
+	sealdescription_dic["representation_filename_hash"] = representation_set.representation_filename_hash 
+	sealdescription_dic["id_representation"] = representation_set.id_representation
+
+	return(sealdescription_dic)
+
+
 def	manifestation_fetchrepresentations(e, manifestation_dic):
 
 	try:
