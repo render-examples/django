@@ -7,12 +7,15 @@ from time import time
 # from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from django.db.models import Q
+from django.db.models import Count
 
 from .models import *
 from .forms import * 
 # from utils.mltools import * 
 from utils.generaltools import *
 from utils.viewtools import *
+
+import json
 
 # Create your views here.
 def index(request):
@@ -615,7 +618,6 @@ def collection_page(request, digisig_entity_number):
 
 	### This code prepares collection info box and the data for charts on the collection page
 
-	print ("Progress")
 	#defaults
 	qcollection = int(digisig_entity_number)
 	data = []
@@ -623,9 +625,10 @@ def collection_page(request, digisig_entity_number):
 	pagetitle = 'All Collections'
 	collectioninfo= []
 	collection = get_object_or_404(Collection, id_collection=qcollection)
-	collectioncontributors = Collectioncontributor.objects.filter(fk_collection=qcollection)
 
-	contributorset = contributorgenerate(collectioncontributors)
+	collection_dic = {}
+
+	collection_dic = sealdescription_contributorgenerate(collection, collection_dic)
 
 	#if collection is set then limit the scope of the dataset
 	if (qcollection == 30000287):
@@ -848,7 +851,7 @@ def collection_page(request, digisig_entity_number):
 		'pagetitle': pagetitle,
 		'collectioninfo': collectioninfo,
 		'collection': collection,
-		'contributorset': contributorset,
+		#'contributorset': contributorset,
 		'labels1': labels1,
 		'data1': data1,
 		'labels2': labels2,
@@ -864,7 +867,7 @@ def collection_page(request, digisig_entity_number):
 		'form': form,
 	}
 		
-	template = loader.get_template('digisig/info_collections.html')                   
+	template = loader.get_template('digisig/collection.html')                   
 	return HttpResponse(template.render(context, request))
 
 
@@ -949,7 +952,6 @@ def item_page(request, digisig_entity_number):
 	except:
 		totalrows = 0
 		totaldisplay = 0
-
 
 	print("Compute Time:", time()-starttime)
 
@@ -1110,6 +1112,66 @@ def place_page(request, digisig_entity_number):
 	return HttpResponse(template.render(context, request))
 
 
+############################## Representation #############################
+
+
+def representation_page(request, digisig_entity_number):
+
+	starttime = time()
+	pagetitle = 'Representation'
+	template = loader.get_template('digisig/representation.html')
+
+	representation_object = Representation.objects.select_related(
+		'fk_manifestation').select_related(
+		'fk_representation_type').select_related(
+		'fk_connection').select_related(
+		'fk_contributor_creator').select_related(
+		'fk_manifestation__fk_support__fk_part__fk_item__fk_repository').select_related(
+		'fk_manifestation__fk_support__fk_part__fk_event').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_group').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_descriptor_title').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_descriptor_name').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix1').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor1').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_separator_1').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix2').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor2').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix3').select_related(
+		'fk_manifestation__fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor3').get(
+		id_representation=digisig_entity_number)
+
+	representation_dic = {}
+
+	#what type of entity is depicted? (Manifestation, Document....)
+	digisigentity = str(representation_object.fk_digisig)
+	representation_dic["entity_type"] = int(digisigentity[7:])
+
+	#defaults to stop some forms from breaking
+	representation_dic["main_title"] = "Title"
+	# representation_dic["manifestation_object"] = get_object_or_404(Manifestation, id_manifestation=10000002)
+	# representation_dic["item"] = get_object_or_404(Item, id_item=10545090)
+
+	representation_dic = representationmetadata(representation_object, representation_dic)
+
+	if representation_dic["entity_type"] == 2:
+		representation_dic = representationmetadata_manifestation(representation_object, representation_dic)
+
+	if representation_dic["entity_type"] == 3:
+		representation_dic = representationmetadata_sealdescription(representation_object, representation_dic)
+
+	if representation_dic["entity_type"] == 8:
+		representation_dic = representationmetadata_part(representation_object, representation_dic)
+
+	context = {
+		'pagetitle': pagetitle,
+		'representation_dic': representation_dic,
+		}
+
+	print("Compute Time:", time()-starttime)
+	return HttpResponse(template.render(context, request))
+
+
 ############################## Seal #############################
 
 
@@ -1152,69 +1214,27 @@ def sealdescription_page(request, digisig_entity_number):
 
 	template = loader.get_template('digisig/sealdescription.html')
 
-	sealdescription_object = Sealdescription.objects.select_related('id_collection').get(id_sealdescription=digisig_entity_number)
+	sealdescription_object = Sealdescription.objects.select_related(
+		'fk_collection').select_related(
+		'fk_seal').get(
+		id_sealdescription=digisig_entity_number)
 	
 	pagetitle = sealdescription_object.fk_collection.collection_title
 
 	sealdescription_dic = {}
 	sealdescription_dic= sealdescription_fetchrepresentation(sealdescription_object, sealdescription_dic)
-	sealdescription_dic = sealdescription_contributorgenerate(sealdescription_object, sealdescription_dic)
+	sealdescription_dic = sealdescription_contributorgenerate(sealdescription_object.fk_collection, sealdescription_dic)
 
 	externallinkset = externallinkgenerator(digisig_entity_number)
 
 	context = {
 		'pagetitle': pagetitle,
 		'sealdescription_object': sealdescription_object,
-		'contributorset': contributorset,
+		'sealdescription_dic': sealdescription_dic,
 		'externallinkset': externallinkset, 
 		}
 
-	print("Compute Time:", time()-starttime)
-	return HttpResponse(template.render(context, request))
-
-################################ TERM ######################################
-
-def term_page(request, digisig_entity_number):
-	pagetitle = 'Term'
-
-	term_object = get_object_or_404(Terminology, id_term=digisig_entity_number)
-	statement_object = Digisigskosdataview.objects.filter(skos_data_subject=digisig_entity_number)
-
-	template = loader.get_template('digisig/term.html')
-	context = {
-		'pagetitle': pagetitle,
-		'term_object': term_object,
-		'statement_object': statement_object,
-		}
-
-	return HttpResponse(template.render(context, request))
-
-
-############################## Representation #############################
-
-
-def representation_page(request, digisig_entity_number):
-
-	starttime = time()
-	pagetitle = 'Representation'
-
-	representation_object = get_object_or_404(Representation, id_representation=digisig_entity_number)
-
-	if request.user.is_authenticated:
-		authenticationstatus = "authenticated"
-		template = loader.get_template('digisig/representation.html')
-		representation_dic = representationmetadata(representation_object, authenticationstatus)
-
-	else:
-		authenticationstatus = "public"
-		representation_dic = representationmetadata(representation_object, authenticationstatus)
-		template = loader.get_template('digisig/representation_simple.html')
-
-	context = {
-		'pagetitle': pagetitle,
-		'representation_dic': representation_dic,
-		}
-
+	print (sealdescription_dic)
 	print("Compute Time:", time()-starttime)
 	return HttpResponse(template.render(context, request))
 

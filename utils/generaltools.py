@@ -217,153 +217,6 @@ def representationlist(sealset):
 	return (representationlist)
 
 
-## function to collect all the possible information you would need to present a representation
-def representationmetadata(representation_case, authenticationstatus):
-
-	representation_dic = {}
-	representation_dic["representation_object"] = representation_case
-	representation_dic["id_representation"] = representation_case.id_representation
-
-	#what type of image? (Photograph, RTI....)
-	representation_dic["representation_type"] = representation_case.fk_representation_type
-
-	#what type of entity is depicted? (Manifestation, Document....)
-	digisigentity = str(representation_case.fk_digisig)
-	representation_dic["entity_type"] = int(digisigentity[7:])
-
-	#where is the image stored?
-	connection = representation_case.fk_connection
-	representation_dic["connection_object"] = representation_case.fk_connection
-
-	if representation_case.fk_representation_type.pk_representation_type == 2:
-		print ("found RTI:", representation_case.id_representation)
-		representation_dic["rti"] = connection.rti
-		representation_dic["representation_folder"] = representation_case.representation_folder
-		try:
-			thumbnailRTI_object = get_object_or_404(Representation, fk_digisig=representation_case.fk_digisig, primacy=1)
-			representation_case = thumbnailRTI_object
-		except:
-			print ("An exception occurred in fetching representation case for the thumbnail of the RTI", representation_dic)
-
-	representation_dic["thumb"] = connection.thumb
-	representation_dic["representation_thumbnail"] = representation_case.representation_thumbnail_hash 
-	representation_dic["medium"] = connection.medium
-	representation_dic["representation_filename"] = representation_case.representation_filename_hash 
-
-	if authenticationstatus == "public":
-		print ("public")
-		return (representation_dic)
-
-	print ("authenticated")
-
-
-	##### for loged on users
-
-	#image dimensions
-	representation_dic["width"] = representation_case.width
-	representation_dic["height"] = representation_case.height
-
-
-
-	#who made it?
-	creator_object = representation_case.fk_contributor_creator
-	representation_dic["contributorcreator_object"] = creator_object
-	try:
-		creator_phrase = creator_object.name_first + " " + creator_object.name_middle + " " + creator_object.name_last
-	except:
-		try:
-			creator_phrase = creator_object.name_first + " " + creator_object.name_last
-		except:
-			try:
-				creator_phrase = creator_object.name_last
-			except:
-				creator_phrase = "N/A"
-	representation_dic["contributorcreator_name"] = creator_phrase.strip()
-
-	#when was it made?
-	representation_dic["datecreated"] = representation_case.representation_datecreated
-
-	#where does it come from?
-	representation_dic["collection_object"] = representation_case.fk_collection
-
-	#what rights?
-	representation_dic["rights_object"] = representation_case.fk_rightsholder
-
-	#some defaults to stop forms breaking.... is there a better way to do this?
-	representation_dic["manifestation_object"] = get_object_or_404(Manifestation, id_manifestation=10000002)
-	representation_dic["item"] = get_object_or_404(Item, id_item=10545090)
-	representation_dic["main_title"] = "Title"
-
-	#information about the original object
-	#Manifestation
-	if representation_dic["entity_type"] == 2:
-
-		try:
-			manifestation = representation_case.fk_manifestation
-			representation_dic["manifestation_object"] = manifestation
-
-			support = manifestation.fk_support
-			representation_dic["support_object"] = support
-
-			part = support.fk_part
-
-			face = manifestation.fk_face
-			seal = face.fk_seal
-			representation_dic["seal"] = seal
-
-			individual_object = seal.fk_individual_realizer
-			individualtarget = individual_object.id_individual
-			representation_dic["outname"] = namecompiler(individualtarget)
-			representation_dic["individual_object"] = individual_object
-
-			sealdescription_objectset = Sealdescription.objects.filter(fk_seal = seal.id_seal)
-			representation_dic["sealdescription_objectset"] = sealdescription_objectset
-
-		except:
-			print("An exception occurred in the manifestation record")
-
-	#Part
-	if representation_dic["entity_type"] == 8:
-
-		try:
-			part = get_object_or_404(Part, id_part=representation_case.fk_digisig)
-
-		except:
-			print ("An exception occurred in the part record")
-
-	try:			
-		item = part.fk_item
-		representation_dic["item"] = item
-		representation_dic["event"] = part.fk_event
-		representation_dic["main_title"] = str(item.fk_repository) + " " + str (item.shelfmark)
-		representation_dic["repository"] = str(item.fk_repository)
-		representation_dic["shelfmark"] = str (item.shelfmark)
-
-	except:
-		print ("An exception occurred in item and event")
-
-	try:
-		region_objectset = Region.objects.filter( 
-			location__locationname__locationreference__fk_locationstatus=1, 
-			location__locationname__locationreference__fk_event=part.fk_event)
-		representation_dic["region_objectset"] = region_objectset
-	except:
-		print ("An exception occurred in region information")
-
-	#Seal Description
-	if representation_dic["entity_type"] == 3:
-		representation_dic["main_title"] = "Seal Description"
-
-
-
-
-
-	#what other representations are there of the targetobject?
-	representation_objectset = Representation.objects.filter(fk_digisig=representation_case.fk_digisig).exclude(id_representation=representation_case.id_representation)
-	representation_dic["representation_objectset"] = representation_objectset
-	representation_dic["totalrows"] = len(representation_objectset)
-
-	return (representation_dic)
 
 
 # information for presenting a seal manifestation
@@ -1112,14 +965,7 @@ def collectiondata(collectionid, sealcount):
 
 	return(collectiondatapackage)
 
-#assembles the list of people credited with a work
-def contributorgenerate(collectioncontributors):
-	contributorset = []
-	for c in collectioncontributors:
-		contributorindividual = c.fk_contributor
-		contributorset.append((c.fk_collectioncontribution, contributorindividual.name_first, contributorindividual.name_last, contributorindividual.name_middle, contributorindividual.uricontributor))
 
-	return(contributorset)
 
 
 ### generate the collection info data for chart-- 'Percentage of seals by class',
@@ -1202,12 +1048,6 @@ def examplefinder(idterm):
 
 	return (examplesetout)
 
-#gets externallinks for object
-def externallinkgenerator(digisig_entity_number):
-	externallinkset = []
-	externallinkset = Externallink.objects.filter(internal_entity=digisig_entity_number)
-
-	return (externallinkset)	
 
 # def eventset_data(itemnumber):
 # 	part_object = Part.objects.filter(fk_item = itemnumber)

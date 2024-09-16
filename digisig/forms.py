@@ -56,6 +56,29 @@ class ManifestationForm(forms.Form):
 	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
 	group = forms.ChoiceField(choices=group_options, required=False, initial={'': 'None'})
 
-
 class PageCycleForm(forms.Form):
 	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
+
+
+#Form for collections, map and time analysis
+
+collections_options = [('30000287', 'All Collections')]
+graphchoices = [('1', 'Seal Descriptions'), ('2', 'Seal Impressions, Matrices and Casts')]
+mapchoices = [('1', 'Places'), ('2', 'Counties'), ('3', 'Regions')]
+sealtype_options = [('', 'None')]
+period_options = [('', 'None')]
+timegroup_options2 = []
+
+for e in Sealtype.objects.order_by('sealtype_name'):
+	sealtype_options.append((e.id_sealtype, e.sealtype_name))
+
+for e in TimegroupC.objects.order_by('pk_timegroup_c'):
+	timegroup_options2.append((e.pk_timegroup_c, e.timegroup_c_range))
+
+class CollectionForm(forms.Form):
+	collection = forms.ChoiceField(choices=collections_options, required=False)
+	#graphchoice = forms.ChoiceField(choices=graphchoices, required=False)
+	mapchoice = forms.ChoiceField(choices=mapchoices, required=False)
+	timechoice = forms.ChoiceField(choices=timegroup_options2, required=False)
+	# classname = forms.ChoiceField(label='Digisig Class', choices=classname_options, required=False)
+	sealtypechoice = forms.ChoiceField(choices=sealtype_options, required=False)	

@@ -24,6 +24,133 @@ def individualsearch(digisig_entity_number):
 
 	return(individual_object)
 
+## function to collect all the possible information you would need to present a representation
+def representationmetadata(representation_case, representation_dic):
+
+	representation_dic["representation_object"] = representation_case
+	representation_dic["id_representation"] = representation_case.id_representation
+
+	#what type of image? (Photograph, RTI....)
+	representation_dic["representation_type"] = representation_case.fk_representation_type
+
+	#where is the image stored?
+	connection = representation_case.fk_connection
+	representation_dic["connection_object"] = representation_case.fk_connection
+
+	if representation_case.fk_representation_type.pk_representation_type == 2:
+		print ("found RTI:", representation_case.id_representation)
+		representation_dic["rti"] = connection.rti
+		representation_dic["representation_folder"] = representation_case.representation_folder
+		try:
+			thumbnailRTI_object = get_object_or_404(Representation, fk_digisig=representation_case.fk_digisig, primacy=1)
+			representation_case = thumbnailRTI_object
+		except:
+			print ("An exception occurred in fetching representation case for the thumbnail of the RTI", representation_dic)
+
+	representation_dic["thumb"] = connection.thumb
+	representation_dic["representation_thumbnail"] = representation_case.representation_thumbnail_hash 
+	representation_dic["medium"] = connection.medium
+	representation_dic["representation_filename"] = representation_case.representation_filename_hash 
+
+	#image dimensions
+	representation_dic["width"] = representation_case.width
+	representation_dic["height"] = representation_case.height
+
+	#who made it?
+	creator_object = representation_case.fk_contributor_creator
+	representation_dic["contributorcreator_object"] = creator_object
+	try:
+		creator_phrase = creator_object.name_first + " " + creator_object.name_middle + " " + creator_object.name_last
+	except:
+		try:
+			creator_phrase = creator_object.name_first + " " + creator_object.name_last
+		except:
+			try:
+				creator_phrase = creator_object.name_last
+			except:
+				creator_phrase = "N/A"
+	representation_dic["contributorcreator_name"] = creator_phrase.strip()
+
+	#when was it made?
+	representation_dic["datecreated"] = representation_case.representation_datecreated
+
+	#where does it come from?
+	representation_dic["collection_object"] = representation_case.fk_collection
+
+	#what rights?
+	representation_dic["rights_object"] = representation_case.fk_rightsholder
+
+	#what other representations are there of the targetobject?
+	representation_objectset = Representation.objects.filter(fk_digisig=representation_case.fk_digisig).exclude(id_representation=representation_case.id_representation)
+	representation_dic["representation_objectset"] = representation_objectset
+	representation_dic["totalrows"] = representation_objectset.count
+
+	return (representation_dic)
+
+
+def representationmetadata_manifestation(representation_case, representation_dic):
+
+	manifestation = representation_case.fk_manifestation
+	representation_dic["manifestation_object"] = manifestation
+
+	support = manifestation.fk_support
+	representation_dic["support_object"] = support
+
+	part = support.fk_part
+	item = part.fk_item
+	representation_dic["item"] = item
+	event = part.fk_event
+	representation_dic["event"] = event
+
+	face = manifestation.fk_face
+	seal = face.fk_seal
+	representation_dic["seal"] = seal
+
+	individual_object = seal.fk_individual_realizer
+	representation_dic["outname"] = namecompiler(individual_object)
+	representation_dic["individual_object"] = individual_object
+
+	sealdescription_objectset = Sealdescription.objects.select_related('fk_collection').filter(fk_seal = seal.id_seal)
+	representation_dic["sealdescription_objectset"] = sealdescription_objectset
+
+	return(representation_dic)
+
+def representationmetadata_part(representation_case, representation_dic):
+
+	try:
+		part = get_object_or_404(Part, id_part=representation_case.fk_digisig)
+
+	except:
+		print ("An exception occurred in the part record")
+
+	try:			
+		item = part.fk_item
+		representation_dic["item"] = item
+		representation_dic["event"] = part.fk_event
+		representation_dic["main_title"] = str(item.fk_repository) + " " + str (item.shelfmark)
+		representation_dic["repository"] = str(item.fk_repository)
+		representation_dic["shelfmark"] = str (item.shelfmark)
+
+	except:
+		print ("An exception occurred in item and event")
+
+	try:
+		region_objectset = Region.objects.filter( 
+			location__locationname__locationreference__fk_locationstatus=1, 
+			location__locationname__locationreference__fk_event=part.fk_event)
+		representation_dic["region_objectset"] = region_objectset
+	except:
+		print ("An exception occurred in region information")
+
+	return(representation_dic)
+
+def representationmetadata_sealdescription(representation_case, representation_dic):
+
+	#Seal Description
+	if representation_dic["entity_type"] == 3:
+		representation_dic["main_title"] = "Seal Description"
+
+	return(representation_dic)
 
 def sealsearch():
 	manifestation_object = Manifestation.objects.all().select_related(
@@ -219,10 +346,10 @@ def sealsearchmanifestationmetadata(manifestation_object):
 
 
 #assembles the list of people credited with a work
-def sealdescription_contributorgenerate(sealdescription_object, sealdescription_dic):
+def sealdescription_contributorgenerate(collection, contributor_dic):
 
 	collectioncontributions = Collectioncontributor.objects.filter(
-		fk_collection=sealdescription_object.fk_collection).select_related(
+		fk_collection=collection).select_related(
 		'fk_contributor').select_related(
 		'fk_collectioncontribution')
 
@@ -231,16 +358,23 @@ def sealdescription_contributorgenerate(sealdescription_object, sealdescription_
 	for c in collectioncontributions:
 		contribution = {}
 		contribution['contribution'] = c.fk_collectioncontribution.collectioncontribution 
-		contribution['name_first'] = c.fk_contributor.name_first
-		contribution['name_last'] = c.fk_contributor.name_last
-		contribution['name_middle'] = c.fk_contributor.name_middle
+		
+		namevalue = ""
+		if c.fk_contributor.name_first:
+			namevalue = namevalue + c.fk_contributor.name_first
+		if c.fk_contributor.name_first:
+			namevalue = namevalue + " " + c.fk_contributor.name_middle
+		if c.fk_contributor.name_first:
+			namevalue = namevalue + " " + c.fk_contributor.name_last
+
+		contribution['name'] = namevalue
 		contribution['uricontributor'] = c.fk_contributor.uricontributor
 		
-		contribution_set[c.sealdescription_person] = contribution
+		contribution_set[c.fk_contributor] = contribution
 
-	sealdescription_dic["contributors"] = contribution_set
+	contributor_dic["contributors"] = contribution_set
 
-	return(sealdescription_dic)
+	return(contributor_dic)
 
 
 def	sealdescription_fetchrepresentation(sealdescription_object, sealdescription_dic):
