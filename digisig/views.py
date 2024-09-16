@@ -1153,7 +1153,7 @@ def sealdescription_page(request, digisig_entity_number):
 	template = loader.get_template('digisig/sealdescription.html')
 
 	sealdescription_object = Sealdescription.objects.select_related('fk_collection').get(id_sealdescription=digisig_entity_number)
-	pagetitle = sealdescription_object.collection_title
+	pagetitle = sealdescription_object.fk_collection.collection_title
 
 	collectioncontributors = Collectioncontributor.objects.filter(fk_collection=sealdescription_object.fk_collection)
 	contributorset = contributorgenerate(collectioncontributors)

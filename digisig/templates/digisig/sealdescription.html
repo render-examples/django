@@ -1,0 +1,215 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="search-catalogue-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+
+
+	<div class="main-title">
+		<h1>{{pagetitle}}</h1>
+	</div>
+
+	<div class="mainpage" id="mainpage"></div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{sealdescription_object.id_sealdescription}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+
+	<div class="entity_detail" id= "entity_detail"> 
+		<table>
+			<h3>Seal description details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3>
+
+			<tr>
+				<th>Title</th>
+				<td>{{sealdescription_object.sealdescription_title}}</td>
+
+			{% if sealdescription_object.representation_filename %}
+					<td rowspan="5"><img class="sealdescription-img" id="modalimagebase" src="{{sealdescription_object.connection_sealdescriptions}}{{sealdescription_object.representation_filename}}" alt="{{sealdescription_object.collection_shorttitle}}, {{sealdescription_object.sealdescription_identifier}}">
+					</td>
+					<!-- The Modal -->
+					<div id="myModal" class="modal">
+					  <span class="close">&times;</span>
+					  <img class="modal-content" id="img01">
+					  <div id="caption"></div>
+					</div>
+			{% endif %}
+
+			</tr>
+
+			<tr>
+				<th>Identifier <a class="help" href="{% url 'entity' digisig_entity_number=10001597 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+				<td>{{sealdescription_object.sealdescription_identifier}}
+
+				{% for link in externallinkset %}
+				{% if link %}<a href="{{link.external_link}}" target="_blank">External Link</a>{% endif %}
+				{% endfor %}	
+
+				</td>
+			</tr>
+			<tr>
+				<th>Collection</th> 
+				<td><a href="{% url 'entity' sealdescription_object.fk_collection.id_collection %}">{{sealdescription_object.fk_collection.collection_title}}</a></td>
+			</tr>
+			{% for val1, val2, val3, val4, val5 in contributorset %}
+				<tr>
+					<th>{% cycle 'Credit' '' '' '' '' '' '' '' '' %}</th>
+					<td>
+					{% if val3 %} {{val3}}, {% endif %} 
+					{% if val2 %} {{val2}} {% endif %} 
+					{% if val4 %} {{val4}} {% endif %} 
+					{% if val1 %} ({{val1}}) {% endif %} 
+					{% if val5 %}<a href="{{val5}}" target="_blank">External Link</a>{% endif %} 
+				</tr>
+			{% endfor %}
+			{% resetcycle %}
+			<tr>
+				<th>Description of</th>
+				<td><a href="{% url 'entity' sealdescription_object.fk_seal.id_seal %}">Seal details</a></td>
+			</tr>
+		</table>
+	</div>
+
+
+				
+	<div class="entity_sealdescription" id="entity_sealdescription">
+		<div class="div-caption">
+			Seal description contents <button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
+		</div>
+
+		<div>
+		<table id="entity1" style="display:none;">
+				{% if sealdescription_object.realizer %}
+				<tr>
+					<th>Actor</th>
+					<td>{{sealdescription_object.realizer}}</td>
+				</tr>
+				{% endif %}
+	
+				{% if sealdescription_object.shape %}
+				<tr>
+					<th>Shape</th>
+					<td>{{sealdescription_object.shape}}</td>
+				</tr>
+				{% endif %}
+	
+				{% if sealdescription_object.sealsize_vertical %}
+				<tr>
+					<th>Dimensions</th>
+					<td>{{sealdescription_object.sealsize_vertical}}
+						{% if sealdescription_object.sealsize_horizontal %}
+								x {{sealdescription_object.sealsize_horizontal}}
+						{% endif %}
+						mm
+					</td>
+				</tr>
+				{% endif %}
+
+<!-- 				{% if sealdescription_object.sealdescription != null %}
+				<tr>
+					<th>Description</th>
+					<td>{{sealdescription_object.sealdescription}}</td>
+				</tr>
+				{% endif %}
+ -->
+			{% if sealdescription_object.motif_reverse %}
+	
+				{% if sealdescription_object.motif_obverse %}
+				<tr>
+					<th>Description (Obverse)</th>
+					<td>{{sealdescription_object.motif_obverse}}</td>
+				</tr>
+				{% endif %}
+	
+				{% if sealdescription_object.legend_obverse %}
+				<tr>
+					<th>Legend (Obverse)</th>
+					<td>{{sealdescription_object.legend_obverse}}</td>
+				</tr>
+				{% endif %}
+	
+				{% if sealdescription_object.motif_reverse %}
+				<tr>
+					<th>Description (Reverse)</th>
+					<td>{{sealdescription_object.motif_reverse}}</td>
+				</tr>
+				{% endif %}
+	
+				{% if sealdescription_object.legend_reverse %}
+				<tr>
+					<th>Legend (Reverse)</th>
+					<td>{{sealdescription_object.legend_reverse}}</td>
+				</tr>
+				{% endif %}
+
+			{% else %}
+	
+				{% if sealdescription_object.motif_obverse %}
+				<tr>
+					<th>Description</th>
+					<td>{{sealdescription_object.motif_obverse}}</td>
+				</tr>
+				{% endif %}
+	
+				{% if sealdescription_object.legend_obverse %}
+				<tr>
+					<th>Legend</th>
+					<td>{{sealdescription_object.legend_obverse}}</td>
+				</tr>
+				{% endif %}				
+	
+			{% endif %}
+
+		</table>
+		</div>
+	</div>
+
+		<div>
+		<table id="entity2" style="display:none;">
+			<tr>
+				<th id="rdfelement">
+				</th>
+			</tr>
+		</table>
+		</div>
+	</div>
+
+
+
+
+<script>
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the image and insert it inside the modal - use its "alt" text as a caption
+var img = document.getElementById("modalimagebase");
+var modalImg = document.getElementById("img01");
+var captionText = document.getElementById("caption");
+img.onclick = function(){
+  modal.style.display = "block";
+  modalImg.src = this.src;
+  captionText.innerHTML = this.alt;
+}
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+} 
+
+</script>
+
+{% endblock %}
