@@ -615,7 +615,7 @@ def actor_page(request, digisig_entity_number):
 
 def collection_page(request, digisig_entity_number):
 	pagetitle = 'Collection'
-
+	starttime = time()
 	### This code prepares collection info box and the data for charts on the collection page
 
 	#defaults
@@ -629,6 +629,8 @@ def collection_page(request, digisig_entity_number):
 	collection_dic = {}
 
 	collection_dic = sealdescription_contributorgenerate(collection, collection_dic)
+
+	print("Compute Time1:", time()-starttime)
 
 	#if collection is set then limit the scope of the dataset
 	if (qcollection == 30000287):
@@ -691,6 +693,7 @@ def collection_page(request, digisig_entity_number):
 	facecount = faceset.count()
 	classcount = faceset.filter(fk_class__isnull=False).exclude(fk_class=10000367).exclude(fk_class=10001007).count()
 
+	print("Compute Time2:", time()-starttime)
 
 	collectioninfo = collectiondata(qcollection, sealcount)
 
@@ -709,14 +712,13 @@ def collection_page(request, digisig_entity_number):
 	actors = calpercent(sealcount, actorscount)
 	date = calpercent(sealcount, datecount)
 	fclass = calpercent(facecount, classcount)
-	#place = calpercent(placecount, placecounttotal)
 	place = calpercent(placecount, casecount)
 
 	data1 = [actors, date, fclass, place]
 	labels1 = ["actor", "date", "class", "place"]
 
 
-
+	print("Compute Time3:", time()-starttime)
 	### generate the collection info data for chart 2 -- 'Percentage of seals per class',
 
 	if (qcollection == 30000287):
@@ -727,16 +729,19 @@ def collection_page(request, digisig_entity_number):
 	data2, labels2 = classdistribution(classset, facecount)
 
 
+	print("Compute Time3a:", time()-starttime)
 	### generate the collection info data for chart 3  -- 'Percentage of seals by period',
 
 	data3, labels3 = datedistribution(sealset)
 
 	### generate the collection info data for chart 4 -- seals per region,
 
+	print("Compute Time3b:", time()-starttime)
 	## data for colorpeth map
 	maplayer1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
 	maplayer = json.loads(maplayer1.jsonfiletxt)
 
+	print("Compute Timec:", time()-starttime)
 	for i in maplayer:
 		if i == "features":
 			for b in maplayer[i]:
@@ -749,12 +754,14 @@ def collection_page(request, digisig_entity_number):
 				for i in numberofcases:
 					j["cases"] = i.numplaces
 
-
+	print("Compute Time3d:", time()-starttime)
 	## data for region map
 	# make circles data -- defaults -- note that this code is very similar to the function mapdata2
 	region_dict = mapgenerator3(regiondisplayset)
 
 	### generate the collection info data for chart 5 --  'Percentage of actors per class',
+
+	print("Compute Time4:", time()-starttime)
 
 	#for print group totals (legacy)
 	if (qcollection == 30000287):
@@ -799,7 +806,9 @@ def collection_page(request, digisig_entity_number):
 		'form': form,
 	}
 		
-	template = loader.get_template('digisig/collection.html')                   
+	template = loader.get_template('digisig/collection.html') 
+
+	print("Compute Time5:", time()-starttime)                  
 	return HttpResponse(template.render(context, request))
 
 

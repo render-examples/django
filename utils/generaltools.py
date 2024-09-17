@@ -857,49 +857,7 @@ def classfilter(resultset, classname):
 	return(resultset)
 
 
-def classdistribution(classset, facecount):
 
-	data2 = []
-	labels2 = []
-	resultdic = {}
-
-	allclasses = Classification.objects.all()
-
-	for case in allclasses:
-		casecount = 0
-		if (case.level == 4):
-			limitset = classset.filter(level4=case.class_number)
-			for l in limitset: 
-				casecount = casecount + l.numcases
-		if (case.level == 3):
-			limitset = classset.filter(level3=case.class_number)
-			for l in limitset:
-				casecount = casecount + l.numcases
-				#print ("++", l.class_name, l.level, l.numcases, case.numcases)
-		if (case.level == 2):
-			limitset = classset.filter(level2=case.class_number)
-			for l in limitset:
-				casecount = casecount + l.numcases
-				#print ("++", l.class_name, l.level, l.numcases, case.numcases)
-		if (case.level == 1):
-			limitset = classset.filter(level1=case.class_number)
-			for l in limitset:
-				casecount = casecount + l.numcases
-				# print ("++", l.class_name, l.level, l.numcases, case.numcases)
-
-		percentagedata = (casecount/facecount)*100
-		if percentagedata > 1:
-			resultdic.update({case.class_name: percentagedata})
-
-	allclasses = allclasses.order_by('class_sortorder')
-	for case in allclasses:
-		if case.class_name in resultdic:
-			classpercentage = resultdic.get(case.class_name)
-			if classpercentage > 1:
-				data2.append(classpercentage)
-				labels2.append(case.class_name)
-
-	return(data2, labels2)
 
 
 def classdistributionv2(face_objectset):
