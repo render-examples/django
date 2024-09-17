@@ -677,11 +677,10 @@ def collection_page(request, digisig_entity_number):
 
 		#data for map counties
 		#revised
-		placeset = Region.objects.select_related(fk_his_countylist).filter(fk_locationtype=4, 
+		placeset = Region.objects.filter(fk_locationtype=4, 
 			location__locationname__locationreference__fk_locationstatus=1, 
 			location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
 			).annotate(numplaces=Count('location__locationname__locationreference'))
-
 
 		#data for region map 
 		regiondisplayset = Regiondisplay.objects.filter( 
@@ -749,10 +748,16 @@ def collection_page(request, digisig_entity_number):
 				countyvalue = j["HCS_NUMBER"]
 				countyname = j["NAME"]
 
-				numberofcases = placeset.filter(fk_his_countylist=countyvalue)
+				#numberofcases = placeset.filter(fk_his_countylist=countyvalue)
+				print ("countyvalue=", countyvalue)
+				try:
+					numberofcases = placeset.get(fk_his_countylist=countyvalue)
+					j["cases"] = numberofcases.numplaces
+				except:
+					print ("counld not find:", countyvalue)
 
-				for i in numberofcases:
-					j["cases"] = i.numplaces
+				# for i in numberofcases:
+				# 	j["cases"] = i.numplaces
 
 	print("Compute Time3d:", time()-starttime)
 	## data for region map
