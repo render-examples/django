@@ -677,7 +677,7 @@ def collection_page(request, digisig_entity_number):
 
 		#data for map counties
 		#revised
-		placeset = Region.objects.filter(fk_locationtype=4, 
+		placeset = Region.objects.select_related(fk_his_countylist).filter(fk_locationtype=4, 
 			location__locationname__locationreference__fk_locationstatus=1, 
 			location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
 			).annotate(numplaces=Count('location__locationname__locationreference'))
