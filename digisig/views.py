@@ -733,44 +733,44 @@ def collection_page(request, digisig_entity_number):
 
 	data3, labels3 = datedistribution(sealset)
 
-	### generate the collection info data for chart 4 -- seals per region,
+	# ### generate the collection info data for chart 4 -- seals per region,
 
 	print("Compute Time3b:", time()-starttime)
 	## data for colorpeth map
 	maplayer1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
 	maplayer = json.loads(maplayer1.jsonfiletxt)
 
-	placedataforcolorpeth = placeset.values('fk_his_countylist', 'numplaces')
-	print (placedataforcolorpeth)
+	# placedataforcolorpeth = placeset.values('fk_his_countylist', 'numplaces')
+	# print (placedataforcolorpeth)
 
-	print("Compute Timec:", time()-starttime)
-	for i in maplayer:
-		if i == "features":
-			for b in maplayer[i]:
-				print("Compute Timec1:", time()-starttime)
-				j = b["properties"]
-				countyvalue = j["HCS_NUMBER"]
-				countyname = j["NAME"]
+	# print("Compute Timec: startloop", time()-starttime)
+	# for i in maplayer:
+	# 	if i == "features":
+	# 		for b in maplayer[i]:
+	# 			print("Compute TimecA:", time()-starttime)
+	# 			j = b["properties"]
+	# 			countyvalue = j["HCS_NUMBER"]
+	# 			countyname = j["NAME"]
 
-				#numberofcases = placeset.filter(fk_his_countylist=countyvalue)
-				print ("countyvalue=", countyvalue)
-				try:
-					numberofcases = placedataforcolorpeth.get(fk_his_countylist=countyvalue)
-					#numberofcases = placeset.get(fk_his_countylist=countyvalue)
-					j["cases"] = numberofcases.numplaces
-				except:
-					print ("counld not find:", countyvalue)
-				print("Compute Timece:", time()-starttime)
-				# for i in numberofcases:
-				# 	j["cases"] = i.numplaces
-				# print("Compute Timecf:", time()-starttime)
+	# 			#numberofcases = placeset.filter(fk_his_countylist=countyvalue)
+	# 			print ("countyvalue=", countyvalue)
+	# 			try:
+	# 				numberofcases = placedataforcolorpeth.get(fk_his_countylist=countyvalue)
+	# 				#numberofcases = placeset.get(fk_his_countylist=countyvalue)
+	# 				j["cases"] = numberofcases.numplaces
+	# 			except:
+	# 				print ("counld not find:", countyvalue)
+	# 			print("Compute TimecB:", time()-starttime)
+	# 			# for i in numberofcases:
+	# 			# 	j["cases"] = i.numplaces
+	# 			# print("Compute Timecf:", time()-starttime)
 
 	print("Compute Time3d:", time()-starttime)
 	## data for region map
 	# make circles data -- defaults -- note that this code is very similar to the function mapdata2
 	region_dict = mapgenerator3(regiondisplayset)
 
-	### generate the collection info data for chart 5 --  'Percentage of actors per class',
+	# ### generate the collection info data for chart 5 --  'Percentage of actors per class',
 
 	print("Compute Time4:", time()-starttime)
 
