@@ -8,12 +8,17 @@ from time import time
 from django.db.models import Prefetch
 from django.db.models import Q
 from django.db.models import Count
+from django.db.models import Min, F
 
 from .models import *
 from .forms import * 
 # from utils.mltools import * 
 from utils.generaltools import *
 from utils.viewtools import *
+
+
+from django.db.models import Count, F, Value
+
 
 import json
 
@@ -720,10 +725,31 @@ def collection_page(request, digisig_entity_number):
 	print("Compute Time3:", time()-starttime)
 	### generate the collection info data for chart 2 -- 'Percentage of seals per class',
 
-	if (qcollection == 30000287):
-		classset = Classification.objects.order_by('-level').annotate(numcases=Count('face')).exclude(id_class=10001007).exclude(id_class=10000367)
-	else:
-		classset = Classification.objects.order_by('-level').filter(face__fk_seal__sealdescription__fk_collection=qcollection).annotate(numcases=Count('face')).exclude(id_class=10001007).exclude(id_class=10000367)
+	# if (qcollection == 30000287):
+	# 	classset = Classification.objects.order_by('-level').annotate(numcases=Count('face')).exclude(id_class=10001007).exclude(id_class=10000367)
+	# else:
+	# 	classset = Classification.objects.order_by('-level').filter(face__fk_seal__sealdescription__fk_collection=qcollection).annotate(numcases=Count('face')).exclude(id_class=10001007).exclude(id_class=10000367)
+
+	# if (qcollection == 30000287):
+	# 	termset = Classification_parentchild.objects.filter(fk_term__term_type=1).annotate(numcases=Count('Classification'))
+	# 	print(termset)
+
+	# termset =Terminology.objects.raw("SELECT terminology.id_term FROM terminology")
+
+	# termset = Terminology.objects.raw("SELECT min terminology.id_term AS id_term,terminology.term_name,count terminology.id_term AS numberofdups,terminology.term_type FROM face LEFT JOIN class ON face.fk_class = class.id_class LEFT JOIN classification_parentchild ON class.id_class = classification_parentchild.fk_class LEFT JOIN terminology ON classification_parentchild.fk_term = terminology.id_term LEFT JOIN sealdescription ON face.fk_seal = sealdescription.fk_seal GROUP BY terminology.term_name, terminology.id_term, terminology.term_type, sealdescription.fk_collection HAVING count(terminology.id_term) > 0 AND terminology.term_type = 1::numeric AND sealdescription.fk_collection = 30000057;")
+
+
+
+
+	# Perform the query
+	# result = Face.objects.annotate(number_of_dups=Count(
+	# 	'fk_class__classificationparentchild_set__fk_term__id_term')).filter(fk_class__classificationparentchild_set__fk_term__term_type=1)
+
+	#https://allwin-raju-12.medium.com/reverse-relationship-in-django-f016d34e2c68
+	result = Face.objects.filter(fk_class__fk_class_interchange__fk_term__term_type=1).count()
+
+	print (result)
+
 
 	data2, labels2 = classdistribution(classset, facecount)
 

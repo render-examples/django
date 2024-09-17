@@ -244,6 +244,19 @@ class Classification(models.Model):
         managed = False
         db_table = 'class'
 
+class Classificationparentchild(models.Model):
+    id_classificationparentchild = models.AutoField(primary_key=True)
+    fk_term = models.ForeignKey('Terminology', models.DO_NOTHING, db_column='fk_term', related_name='fk_term_interchange', blank=True, null=True)
+    class_numberparent = models.IntegerField(blank=True, null=True)
+    fk_class = models.ForeignKey('Classification', models.DO_NOTHING, db_column='fk_class', related_name='fk_class_interchange',blank=True, null=True)
+    class_numberchild = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'classification_parentchild'
+
+
+
 class Collection(models.Model):
     pk_collection = models.IntegerField(blank=True, null=True)
     collection_shorttitle = models.TextField(blank=True, null=True)
@@ -473,7 +486,8 @@ class Face(models.Model):
     fk_legend_specific = models.IntegerField(blank=True, null=True)
     print_sealmanifestation = models.TextField(blank=True, null=True)
     print_sealsizeandshape = models.TextField(blank=True, null=True)
-    fk_class = models.ForeignKey('Classification', models.DO_NOTHING, db_column='fk_class', blank=True, null=True)
+    #fk_class = models.ForeignKey('Classification_parent', models.DO_NOTHING, db_column='fk_classchild', blank=True, null=True)
+    fk_class = models.ForeignKey('Classification', models.DO_NOTHING, db_column='fk_class', related_name='fk_class_face',blank=True, null=True)
     datasetparticipation = models.IntegerField(blank=True, null=True)
     dataset_durham = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True)
     id_face = models.AutoField(primary_key=True)
