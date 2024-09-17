@@ -636,10 +636,6 @@ def collection_page(request, digisig_entity_number):
 		sealset = Seal.objects.all()
 		faceset = Face.objects.filter(fk_faceterm=1)
 
-		#total count to enable calculation of portion of entries with place info
-		# placecount = Manifestation.objects.filter(
-		#   fk_support__fk_part__fk_event__locationreference__fk_locationstatus__isnull=False).values().distinct().count()
-
 		#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned --- location status =2 is a secondary location
 		casecount = Locationname.objects.exclude(
 			pk_locationname=7042).exclude(
@@ -652,15 +648,11 @@ def collection_page(request, digisig_entity_number):
 			locationreference__fk_event__part__fk_part__fk_support__gt=1).count()
 
 		#data for map counties
-		# placeset = Region.objects.filter(fk_locationtype=4).annotate(numplaces=Count('location__locationname__locationreference', 
-		#   filter=Q(location__locationname__locationreference__fk_locationstatus=1)))
 		placeset = Region.objects.filter(fk_locationtype=4, 
 			location__locationname__locationreference__fk_locationstatus=1
 			).annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
 
 		#data for map regions -- not active?
-		# regiondisplayset = Regiondisplay.objects.annotate(numregions=Count('region__location__locationname__locationreference', 
-		#   filter=Q(region__location__locationname__locationreference__fk_locationstatus=1)))
 		regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1
 			).annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
 
@@ -669,11 +661,6 @@ def collection_page(request, digisig_entity_number):
 		sealset = Seal.objects.filter(sealdescription__fk_collection=qcollection)
 		faceset = Face.objects.filter(fk_seal__sealdescription__fk_collection=qcollection).filter(fk_faceterm=1)
 		pagetitle = collection.collection_title
-
-		#total count to enable calculation of portion of entries with place info
-		# placecount = Manifestation.objects.filter(
-		#   fk_face__fk_seal__sealdescription__fk_collection=qcollection).filter(
-		#   fk_support__fk_part__fk_event__locationreference__fk_locationstatus__isnull=False).values().distinct().count()
 
 		#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned
 		casecount = Locationname.objects.exclude(
@@ -687,20 +674,12 @@ def collection_page(request, digisig_entity_number):
 			locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection).count()
 
 		#data for map counties
-		#original
-		# placeset = Region.objects.filter(fk_locationtype=4).annotate(numplaces=Count('location__locationname__locationreference', 
-		#   filter=Q(location__locationname__locationreference__fk_locationstatus=1) & 
-		#   Q(location__locationname__locationreference__fk_event__part__support__manifestation__fk_face__fk_seal__sealdescription__fk_collection=qcollection)))
 		#revised
 		placeset = Region.objects.filter(fk_locationtype=4, 
 			location__locationname__locationreference__fk_locationstatus=1, 
 			location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
 			).annotate(numplaces=Count('location__locationname__locationreference'))
 
-		# #data for region map 
-		# regiondisplayset = Regiondisplay.objects.annotate(numregions=Count('region__location__locationname__locationreference', 
-		#   filter=Q(region__location__locationname__locationreference__fk_locationstatus=1) & 
-		#   Q(region__location__locationname__locationreference__fk_event__part__support__manifestation__fk_face__fk_seal__sealdescription__fk_collection=qcollection)))
 
 		#data for region map 
 		regiondisplayset = Regiondisplay.objects.filter( 
@@ -712,9 +691,6 @@ def collection_page(request, digisig_entity_number):
 	facecount = faceset.count()
 	classcount = faceset.filter(fk_class__isnull=False).exclude(fk_class=10000367).exclude(fk_class=10001007).count()
 
-	# placecounttotal = 0
-	# for i in placeset:
-	#   placecounttotal = placecounttotal + i.numplaces
 
 	collectioninfo = collectiondata(qcollection, sealcount)
 
@@ -736,11 +712,6 @@ def collection_page(request, digisig_entity_number):
 	#place = calpercent(placecount, placecounttotal)
 	place = calpercent(placecount, casecount)
 
-
-	#9/9/2022 -- decided to limit the info to actor, date, class, place
-	# data1 = [title, motif, identifier, actors, date, fclass, place]
-	# labels1 = ["title", "description", "identifier", "actor", "date", "class", "place"]
-
 	data1 = [actors, date, fclass, place]
 	labels1 = ["actor", "date", "class", "place"]
 
@@ -756,12 +727,9 @@ def collection_page(request, digisig_entity_number):
 	data2, labels2 = classdistribution(classset, facecount)
 
 
-
 	### generate the collection info data for chart 3  -- 'Percentage of seals by period',
 
 	data3, labels3 = datedistribution(sealset)
-
-
 
 	### generate the collection info data for chart 4 -- seals per region,
 
@@ -785,42 +753,6 @@ def collection_page(request, digisig_entity_number):
 	## data for region map
 	# make circles data -- defaults -- note that this code is very similar to the function mapdata2
 	region_dict = mapgenerator3(regiondisplayset)
-
-	# mapdic = {"type": "FeatureCollection"}
-	# properties = {}
-	# geometry = {}
-	# location = {}
-	# regionlist = []
-
-
-
-	# #for circles
-	# for r in regiondisplayset:
-	#   if (r.numregions > 0):
-	#       data4.append(r.numregions)
-	#       labels4.append(r.regiondisplay_label)
-
-	#       value1 = r.id_regiondisplay
-	#       value2 = r.regiondisplay_label
-	#       value3 = r.numregions
-	#       value4 = r.regiondisplay_long
-	#       value5 = r.regiondisplay_lat
-
-	#       popupcontent = str(value2)
-
-	#       if value3 > 0:
-	#           popupcontent = popupcontent + ' ' + str(value3)
-
-	#       properties = {"id_location": value1, "location": value2, "count": value3, "popupContent": popupcontent}
-	#       geometry = {"type": "Point", "coordinates": [value4, value5]}
-	#       location = {"type": "Feature", "properties": properties, "geometry": geometry}
-
-	#       regionlist.append(location)
-
-	# mapdic["features"] = regionlist
-
-	# data4 = []
-	# labels4 = []
 
 	### generate the collection info data for chart 5 --  'Percentage of actors per class',
 
