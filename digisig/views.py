@@ -740,10 +740,14 @@ def collection_page(request, digisig_entity_number):
 	maplayer1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
 	maplayer = json.loads(maplayer1.jsonfiletxt)
 
+	placedataforcolorpeth = placeset.values('fk_his_countylist', 'numplaces')
+	print (placedataforcolorpeth)
+
 	print("Compute Timec:", time()-starttime)
 	for i in maplayer:
 		if i == "features":
 			for b in maplayer[i]:
+				print("Compute Timec1:", time()-starttime)
 				j = b["properties"]
 				countyvalue = j["HCS_NUMBER"]
 				countyname = j["NAME"]
@@ -751,13 +755,15 @@ def collection_page(request, digisig_entity_number):
 				#numberofcases = placeset.filter(fk_his_countylist=countyvalue)
 				print ("countyvalue=", countyvalue)
 				try:
-					numberofcases = placeset.get(fk_his_countylist=countyvalue)
+					numberofcases = placedataforcolorpeth.get(fk_his_countylist=countyvalue)
+					#numberofcases = placeset.get(fk_his_countylist=countyvalue)
 					j["cases"] = numberofcases.numplaces
 				except:
 					print ("counld not find:", countyvalue)
-
+				print("Compute Timece:", time()-starttime)
 				# for i in numberofcases:
 				# 	j["cases"] = i.numplaces
+				# print("Compute Timecf:", time()-starttime)
 
 	print("Compute Time3d:", time()-starttime)
 	## data for region map
