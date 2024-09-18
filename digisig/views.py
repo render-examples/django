@@ -743,7 +743,17 @@ def collection_page(request, digisig_entity_number):
 
 	#https://allwin-raju-12.medium.com/reverse-relationship-in-django-f016d34e2c68
 	#result = Face.objects.filter(fk_class__fk_class_interchange__fk_term__term_type=1).count()
-	result = Terminology.objects.filter(term_type=1).annotate(num_cases=Count("fk_term_interchange__fk_class__fk_class_face"))
+	if (qcollection == 30000287):
+		result = Terminology.objects.filter(
+			term_type=1).order_by(
+			'term_sortorder').annotate(
+			num_cases=Count("fk_term_interchange__fk_class__fk_class_face"))
+	else:
+		result = Terminology.objects.filter(
+			term_type=1).order_by(
+			'term_sortorder').annotate(
+			num_cases=Count("fk_term_interchange__fk_class__fk_class_face"))
+
 
 	totalcases = sum([r.num_cases for r in result])	
 
