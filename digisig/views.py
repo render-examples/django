@@ -8,17 +8,13 @@ from time import time
 from django.db.models import Prefetch
 from django.db.models import Q
 from django.db.models import Count
-from django.db.models import Min, F
+from django.db.models import Sum
 
 from .models import *
 from .forms import * 
 # from utils.mltools import * 
 from utils.generaltools import *
 from utils.viewtools import *
-
-
-from django.db.models import Count, F, Value
-
 
 import json
 
@@ -746,12 +742,20 @@ def collection_page(request, digisig_entity_number):
 	# 	'fk_class__classificationparentchild_set__fk_term__id_term')).filter(fk_class__classificationparentchild_set__fk_term__term_type=1)
 
 	#https://allwin-raju-12.medium.com/reverse-relationship-in-django-f016d34e2c68
-	result = Face.objects.filter(fk_class__fk_class_interchange__fk_term__term_type=1).count()
+	#result = Face.objects.filter(fk_class__fk_class_interchange__fk_term__term_type=1).count()
+	result = Terminology.objects.filter(term_type=1).annotate(num_cases=Count("fk_term_interchange__fk_class__fk_class_face"))
 
-	print (result)
+	totalcases = sum([r.num_cases for r in result])	
 
+	data2 = []
+	labels2 = []
 
-	data2, labels2 = classdistribution(classset, facecount)
+	for r in result:
+
+		data2.append((r.num_cases /totalcases) * 100)
+		labels2.append(r.term_name)
+
+	# data2, labels2 = classdistribution(classset, facecount)
 
 
 	print("Compute Time3a:", time()-starttime)
