@@ -15,6 +15,13 @@ def collection_basemetricsqueries():
 		locationreference__fk_locationstatus=2).filter(
 		locationreference__fk_event__part__fk_part__fk_support__gt=1)
 
+	# 	casecount = Locationname.objects.exclude(
+	# 		pk_locationname=7042).exclude(
+	# 		locationreference__fk_locationstatus__isnull=True).filter(
+	# 		locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
+
+
+
 	#total portion of entries with place info
 	placecount = Locationname.objects.exclude(
 		locationreference__fk_locationstatus=2).filter(

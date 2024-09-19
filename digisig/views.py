@@ -645,16 +645,16 @@ def collection_page(request, digisig_entity_number):
 		regiondisplayset = regiondisplayset.annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
 
 	else:
+		pagetitle = collection.collection_title
 		sealset = Seal.objects.filter(fk_sealsealdescription__fk_collection=qcollection)
+		sealdescription_set = sealdescription_set.filter(fk_collection=qcollection)
 		casecount =  casecount.count() 
 		placecount = placecount.count()
 		placeset = placeset.annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
 		regiondisplayset = regiondisplayset.annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
-		sealdescription_set = sealdescription_set.filter(fk_collection=qcollection)
+		faceset = faceset.filter(fk_seal__fk_sealsealdescription__fk_collection=qcollection)
 
 
-	# 	faceset = Face.objects.filter(fk_seal__fk_sealsealdescription__fk_collection=qcollection).filter(fk_faceterm=1)
-	# 	pagetitle = collection.collection_title
 
 	# 	#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned
 	# 	casecount = Locationname.objects.exclude(
