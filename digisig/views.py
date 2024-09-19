@@ -661,32 +661,32 @@ def collection_page(request, digisig_entity_number):
 
 	else:
 		sealdescriptionset = Sealdescription.objects.filter(fk_collection=qcollection)
-		sealset = Seal.objects.filter(sealdescription__fk_collection=qcollection)
-		faceset = Face.objects.filter(fk_seal__sealdescription__fk_collection=qcollection).filter(fk_faceterm=1)
+		sealset = Seal.objects.filter(fk_sealsealdescription__fk_collection=qcollection)
+		faceset = Face.objects.filter(fk_seal__fk_sealsealdescription__fk_collection=qcollection).filter(fk_faceterm=1)
 		pagetitle = collection.collection_title
 
 		#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned
 		casecount = Locationname.objects.exclude(
 			pk_locationname=7042).exclude(
 			locationreference__fk_locationstatus__isnull=True).filter(
-			locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection).count()
+			locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
 
 		#total portion of entries with place info
 		placecount = Locationname.objects.exclude(
 			locationreference__fk_locationstatus__isnull=True).filter(
-			locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection).count()
+			locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
 
 		#data for map counties
 		#revised
 		placeset = Region.objects.filter(fk_locationtype=4, 
 			location__locationname__locationreference__fk_locationstatus=1, 
-			location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+			location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
 			).annotate(numplaces=Count('location__locationname__locationreference'))
 
 		#data for region map 
 		regiondisplayset = Regiondisplay.objects.filter( 
 			region__location__locationname__locationreference__fk_locationstatus=1, 
-			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
 			).annotate(numregions=Count('region__location__locationname__locationreference'))
 
 	sealcount = sealset.count()
@@ -743,17 +743,17 @@ def collection_page(request, digisig_entity_number):
 
 	#https://allwin-raju-12.medium.com/reverse-relationship-in-django-f016d34e2c68
 	#result = Face.objects.filter(fk_class__fk_class_interchange__fk_term__term_type=1).count()
-	if (qcollection == 30000287):
-		result = Terminology.objects.filter(
-			term_type=1).order_by(
-			'term_sortorder').annotate(
-			num_cases=Count("fk_term_interchange__fk_class__fk_class_face"))
-	else:
-		result = Terminology.objects.filter(
-			term_type=1).order_by(
-			'term_sortorder').annotate(
-			num_cases=Count("fk_term_interchange__fk_class__fk_class_face"))
+	result = Terminology.objects.filter(
+		term_type=1).order_by(
+		'term_sortorder').annotate(
+		num_cases=Count("fk_term_interchange__fk_class__fk_class_face"))
 
+
+	if (qcollection == 30000287):
+		print ("whole collection")		
+	# else:
+	# 	result = result.filter(fk_term_interchange__fk_class__fk_class_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
+	# 	print (result)
 
 	totalcases = sum([r.num_cases for r in result])	
 
@@ -762,8 +762,11 @@ def collection_page(request, digisig_entity_number):
 
 	for r in result:
 
-		data2.append((r.num_cases /totalcases) * 100)
-		labels2.append(r.term_name)
+		percentageresult = (r.num_cases / totalcases) * 100 
+
+		if percentageresult > 1:
+			data2.append((r.num_cases / totalcases) * 100)
+			labels2.append(r.term_name)
 
 	# data2, labels2 = classdistribution(classset, facecount)
 
@@ -816,16 +819,16 @@ def collection_page(request, digisig_entity_number):
 
 	#for print group totals (legacy)
 	if (qcollection == 30000287):
-		printgroupset = Printgroup.objects.annotate(numcases=Count('fk_printgroup', filter=Q(fk_printgroup__sealdescription__fk_collection__gte=0))).order_by('printgroup_order')
+		printgroupset = Printgroup.objects.annotate(numcases=Count('fk_printgroup', filter=Q(fk_printgroup__fk_sealsealdescription__fk_collection__gte=0))).order_by('printgroup_order')
 
-	else: printgroupset = Printgroup.objects.annotate(numcases=Count('fk_printgroup', filter=Q(fk_printgroup__sealdescription__fk_collection=qcollection))).order_by('printgroup_order')
+	else: printgroupset = Printgroup.objects.annotate(numcases=Count('fk_printgroup', filter=Q(fk_printgroup__fk_sealsealdescription__fk_collection=qcollection))).order_by('printgroup_order')
 
 	#for modern group system
 	if (qcollection == 30000287):
-		groupset = Groupclass.objects.annotate(numcases=Count('id_groupclass', filter=Q(fk_group_class__fk_group__fk_actor_group__sealdescription__fk_collection__gte=0))).order_by('id_groupclass')
+		groupset = Groupclass.objects.annotate(numcases=Count('id_groupclass', filter=Q(fk_group_class__fk_group__fk_actor_group__fk_sealsealdescription__fk_collection__gte=0))).order_by('id_groupclass')
 
 	else:
-		groupset = Groupclass.objects.annotate(numcases=Count('id_groupclass', filter=Q(fk_group_class__fk_group__fk_actor_group__sealdescription__fk_collection=qcollection))).order_by('id_groupclass')
+		groupset = Groupclass.objects.annotate(numcases=Count('id_groupclass', filter=Q(fk_group_class__fk_group__fk_actor_group__fk_sealsealdescription__fk_collection=qcollection))).order_by('id_groupclass')
 
 	data5 = []
 	labels5 = []

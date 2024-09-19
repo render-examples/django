@@ -1329,7 +1329,7 @@ class Sealdescription(models.Model):
     fk_collection = models.ForeignKey('Collection', models.DO_NOTHING, db_column='fk_collection', blank=True, null=True)
     sealdescription = models.TextField(blank=True, null=True)
     sealdescription_identifier = models.TextField(blank=True, null=True)
-    fk_seal = models.ForeignKey('Seal', models.DO_NOTHING, db_column='fk_seal', blank=True, null=True)
+    fk_seal = models.ForeignKey('Seal', models.DO_NOTHING, db_column='fk_seal', related_name= 'fk_sealsealdescription', blank=True, null=True)
     bifaceseal = models.BooleanField(blank=True, null=True)
     motif_obverse = models.TextField(blank=True, null=True)
     motif_reverse = models.TextField(blank=True, null=True)
