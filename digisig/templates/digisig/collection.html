@@ -58,18 +58,22 @@
 				</td>
 				{% endif %}
 			</tr>
-		{% for val1, val2, val3, val4, val5 in contributorset %}
-			<tr>
-				<th>{% cycle 'Credit' '' '' '' '' '' '' '' '' %}</th>
-				<td>
-				{% if val3 %} {{val3}}, {% endif %} 
-				{% if val2 %} {{val2}} {% endif %} 
-				{% if val4 %} {{val4}} {% endif %} 
-				{% if val1 %} ({{val1}}) {% endif %}
-				{% if val5 %}<a href="{{val5}}"  target="_blank">External Link</a>{% endif %}  
-			</tr>
-		{% endfor %}
-		{% resetcycle %}
+
+			{% for key, value in contributor_dic.items %}
+				<tr>
+					<th>{% cycle 'Credit' '' '' '' '' '' '' '' '' %}</th>
+					<td>
+						{{value.contribution}} {{value.name}}
+					{% if value.uricontributor %}
+					<a href="{{value.uricontributor}}" target="_blank">External Link</a>
+					{% endif %}
+					</td> 
+				</tr>
+			{% endfor %}
+			{% resetcycle %}
+
+
+
 
 			<tr>
 				<th>Publication details</th>

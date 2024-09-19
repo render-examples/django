@@ -617,6 +617,7 @@ def actor_page(request, digisig_entity_number):
 def collection_page(request, digisig_entity_number):
 	pagetitle = 'Collection'
 	starttime = time()
+	
 	### This code prepares collection info box and the data for charts on the collection page
 
 	#defaults
@@ -629,69 +630,59 @@ def collection_page(request, digisig_entity_number):
 
 	collection_dic = {}
 
-	collection_dic = sealdescription_contributorgenerate(collection, collection_dic)
+	contributor_dic = sealdescription_contributorgenerate(collection, collection_dic)
 
 	print("Compute Time1:", time()-starttime)
 
+	sealdescription_set, casecount, placecount, placeset, regiondisplayset, faceset = collection_basemetricsqueries()
+
 	#if collection is set then limit the scope of the dataset
 	if (qcollection == 30000287):
-		sealdescriptionset = Sealdescription.objects.filter(fk_seal__gt=1)
 		sealset = Seal.objects.all()
-		faceset = Face.objects.filter(fk_faceterm=1)
-
-		#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned --- location status =2 is a secondary location
-		casecount = Locationname.objects.exclude(
-			pk_locationname=7042).exclude(
-			locationreference__fk_locationstatus=2).filter(
-			locationreference__fk_event__part__fk_part__fk_support__gt=1).count()
-
-		#total portion of entries with place info
-		placecount = Locationname.objects.exclude(
-			locationreference__fk_locationstatus=2).filter(
-			locationreference__fk_event__part__fk_part__fk_support__gt=1).count()
-
-		#data for map counties
-		placeset = Region.objects.filter(fk_locationtype=4, 
-			location__locationname__locationreference__fk_locationstatus=1
-			).annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
-
-		# #data for map regions -- not active?
-		# regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1
-		# 	).annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+		casecount =  casecount.count() 
+		placecount = placecount.count()
+		placeset = placeset.annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
+		regiondisplayset = regiondisplayset.annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
 
 	else:
-		sealdescriptionset = Sealdescription.objects.filter(fk_collection=qcollection)
 		sealset = Seal.objects.filter(fk_sealsealdescription__fk_collection=qcollection)
-		faceset = Face.objects.filter(fk_seal__fk_sealsealdescription__fk_collection=qcollection).filter(fk_faceterm=1)
-		pagetitle = collection.collection_title
+		casecount =  casecount.count() 
+		placecount = placecount.count()
+		placeset = placeset.annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
+		regiondisplayset = regiondisplayset.annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
+		sealdescription_set = sealdescription_set.filter(fk_collection=qcollection)
 
-		#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned
-		casecount = Locationname.objects.exclude(
-			pk_locationname=7042).exclude(
-			locationreference__fk_locationstatus__isnull=True).filter(
-			locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
 
-		#total portion of entries with place info
-		placecount = Locationname.objects.exclude(
-			locationreference__fk_locationstatus__isnull=True).filter(
-			locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
+	# 	faceset = Face.objects.filter(fk_seal__fk_sealsealdescription__fk_collection=qcollection).filter(fk_faceterm=1)
+	# 	pagetitle = collection.collection_title
 
-		#data for map counties
-		#revised
-		placeset = Region.objects.filter(fk_locationtype=4, 
-			location__locationname__locationreference__fk_locationstatus=1, 
-			location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
-			).annotate(numplaces=Count('location__locationname__locationreference'))
+	# 	#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned
+	# 	casecount = Locationname.objects.exclude(
+	# 		pk_locationname=7042).exclude(
+	# 		locationreference__fk_locationstatus__isnull=True).filter(
+	# 		locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
 
-		#data for region map 
-		regiondisplayset = Regiondisplay.objects.filter( 
-			region__location__locationname__locationreference__fk_locationstatus=1, 
-			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
-			).annotate(numregions=Count('region__location__locationname__locationreference'))
+	# 	#total portion of entries with place info
+	# 	placecount = Locationname.objects.exclude(
+	# 		locationreference__fk_locationstatus__isnull=True).filter(
+	# 		locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
 
-	sealcount = sealset.count()
-	facecount = faceset.count()
-	classcount = faceset.filter(fk_class__isnull=False).exclude(fk_class=10000367).exclude(fk_class=10001007).count()
+	# 	#data for map counties
+	# 	#revised
+	# 	placeset = Region.objects.filter(fk_locationtype=4, 
+	# 		location__locationname__locationreference__fk_locationstatus=1, 
+	# 		location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
+	# 		).annotate(numplaces=Count('location__locationname__locationreference'))
+
+	# 	#data for region map 
+	# 	regiondisplayset = Regiondisplay.objects.filter( 
+	# 		region__location__locationname__locationreference__fk_locationstatus=1, 
+	# 		region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
+	# 		).annotate(numregions=Count('region__location__locationname__locationreference'))
+
+	# sealcount = sealset.count()
+	# facecount = faceset.count()
+	# classcount = faceset.filter(fk_class__isnull=False).exclude(fk_class=10000367).exclude(fk_class=10001007).count()
 
 	print("Compute Time2:", time()-starttime)
 
@@ -844,7 +835,7 @@ def collection_page(request, digisig_entity_number):
 		'pagetitle': pagetitle,
 		'collectioninfo': collectioninfo,
 		'collection': collection,
-		#'contributorset': contributorset,
+		'contributor_dic': contributor_dic,
 		'labels1': labels1,
 		'data1': data1,
 		'labels2': labels2,

@@ -6,6 +6,46 @@ from django.core.paginator import Paginator
 from time import time
 
 
+def collection_basemetricsqueries():
+	sealdescription_set = Sealdescription.objects.filter(fk_seal__gt=1)
+
+	#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned --- location status =2 is a secondary location
+	casecount = Locationname.objects.exclude(
+		pk_locationname=7042).exclude(
+		locationreference__fk_locationstatus=2).filter(
+		locationreference__fk_event__part__fk_part__fk_support__gt=1)
+
+	#total portion of entries with place info
+	placecount = Locationname.objects.exclude(
+		locationreference__fk_locationstatus=2).filter(
+		locationreference__fk_event__part__fk_part__fk_support__gt=1)
+
+	#data for map counties
+	placeset = Region.objects.filter(fk_locationtype=4, 
+		location__locationname__locationreference__fk_locationstatus=1)
+
+	#data for map regions
+	regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1) 
+
+	faceset = Face.objects.filter(fk_faceterm=1)
+
+	return(sealdescription_set, casecount, placecount, placeset, regiondisplayset, faceset)
+
+
+def collectiondata(collectionid, sealcount):
+	collectiondatapackage = []
+	if collectionid == 30000287:
+		totalsealdescriptions = Sealdescription.objects.all().count()
+	else:
+		totalsealdescriptions = Sealdescription.objects.filter(fk_collection=collectionid).values().distinct('sealdescription_identifier').count()
+
+	collectiondatapackage.extend([totalsealdescriptions, sealcount])
+
+	return(collectiondatapackage)
+
+
+
+
 def individualsearch(digisig_entity_number):
 
 	individual_object = Individual.objects.select_related(
