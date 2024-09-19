@@ -6,8 +6,90 @@ from django.core.paginator import Paginator
 from time import time
 
 
+
+
+### generate the collection info data for chart-- 'Percentage of seals by class',
+def datedistribution(qcollection):
+
+	sealset = Seal.objects.values('date_origin')
+
+	if (qcollection == 30000287):
+		print ("whole collection")
+
+	else:
+		sealset = sealset.filter(fk_sealsealdescription__fk_collection=qcollection)
+
+	eleventhc = 0
+	twelfthc = 0
+	thirteenthc = 0
+	fourteenthc = 0
+	fifteenthc = 0
+	sixteenthc = 0
+	seventeenthc = 0
+	eighteenthc = 0
+	nineteenthc = 0
+	twentiethc = 0
+
+	for s in sealset:
+		print (s)
+		if int(s) >= 1000 and s.date_origin <= 1099 : 
+			eleventhc = eleventhc + 1
+		elif date_origin >= 1100 and s.date_origin <= 1199 : 
+			twelfthc = twelfthc + 1
+		elif s.date_origin >= 1200 and s.date_origin <= 1299 : 
+			thirteenthc = thirteenthc + 1
+		elif s.date_origin >= 1300 and s.date_origin <= 1399 : 
+			fourteenthc = fourteenthc + 1
+		elif s.date_origin >= 1400 and s.date_origin <= 1499 : 
+			fifteenthc = fifteenthc + 1
+		elif s.date_origin >= 1500 and s.date_origin <= 1599 : 
+			sixteenthc = sixteenthc + 1
+		elif s.date_origin >= 1600 and s.date_origin <= 1699 : 
+			seventeenthc = seventeenthc + 1
+		elif s.date_origin >= 1700 and s.date_origin <= 1799 : 
+			eighteenthc = eighteenthc + 1
+		elif s.date_origin >= 1800 and s.date_origin <= 1899 : 
+			nineteenthc = nineteenthc + 1
+		elif s.date_origin >= 1900 and s.date_origin <= 1999 : 
+			twentiethc = twentiethc + 1
+
+
+	# for s in sealset:
+	# 	print (s)
+	# 	if s.date_origin >= 1000 and s.date_origin <= 1099 : 
+	# 		eleventhc = eleventhc + 1
+	# 	elif s.date_origin >= 1100 and s.date_origin <= 1199 : 
+	# 		twelfthc = twelfthc + 1
+	# 	elif s.date_origin >= 1200 and s.date_origin <= 1299 : 
+	# 		thirteenthc = thirteenthc + 1
+	# 	elif s.date_origin >= 1300 and s.date_origin <= 1399 : 
+	# 		fourteenthc = fourteenthc + 1
+	# 	elif s.date_origin >= 1400 and s.date_origin <= 1499 : 
+	# 		fifteenthc = fifteenthc + 1
+	# 	elif s.date_origin >= 1500 and s.date_origin <= 1599 : 
+	# 		sixteenthc = sixteenthc + 1
+	# 	elif s.date_origin >= 1600 and s.date_origin <= 1699 : 
+	# 		seventeenthc = seventeenthc + 1
+	# 	elif s.date_origin >= 1700 and s.date_origin <= 1799 : 
+	# 		eighteenthc = eighteenthc + 1
+	# 	elif s.date_origin >= 1800 and s.date_origin <= 1899 : 
+	# 		nineteenthc = nineteenthc + 1
+	# 	elif s.date_origin >= 1900 and s.date_origin <= 1999 : 
+	# 		twentiethc = twentiethc + 1
+
+		else:
+			pass
+
+	data3 = [eleventhc, twelfthc, thirteenthc, fourteenthc, fifteenthc, sixteenthc, seventeenthc, eighteenthc, nineteenthc, twentiethc]
+	labels3 = ["11th", "12th", "13th", "14th", "15th", "16th", "17th", "18th", "19th", "20th"]
+
+	return(data3, labels3)
+
+
+
+
 def collection_basemetricsqueries():
-	sealdescription_set = Sealdescription.objects.filter(fk_seal__gt=1)
+
 
 	#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned --- location status =2 is a secondary location
 	casecount = Locationname.objects.exclude(
@@ -15,17 +97,18 @@ def collection_basemetricsqueries():
 		locationreference__fk_locationstatus=2).filter(
 		locationreference__fk_event__part__fk_part__fk_support__gt=1)
 
-	# 	casecount = Locationname.objects.exclude(
-	# 		pk_locationname=7042).exclude(
-	# 		locationreference__fk_locationstatus__isnull=True).filter(
-	# 		locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
-
-
+	# casecount = Locationname.objects.exclude(
+	# 	pk_locationname=7042).exclude(
+	# 	locationreference__fk_locationstatus__isnull=True).filter(
+	# 	locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
 
 	#total portion of entries with place info
-	placecount = Locationname.objects.exclude(
-		locationreference__fk_locationstatus=2).filter(
-		locationreference__fk_event__part__fk_part__fk_support__gt=1)
+	# placecount = Locationname.objects.exclude(
+	# 	locationreference__fk_locationstatus=2).filter(
+	# 	locationreference__fk_event__part__fk_part__fk_support__gt=1)
+
+	place_set = sealdescription_set.exclude(fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationstatus__isnull=True).exclude(
+			fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationname__fk_location=7042)
 
 	#data for map counties
 	placeset = Region.objects.filter(fk_locationtype=4, 
@@ -34,9 +117,10 @@ def collection_basemetricsqueries():
 	#data for map regions
 	regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1) 
 
-	faceset = Face.objects.filter(fk_faceterm=1)
+	#faceset = Face.objects.filter(fk_faceterm=1)
+	face_set = sealdescription_set.filter(fk_seal__fk_seal_face__fk_faceterm=1).distinct('fk_seal__fk_seal_face') 
 
-	return(sealdescription_set, casecount, placecount, placeset, regiondisplayset, faceset)
+	return(sealdescription_set, casecount, place_set, placeset, regiondisplayset, face_set)
 
 
 def collectiondata(collectionid, sealcount):

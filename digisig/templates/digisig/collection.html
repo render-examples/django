@@ -22,7 +22,7 @@
 		<h1>{{pagetitle}}</h1>
 	</div>
 
-	<div class="mainpage" id="mainpage"> </div>
+	<div class="mainpage" id="mainpage"></div>
 
 	<div class="entity-permalink" id="entity-permalink">
 		<div class="permalinkinfo" id="permalinkinfo">
@@ -30,7 +30,7 @@
 		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
 		<form action="#">
 			<label>Copy this URL to link to this page:</label>
-			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{collection.id_collection}}" type="text" readonly>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{collection_dic.id_collection}}" type="text" readonly>
 		</form>
 		</div>
 	</div>
@@ -40,56 +40,53 @@
 		<table>
 			<tr>
 				<th>Title</th>
-				<td>{{collection.collection_title}}</td>
-				{% if collection.collection_thumbnail != null %}
+				<td>{{collection_dic.collection_title}}</td>
+				{% if collection_dic.collection_thumbnail != null %}
 				<td rowspan="4">
 					<div>
 						<figure>
-							<img class="modalimage" id="modalimagebase1" src="{% static 'sealquery/images/collections_cover/'%}{{collection.collection_thumbnail}}" alt="catalogue cover photograph" onclick="image(1)">
+							<img class="modalimage" id="modalimagebase1" src="{% static 'digisig/images/collections_cover/'%}{{collection_dic.collection_thumbnail}}" alt="catalogue cover photograph" onclick="image(1)">
 						</figure>
 
 						<!-- The Modal -->
 	 					<div id="myModal1" class="modal" style="display: none;">
 						  <span class="close" onclick="modalclose(1)">&times;</span>
-						  <img class="modal-content" id="modalimg1" src="{% static 'sealquery/images/collections_cover/'%}{{collection.collection_thumbnail}}" alt="catalogue cover photograph">
-						  <div class="modal-caption" id="caption1">{{collection.collection_fulltitle}}</div>
+						  <img class="modal-content" id="modalimg1" src="{% static 'sealquery/images/collections_cover/'%}{{collection_dic.collection_thumbnail}}" alt="catalogue cover photograph">
+						  <div class="modal-caption" id="caption1">{{collection_dic.collection_fulltitle}}</div>
 						</div>
 					</div>
 				</td>
 				{% endif %}
 			</tr>
 
-			{% for key, value in contributor_dic.items %}
-				<tr>
-					<th>{% cycle 'Credit' '' '' '' '' '' '' '' '' %}</th>
-					<td>
-						{{value.contribution}} {{value.name}}
-					{% if value.uricontributor %}
-					<a href="{{value.uricontributor}}" target="_blank">External Link</a>
-					{% endif %}
-					</td> 
-				</tr>
+			{% for key, value in collection_dic.contributors.items %}
+			<tr>
+				<th>{% cycle 'Credit' '' '' '' '' '' '' '' '' %}</th>
+				<td>
+					{{value.contribution}} {{value.name}}
+				{% if value.uricontributor %}
+				<a href="{{value.uricontributor}}" target="_blank">External Link</a>
+				{% endif %}
+				</td> 
+			</tr>
 			{% endfor %}
 			{% resetcycle %}
 
-
-
-
 			<tr>
 				<th>Publication details</th>
-				<td>{{collection.collection_publicationdata}}</td>
+				<td>{{collection_dic.collection_publicationdata}}</td>
 			</tr>
 			<tr>
 				<th>Total Entries</th>
-				<td>{{collectioninfo.0}}</td>
+				<td>{{collection_dic.totalsealdescriptions}}</td>
 			<tr>
 			<tr>
 				<th>Total Seals</th>
-				<td>{{collectioninfo.1}}</td>
+				<td>{{collection_dic.totalseals}}</td>
 			</tr>
 			<tr>
 				<th>Notes</th>
-				<td>{{collection.notes}}</td>
+				<td>{{collection_dic.notes}}</td>
 			</tr>
 
 

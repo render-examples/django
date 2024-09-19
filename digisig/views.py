@@ -613,6 +613,7 @@ def actor_page(request, digisig_entity_number):
 
 ################################ Collection ######################################
 
+#https://allwin-raju-12.medium.com/reverse-relationship-in-django-f016d34e2c68
 
 def collection_page(request, digisig_entity_number):
 	pagetitle = 'Collection'
@@ -622,129 +623,65 @@ def collection_page(request, digisig_entity_number):
 
 	#defaults
 	qcollection = int(digisig_entity_number)
-	data = []
-	labels = []
-	pagetitle = 'All Collections'
-	collectioninfo= []
+
 	collection = get_object_or_404(Collection, id_collection=qcollection)
 
 	collection_dic = {}
-
+	collection_dic["id_collection"] = int(qcollection)
+	collection_dic["collection_thumbnail"] = collection.collection_thumbnail
+	collection_dic["collection_publicationdata"] = collection.collection_publicationdata
+	collection_dic["collection_fulltitle"] = collection.collection_fulltitle
+	collection_dic["notes"] = collection.notes
 	contributor_dic = sealdescription_contributorgenerate(collection, collection_dic)
 
 	print("Compute Time1:", time()-starttime)
 
-	sealdescription_set, casecount, placecount, placeset, regiondisplayset, faceset = collection_basemetricsqueries()
+	sealdescription_set = Sealdescription.objects.filter(fk_seal__gt=1).select_related('fk_seal')
 
 	#if collection is set then limit the scope of the dataset
 	if (qcollection == 30000287):
-		sealset = Seal.objects.all()
-		casecount =  casecount.count() 
-		placecount = placecount.count()
-		placeset = placeset.annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
-		regiondisplayset = regiondisplayset.annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
+		collection_dic["collection_title"] = 'All Collections'
+		pagetitle = 'All Collections'
+		collection_dic["totalsealdescriptions"] = sealdescription_set.count()
+		collection_dic["totalseals"] = sealdescription_set.distinct('fk_seal').count()
 
 	else:
+		collection_dic["collection_title"] = collection.collection_title
 		pagetitle = collection.collection_title
-		sealset = Seal.objects.filter(fk_sealsealdescription__fk_collection=qcollection)
 		sealdescription_set = sealdescription_set.filter(fk_collection=qcollection)
-		casecount =  casecount.count() 
-		placecount = placecount.count()
-		placeset = placeset.annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
-		regiondisplayset = regiondisplayset.annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support'))
-		faceset = faceset.filter(fk_seal__fk_sealsealdescription__fk_collection=qcollection)
-
-
-
-	# 	#total number cases that have NOT been assigned to a location (yet) --- 7042 = not assigned
-	# 	casecount = Locationname.objects.exclude(
-	# 		pk_locationname=7042).exclude(
-	# 		locationreference__fk_locationstatus__isnull=True).filter(
-	# 		locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
-
-	# 	#total portion of entries with place info
-	# 	placecount = Locationname.objects.exclude(
-	# 		locationreference__fk_locationstatus__isnull=True).filter(
-	# 		locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
-
-	# 	#data for map counties
-	# 	#revised
-	# 	placeset = Region.objects.filter(fk_locationtype=4, 
-	# 		location__locationname__locationreference__fk_locationstatus=1, 
-	# 		location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
-	# 		).annotate(numplaces=Count('location__locationname__locationreference'))
-
-	# 	#data for region map 
-	# 	regiondisplayset = Regiondisplay.objects.filter( 
-	# 		region__location__locationname__locationreference__fk_locationstatus=1, 
-	# 		region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
-	# 		).annotate(numregions=Count('region__location__locationname__locationreference'))
-
-	# sealcount = sealset.count()
-	# facecount = faceset.count()
-	# classcount = faceset.filter(fk_class__isnull=False).exclude(fk_class=10000367).exclude(fk_class=10001007).count()
+		collection_dic["totalsealdescriptions"] = sealdescription_set.distinct(
+			'sealdescription_identifier').count()
+		collection_dic["totalseals"] = sealdescription_set.distinct(
+			'fk_seals').count()
 
 	print("Compute Time2:", time()-starttime)
+	### generate the collection info data for chart 1
+	actorscount = sealdescription_set.filter(fk_seal__fk_individual_realizer__gt=10000019).count()
+	datecount =sealdescription_set.filter(fk_seal__date_origin__gt=1).count()
+	classcount = sealdescription_set.filter(
+		fk_seal__fk_seal_face__fk_class__isnull=False).exclude(
+		fk_seal__fk_seal_face__fk_class=10000367).exclude(
+		fk_seal__fk_seal_face__fk_class=10001007).count()
+	placecount = sealdescription_set.exclude(
+		fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationstatus__isnull=True).exclude(
+		fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationname__fk_location=7042).count()
+	facecount = sealdescription_set.filter(fk_seal__fk_seal_face__fk_faceterm=1).distinct('fk_seal__fk_seal_face').count() 
 
-	collectioninfo = collectiondata(qcollection, sealcount)
-
-	### generate the collection info data for chart 1 'Percentage of complete entries',
-	sealdescriptioncount = sealdescriptionset.count()
-	sealdescriptiontitle = sealdescriptionset.filter(sealdescription_title__isnull=False).count()
-	sealdescriptionmotif = sealdescriptionset.filter(motif_obverse__isnull=False).count()
-	sealdescriptionidentifier = sealdescriptionset.filter(sealdescription_identifier__isnull=False).count()
-
-	actorscount = sealset.filter(fk_individual_realizer__gt=10000019).count()
-	datecount =sealset.filter(date_origin__gt=1).count()
-
-	title = calpercent(sealdescriptioncount, sealdescriptiontitle)
-	motif = calpercent(sealdescriptioncount, sealdescriptionmotif)
-	identifier = calpercent(sealdescriptioncount, sealdescriptionidentifier)
-	actors = calpercent(sealcount, actorscount)
-	date = calpercent(sealcount, datecount)
+	actors = calpercent(collection_dic["totalseals"], actorscount)
+	date = calpercent(collection_dic["totalseals"], datecount)
 	fclass = calpercent(facecount, classcount)
-	place = calpercent(placecount, casecount)
+	place = calpercent(collection_dic["totalseals"], placecount)
 
 	data1 = [actors, date, fclass, place]
 	labels1 = ["actor", "date", "class", "place"]
 
-
 	print("Compute Time3:", time()-starttime)
 	### generate the collection info data for chart 2 -- 'Percentage of seals per class',
 
-	# if (qcollection == 30000287):
-	# 	classset = Classification.objects.order_by('-level').annotate(numcases=Count('face')).exclude(id_class=10001007).exclude(id_class=10000367)
-	# else:
-	# 	classset = Classification.objects.order_by('-level').filter(face__fk_seal__sealdescription__fk_collection=qcollection).annotate(numcases=Count('face')).exclude(id_class=10001007).exclude(id_class=10000367)
-
-	# if (qcollection == 30000287):
-	# 	termset = Classification_parentchild.objects.filter(fk_term__term_type=1).annotate(numcases=Count('Classification'))
-	# 	print(termset)
-
-	# termset =Terminology.objects.raw("SELECT terminology.id_term FROM terminology")
-
-	# termset = Terminology.objects.raw("SELECT min terminology.id_term AS id_term,terminology.term_name,count terminology.id_term AS numberofdups,terminology.term_type FROM face LEFT JOIN class ON face.fk_class = class.id_class LEFT JOIN classification_parentchild ON class.id_class = classification_parentchild.fk_class LEFT JOIN terminology ON classification_parentchild.fk_term = terminology.id_term LEFT JOIN sealdescription ON face.fk_seal = sealdescription.fk_seal GROUP BY terminology.term_name, terminology.id_term, terminology.term_type, sealdescription.fk_collection HAVING count(terminology.id_term) > 0 AND terminology.term_type = 1::numeric AND sealdescription.fk_collection = 30000057;")
-
-
-
-
-	# Perform the query
-	# result = Face.objects.annotate(number_of_dups=Count(
-	# 	'fk_class__classificationparentchild_set__fk_term__id_term')).filter(fk_class__classificationparentchild_set__fk_term__term_type=1)
-
-	#https://allwin-raju-12.medium.com/reverse-relationship-in-django-f016d34e2c68
-	#result = Face.objects.filter(fk_class__fk_class_interchange__fk_term__term_type=1).count()
 	result = Terminology.objects.filter(
 		term_type=1).order_by(
 		'term_sortorder').annotate(
 		num_cases=Count("fk_term_interchange__fk_class__fk_class_face"))
-
-
-	if (qcollection == 30000287):
-		print ("whole collection")		
-	# else:
-	# 	result = result.filter(fk_term_interchange__fk_class__fk_class_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).count()
-	# 	print (result)
 
 	totalcases = sum([r.num_cases for r in result])	
 
@@ -759,13 +696,11 @@ def collection_page(request, digisig_entity_number):
 			data2.append((r.num_cases / totalcases) * 100)
 			labels2.append(r.term_name)
 
-	# data2, labels2 = classdistribution(classset, facecount)
-
 
 	print("Compute Time3a:", time()-starttime)
 	### generate the collection info data for chart 3  -- 'Percentage of seals by period',
 
-	data3, labels3 = datedistribution(sealset)
+	data3, labels3 = datedistribution(qcollection)
 
 	# ### generate the collection info data for chart 4 -- seals per region,
 
@@ -773,31 +708,6 @@ def collection_page(request, digisig_entity_number):
 	## data for colorpeth map
 	maplayer1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
 	maplayer = json.loads(maplayer1.jsonfiletxt)
-
-	# placedataforcolorpeth = placeset.values('fk_his_countylist', 'numplaces')
-	# print (placedataforcolorpeth)
-
-	# print("Compute Timec: startloop", time()-starttime)
-	# for i in maplayer:
-	# 	if i == "features":
-	# 		for b in maplayer[i]:
-	# 			print("Compute TimecA:", time()-starttime)
-	# 			j = b["properties"]
-	# 			countyvalue = j["HCS_NUMBER"]
-	# 			countyname = j["NAME"]
-
-	# 			#numberofcases = placeset.filter(fk_his_countylist=countyvalue)
-	# 			print ("countyvalue=", countyvalue)
-	# 			try:
-	# 				numberofcases = placedataforcolorpeth.get(fk_his_countylist=countyvalue)
-	# 				#numberofcases = placeset.get(fk_his_countylist=countyvalue)
-	# 				j["cases"] = numberofcases.numplaces
-	# 			except:
-	# 				print ("counld not find:", countyvalue)
-	# 			print("Compute TimecB:", time()-starttime)
-	# 			# for i in numberofcases:
-	# 			# 	j["cases"] = i.numplaces
-	# 			# print("Compute Timecf:", time()-starttime)
 
 	print("Compute Time3d:", time()-starttime)
 	## data for region map
@@ -825,7 +735,7 @@ def collection_page(request, digisig_entity_number):
 	labels5 = []
 	for g in groupset:
 		if (g.numcases > 0):
-			percentagedata = (g.numcases/sealcount)*100 
+			percentagedata = (g.numcases/collection_dic["totalseals"])*100 
 			# if percentagedata > 1:
 			data5.append(percentagedata)
 			labels5.append(g.groupclass)
@@ -835,6 +745,7 @@ def collection_page(request, digisig_entity_number):
 		'pagetitle': pagetitle,
 		'collectioninfo': collectioninfo,
 		'collection': collection,
+		'collection_dic': collection_dic,
 		'contributor_dic': contributor_dic,
 		'labels1': labels1,
 		'data1': data1,
@@ -853,6 +764,7 @@ def collection_page(request, digisig_entity_number):
 		
 	template = loader.get_template('digisig/collection.html') 
 
+	print (collection_dic)
 	print("Compute Time5:", time()-starttime)                  
 	return HttpResponse(template.render(context, request))
 

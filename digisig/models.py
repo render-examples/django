@@ -776,7 +776,7 @@ class Locationname(models.Model):
 
 class Locationreference(models.Model):
     pk_location_reference = models.AutoField(primary_key=True)
-    fk_event = models.ForeignKey('Event', models.DO_NOTHING, db_column='fk_event', blank=True, null=True)
+    fk_event = models.ForeignKey('Event', models.DO_NOTHING, db_column='fk_event', related_name="fk_event_locationreference", blank=True, null=True)
     fk_locationname = models.ForeignKey('Locationname', models.DO_NOTHING, db_column='fk_locationname', blank=True, null=True)
     location_reference = models.TextField(blank=True, null=True)
     location_reference_primary = models.BooleanField(blank=True, null=True)
