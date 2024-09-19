@@ -655,9 +655,9 @@ def collection_page(request, digisig_entity_number):
 			location__locationname__locationreference__fk_locationstatus=1
 			).annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
 
-		#data for map regions -- not active?
-		regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1
-			).annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+		# #data for map regions -- not active?
+		# regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1
+		# 	).annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
 
 	else:
 		sealdescriptionset = Sealdescription.objects.filter(fk_collection=qcollection)
