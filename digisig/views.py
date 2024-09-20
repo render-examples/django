@@ -683,9 +683,10 @@ def collection_page(request, digisig_entity_number):
 
 	print("Compute Time2c:", time()-starttime)
 
-	# placecount = sealdescription_set.exclude(
-	# 	fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationstatus__isnull=True).exclude(
-	# 	fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationname__fk_location=7042).count()
+	# placecount = Locationname.objects.exclude(
+	# 	locationreference__fk_locationstatus=2).filter(
+	# 	locationreference__fk_event__part__fk_part__fk_support__gt=1).count()
+
 
 	# print (placecount)
 
@@ -703,12 +704,14 @@ def collection_page(request, digisig_entity_number):
 	actors = calpercent(collection_dic["totalseals"], actorscount)
 	date = calpercent(collection_dic["totalseals"], datecount)
 	fclass = calpercent(facecount, classcount)
-	# place = calpercent(collection_dic["totalseals"], placecount)
+	#place = calpercent(collection_dic["totalseals"], placecount)
 
-	place = 5
+	# data1 = [actors, date, fclass, place]
+	# labels1 = ["actor", "date", "class", "place"]
 
-	data1 = [actors, date, fclass, place]
-	labels1 = ["actor", "date", "class", "place"]
+	data1 = [actors, date, fclass]
+	labels1 = ["actor", "date", "class"]
+
 
 	print("Compute Time3:", time()-starttime)
 	### generate the collection info data for chart 2 -- 'Percentage of seals per class',
