@@ -31,8 +31,9 @@ def datedistribution(qcollection):
 	twentiethc = 0
 
 	for s in sealset:
-		print (s)
-		if int(s) >= 1000 and s.date_origin <= 1099 : 
+
+		t = s['date_origin']
+		if t >= 1000 and t <= 1099 : 
 			eleventhc = eleventhc + 1
 		elif date_origin >= 1100 and s.date_origin <= 1199 : 
 			twelfthc = twelfthc + 1
