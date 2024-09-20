@@ -645,6 +645,11 @@ def collection_page(request, digisig_entity_number):
 		collection_dic["totalsealdescriptions"] = sealdescription_set.count()
 		collection_dic["totalseals"] = sealdescription_set.distinct('fk_seal').count()
 
+		regiondisplayset = Regiondisplay.objects.filter(
+			region__location__locationname__locationreference__fk_locationstatus=1).annotate(
+			numregions=Count(
+				'region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+
 	else:
 		collection_dic["collection_title"] = collection.collection_title
 		pagetitle = collection.collection_title
@@ -653,6 +658,14 @@ def collection_page(request, digisig_entity_number):
 			'sealdescription_identifier').count()
 		collection_dic["totalseals"] = sealdescription_set.distinct(
 			'fk_seal').count()
+
+		#data for region map 
+		regiondisplayset = Regiondisplay.objects.filter( 
+			region__location__locationname__locationreference__fk_locationstatus=1, 
+			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+			).annotate(numregions=Count('region__location__locationname__locationreference'))
+
+		
 
 	print("Compute Time2:", time()-starttime)
 	### generate the collection info data for chart 1
