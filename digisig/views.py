@@ -670,15 +670,29 @@ def collection_page(request, digisig_entity_number):
 	print("Compute Time2:", time()-starttime)
 	### generate the collection info data for chart 1
 	actorscount = sealdescription_set.filter(fk_seal__fk_individual_realizer__gt=10000019).count()
+
+	print("Compute Time2a:", time()-starttime)
 	datecount =sealdescription_set.filter(fk_seal__date_origin__gt=1).count()
+
+	print("Compute Time2b:", time()-starttime)
+
 	classcount = sealdescription_set.filter(
 		fk_seal__fk_seal_face__fk_class__isnull=False).exclude(
 		fk_seal__fk_seal_face__fk_class=10000367).exclude(
 		fk_seal__fk_seal_face__fk_class=10001007).count()
+
+	print("Compute Time2c:", time()-starttime)
+
 	placecount = sealdescription_set.exclude(
 		fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationstatus__isnull=True).exclude(
 		fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationname__fk_location=7042).count()
+
+
+	print("Compute Time2d:", time()-starttime)
+
 	facecount = sealdescription_set.filter(fk_seal__fk_seal_face__fk_faceterm=1).distinct('fk_seal__fk_seal_face').count() 
+
+	print("Compute Time2e:", time()-starttime)
 
 	actors = calpercent(collection_dic["totalseals"], actorscount)
 	date = calpercent(collection_dic["totalseals"], datecount)
