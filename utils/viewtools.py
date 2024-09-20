@@ -7,6 +7,43 @@ from time import time
 
 
 
+def mapgenerator3(regiondisplayset):
+	## data for region map
+	# make circles data -- defaults -- note that this code is very similar to the function mapdata2
+	mapdic = {"type": "FeatureCollection"}
+	properties = {}
+	geometry = {}
+	location = {}
+	regionlist = []
+
+	#for circles
+	for r in regiondisplayset:
+		if (r.numregions > 0):
+			# data4.append(r.numregions)
+			# labels4.append(r.regiondisplay_label)
+
+			value1 = r.id_regiondisplay
+			value2 = r.regiondisplay_label
+			value3 = r.numregions
+			value4 = r.regiondisplay_long
+			value5 = r.regiondisplay_lat
+
+			popupcontent = str(value2)
+			if value3 > 0:
+				popupcontent = popupcontent + ' ' + str(value3)
+
+			properties = {"id_location": value1, "location": value2, "count": value3, "popupContent": popupcontent}
+			geometry = {"type": "Point", "coordinates": [value4, value5]}
+			location = {"type": "Feature", "properties": properties, "geometry": geometry}
+			regionlist.append(location)
+
+	mapdic["features"] = regionlist
+
+	return(mapdic)
+
+
+
+
 
 ### generate the collection info data for chart-- 'Percentage of seals by class',
 def datedistribution(qcollection):
