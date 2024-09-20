@@ -662,7 +662,7 @@ def collection_page(request, digisig_entity_number):
 		#data for region map 
 		regiondisplayset = Regiondisplay.objects.filter( 
 			region__location__locationname__locationreference__fk_locationstatus=1, 
-			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
 			).annotate(numregions=Count('region__location__locationname__locationreference'))
 
 		
@@ -756,7 +756,7 @@ def collection_page(request, digisig_entity_number):
 	form = CollectionForm(initial={'collection': collection.id_collection})     
 	context = {
 		'pagetitle': pagetitle,
-		'collectioninfo': collectioninfo,
+		#'collectioninfo': collectioninfo,
 		'collection': collection,
 		'collection_dic': collection_dic,
 		'contributor_dic': contributor_dic,
