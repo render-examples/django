@@ -926,65 +926,65 @@ def collectiondata(collectionid, sealcount):
 
 
 
-### generate the collection info data for chart-- 'Percentage of seals by class',
-def datedistribution(sealset):
+# ### generate the collection info data for chart-- 'Percentage of seals by class',
+# def datedistribution(sealset):
 
-	# eleventhc = sealset.filter(date_origin__gte=1000, date_origin__lte=1099).count()
-	# twelfthc = sealset.filter(date_origin__gte=1100, date_origin__lte=1199).count()
-	# thirteenthc = sealset.filter(date_origin__gte=1200, date_origin__lte=1299).count()
-	# fourteenthc = sealset.filter(date_origin__gte=1300, date_origin__lte=1399).count()
-	# fifteenthc = sealset.filter(date_origin__gte=1400, date_origin__lte=1499).count()
-	# sixteenthc = sealset.filter(date_origin__gte=1500, date_origin__lte=1599).count()
-	# seventeenthc = sealset.filter(date_origin__gte=1600, date_origin__lte=1699).count()
-	# eighteenthc = sealset.filter(date_origin__gte=1700, date_origin__lte=1799).count()
-	# ninteenthc = sealset.filter(date_origin__gte=1800, date_origin__lte=1899).count()
-	# twentiethc = sealset.filter(date_origin__gte=1900, date_origin__lte=1999).count()
+# 	# eleventhc = sealset.filter(date_origin__gte=1000, date_origin__lte=1099).count()
+# 	# twelfthc = sealset.filter(date_origin__gte=1100, date_origin__lte=1199).count()
+# 	# thirteenthc = sealset.filter(date_origin__gte=1200, date_origin__lte=1299).count()
+# 	# fourteenthc = sealset.filter(date_origin__gte=1300, date_origin__lte=1399).count()
+# 	# fifteenthc = sealset.filter(date_origin__gte=1400, date_origin__lte=1499).count()
+# 	# sixteenthc = sealset.filter(date_origin__gte=1500, date_origin__lte=1599).count()
+# 	# seventeenthc = sealset.filter(date_origin__gte=1600, date_origin__lte=1699).count()
+# 	# eighteenthc = sealset.filter(date_origin__gte=1700, date_origin__lte=1799).count()
+# 	# ninteenthc = sealset.filter(date_origin__gte=1800, date_origin__lte=1899).count()
+# 	# twentiethc = sealset.filter(date_origin__gte=1900, date_origin__lte=1999).count()
 
-	# data3 = [eleventhc, twelfthc, thirteenthc, fourteenthc, fifteenthc, sixteenthc, seventeenthc, eighteenthc, ninteenthc, twentiethc]
-	# labels3 = ["11th", "12th", "13th", "14th", "15th", "16th", "17th", "18th", "19th", "20th"]
+# 	# data3 = [eleventhc, twelfthc, thirteenthc, fourteenthc, fifteenthc, sixteenthc, seventeenthc, eighteenthc, ninteenthc, twentiethc]
+# 	# labels3 = ["11th", "12th", "13th", "14th", "15th", "16th", "17th", "18th", "19th", "20th"]
 
-	## rewrite of algorithm 1/3/2024, below 
+# 	## rewrite of algorithm 1/3/2024, below 
 
-	eleventhc = 0
-	twelfthc = 0
-	thirteenthc = 0
-	fourteenthc = 0
-	fifteenthc = 0
-	sixteenthc = 0
-	seventeenthc = 0
-	eighteenthc = 0
-	nineteenthc = 0
-	twentiethc = 0
+# 	eleventhc = 0
+# 	twelfthc = 0
+# 	thirteenthc = 0
+# 	fourteenthc = 0
+# 	fifteenthc = 0
+# 	sixteenthc = 0
+# 	seventeenthc = 0
+# 	eighteenthc = 0
+# 	nineteenthc = 0
+# 	twentiethc = 0
 
-	for s in sealset:
-		if s.date_origin >= 1000 and s.date_origin <= 1099 : 
-			eleventhc = eleventhc + 1
-		elif s.date_origin >= 1100 and s.date_origin <= 1199 : 
-			twelfthc = twelfthc + 1
-		elif s.date_origin >= 1200 and s.date_origin <= 1299 : 
-			thirteenthc = thirteenthc + 1
-		elif s.date_origin >= 1300 and s.date_origin <= 1399 : 
-			fourteenthc = fourteenthc + 1
-		elif s.date_origin >= 1400 and s.date_origin <= 1499 : 
-			fifteenthc = fifteenthc + 1
-		elif s.date_origin >= 1500 and s.date_origin <= 1599 : 
-			sixteenthc = sixteenthc + 1
-		elif s.date_origin >= 1600 and s.date_origin <= 1699 : 
-			seventeenthc = seventeenthc + 1
-		elif s.date_origin >= 1700 and s.date_origin <= 1799 : 
-			eighteenthc = eighteenthc + 1
-		elif s.date_origin >= 1800 and s.date_origin <= 1899 : 
-			nineteenthc = nineteenthc + 1
-		elif s.date_origin >= 1900 and s.date_origin <= 1999 : 
-			twentiethc = twentiethc + 1
+# 	for s in sealset:
+# 		if s.date_origin >= 1000 and s.date_origin <= 1099 : 
+# 			eleventhc = eleventhc + 1
+# 		elif s.date_origin >= 1100 and s.date_origin <= 1199 : 
+# 			twelfthc = twelfthc + 1
+# 		elif s.date_origin >= 1200 and s.date_origin <= 1299 : 
+# 			thirteenthc = thirteenthc + 1
+# 		elif s.date_origin >= 1300 and s.date_origin <= 1399 : 
+# 			fourteenthc = fourteenthc + 1
+# 		elif s.date_origin >= 1400 and s.date_origin <= 1499 : 
+# 			fifteenthc = fifteenthc + 1
+# 		elif s.date_origin >= 1500 and s.date_origin <= 1599 : 
+# 			sixteenthc = sixteenthc + 1
+# 		elif s.date_origin >= 1600 and s.date_origin <= 1699 : 
+# 			seventeenthc = seventeenthc + 1
+# 		elif s.date_origin >= 1700 and s.date_origin <= 1799 : 
+# 			eighteenthc = eighteenthc + 1
+# 		elif s.date_origin >= 1800 and s.date_origin <= 1899 : 
+# 			nineteenthc = nineteenthc + 1
+# 		elif s.date_origin >= 1900 and s.date_origin <= 1999 : 
+# 			twentiethc = twentiethc + 1
 
-		else:
-			pass
+# 		else:
+# 			pass
 
-	data3 = [eleventhc, twelfthc, thirteenthc, fourteenthc, fifteenthc, sixteenthc, seventeenthc, eighteenthc, nineteenthc, twentiethc]
-	labels3 = ["11th", "12th", "13th", "14th", "15th", "16th", "17th", "18th", "19th", "20th"]
+# 	data3 = [eleventhc, twelfthc, thirteenthc, fourteenthc, fifteenthc, sixteenthc, seventeenthc, eighteenthc, nineteenthc, twentiethc]
+# 	labels3 = ["11th", "12th", "13th", "14th", "15th", "16th", "17th", "18th", "19th", "20th"]
 
-	return(data3, labels3)
+# 	return(data3, labels3)
 
 
 #gets example for classification display

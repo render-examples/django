@@ -10,7 +10,6 @@ from time import time
 
 ### generate the collection info data for chart-- 'Percentage of seals by class',
 def datedistribution(qcollection):
-
 	sealset = Seal.objects.values('date_origin')
 
 	if (qcollection == 30000287):
@@ -30,29 +29,28 @@ def datedistribution(qcollection):
 	nineteenthc = 0
 	twentiethc = 0
 
-	for s in sealset:
-
-		t = s['date_origin']
-		if t >= 1000 and t <= 1099 : 
-			eleventhc = eleventhc + 1
-		elif date_origin >= 1100 and s.date_origin <= 1199 : 
-			twelfthc = twelfthc + 1
-		elif s.date_origin >= 1200 and s.date_origin <= 1299 : 
-			thirteenthc = thirteenthc + 1
-		elif s.date_origin >= 1300 and s.date_origin <= 1399 : 
-			fourteenthc = fourteenthc + 1
-		elif s.date_origin >= 1400 and s.date_origin <= 1499 : 
-			fifteenthc = fifteenthc + 1
-		elif s.date_origin >= 1500 and s.date_origin <= 1599 : 
-			sixteenthc = sixteenthc + 1
-		elif s.date_origin >= 1600 and s.date_origin <= 1699 : 
-			seventeenthc = seventeenthc + 1
-		elif s.date_origin >= 1700 and s.date_origin <= 1799 : 
-			eighteenthc = eighteenthc + 1
-		elif s.date_origin >= 1800 and s.date_origin <= 1899 : 
-			nineteenthc = nineteenthc + 1
-		elif s.date_origin >= 1900 and s.date_origin <= 1999 : 
-			twentiethc = twentiethc + 1
+	for s in sealset.all():
+		for key, value in s:
+			if value >= 1000 and value <= 1099 : 
+				eleventhc = eleventhc + 1
+			elif date_origin >= 1100 and s.date_origin <= 1199 : 
+				twelfthc = twelfthc + 1
+			elif s.date_origin >= 1200 and s.date_origin <= 1299 : 
+				thirteenthc = thirteenthc + 1
+			elif s.date_origin >= 1300 and s.date_origin <= 1399 : 
+				fourteenthc = fourteenthc + 1
+			elif s.date_origin >= 1400 and s.date_origin <= 1499 : 
+				fifteenthc = fifteenthc + 1
+			elif s.date_origin >= 1500 and s.date_origin <= 1599 : 
+				sixteenthc = sixteenthc + 1
+			elif s.date_origin >= 1600 and s.date_origin <= 1699 : 
+				seventeenthc = seventeenthc + 1
+			elif s.date_origin >= 1700 and s.date_origin <= 1799 : 
+				eighteenthc = eighteenthc + 1
+			elif s.date_origin >= 1800 and s.date_origin <= 1899 : 
+				nineteenthc = nineteenthc + 1
+			elif s.date_origin >= 1900 and s.date_origin <= 1999 : 
+				twentiethc = twentiethc + 1
 
 
 	# for s in sealset:
