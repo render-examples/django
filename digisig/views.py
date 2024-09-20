@@ -624,7 +624,7 @@ def collection_page(request, digisig_entity_number):
 	#defaults
 	qcollection = int(digisig_entity_number)
 
-	collection = get_object_or_404(Collection, id_collection=qcollection)
+	collection = Collection.objects.get(id_collection=qcollection)
 
 	collection_dic = {}
 	collection_dic["id_collection"] = int(qcollection)
@@ -645,10 +645,7 @@ def collection_page(request, digisig_entity_number):
 		collection_dic["totalsealdescriptions"] = sealdescription_set.count()
 		collection_dic["totalseals"] = sealdescription_set.distinct('fk_seal').count()
 
-		regiondisplayset = Regiondisplay.objects.filter(
-			region__location__locationname__locationreference__fk_locationstatus=1).annotate(
-			numregions=Count(
-				'region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+
 
 	else:
 		collection_dic["collection_title"] = collection.collection_title
@@ -659,11 +656,7 @@ def collection_page(request, digisig_entity_number):
 		collection_dic["totalseals"] = sealdescription_set.distinct(
 			'fk_seal').count()
 
-		#data for region map 
-		regiondisplayset = Regiondisplay.objects.filter( 
-			region__location__locationname__locationreference__fk_locationstatus=1, 
-			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
-			).annotate(numregions=Count('region__location__locationname__locationreference'))
+
 
 		
 
@@ -712,7 +705,6 @@ def collection_page(request, digisig_entity_number):
 	data1 = [actors, date, fclass]
 	labels1 = ["actor", "date", "class"]
 
-
 	print("Compute Time3:", time()-starttime)
 	### generate the collection info data for chart 2 -- 'Percentage of seals per class',
 
@@ -750,6 +742,32 @@ def collection_page(request, digisig_entity_number):
 	print("Compute Time3d:", time()-starttime)
 	## data for region map
 	# make circles data -- defaults -- note that this code is very similar to the function mapdata2
+	#data for region map 
+
+
+	# regiondisplayset = Regiondisplay.objects.filter(
+	# 	region__location__locationname__locationreference__fk_locationstatus=1)
+
+
+	if (qcollection == 30000287):
+		regiondisplayset = Regiondisplay.objects.filter(
+			region__location__locationname__locationreference__fk_locationstatus=1).annotate(
+			numregions=Count(
+				'region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')).values(
+		'id_regiondisplay', 'id_regiondisplay', 'regiondisplay_label', 'numregions', 'regiondisplay_long', 'regiondisplay_lat') 
+	else:
+		regiondisplayset = Regiondisplay.objects.filter( 
+			region__location__locationname__locationreference__fk_locationstatus=1, 
+			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
+			).annotate(
+			numregions=Count(
+				'region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')).values(
+		'id_regiondisplay', 'id_regiondisplay', 'regiondisplay_label', 'numregions', 'regiondisplay_long', 'regiondisplay_lat')
+
+
+
+	print("Compute Time3e:", time()-starttime)
+
 	region_dict = mapgenerator3(regiondisplayset)
 
 	# ### generate the collection info data for chart 5 --  'Percentage of actors per class',

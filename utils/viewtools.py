@@ -16,17 +16,16 @@ def mapgenerator3(regiondisplayset):
 	location = {}
 	regionlist = []
 
+	count = 0
+
 	#for circles
 	for r in regiondisplayset:
-		if (r.numregions > 0):
-			# data4.append(r.numregions)
-			# labels4.append(r.regiondisplay_label)
-
-			value1 = r.id_regiondisplay
-			value2 = r.regiondisplay_label
-			value3 = r.numregions
-			value4 = r.regiondisplay_long
-			value5 = r.regiondisplay_lat
+		if (r['numregions'] > 0):
+			value1 = r['id_regiondisplay']
+			value2 = r['regiondisplay_label']
+			value3 = r['numregions']
+			value4 = r['regiondisplay_long']
+			value5 = r['regiondisplay_lat']
 
 			popupcontent = str(value2)
 			if value3 > 0:
@@ -88,30 +87,6 @@ def datedistribution(qcollection):
 				nineteenthc = nineteenthc + 1
 			elif date_origin >= 1900 and date_origin <= 1999 : 
 				twentiethc = twentiethc + 1
-
-
-	# for s in sealset:
-	# 	print (s)
-	# 	if s.date_origin >= 1000 and s.date_origin <= 1099 : 
-	# 		eleventhc = eleventhc + 1
-	# 	elif s.date_origin >= 1100 and s.date_origin <= 1199 : 
-	# 		twelfthc = twelfthc + 1
-	# 	elif s.date_origin >= 1200 and s.date_origin <= 1299 : 
-	# 		thirteenthc = thirteenthc + 1
-	# 	elif s.date_origin >= 1300 and s.date_origin <= 1399 : 
-	# 		fourteenthc = fourteenthc + 1
-	# 	elif s.date_origin >= 1400 and s.date_origin <= 1499 : 
-	# 		fifteenthc = fifteenthc + 1
-	# 	elif s.date_origin >= 1500 and s.date_origin <= 1599 : 
-	# 		sixteenthc = sixteenthc + 1
-	# 	elif s.date_origin >= 1600 and s.date_origin <= 1699 : 
-	# 		seventeenthc = seventeenthc + 1
-	# 	elif s.date_origin >= 1700 and s.date_origin <= 1799 : 
-	# 		eighteenthc = eighteenthc + 1
-	# 	elif s.date_origin >= 1800 and s.date_origin <= 1899 : 
-	# 		nineteenthc = nineteenthc + 1
-	# 	elif s.date_origin >= 1900 and s.date_origin <= 1999 : 
-	# 		twentiethc = twentiethc + 1
 
 		else:
 			pass
