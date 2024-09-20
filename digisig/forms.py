@@ -1,5 +1,5 @@
 from django import forms
-# from django.db.models import Count
+from django.db.models import Count
 # from django.db.models import Q
 
 from .models import * 
@@ -69,6 +69,10 @@ sealtype_options = [('', 'None')]
 period_options = [('', 'None')]
 timegroup_options2 = []
 
+
+for e in Collection.objects.order_by('collection_shorttitle'):
+	collections_options.append((e.id_collection, e.collection_shorttitle))
+
 for e in Sealtype.objects.order_by('sealtype_name'):
 	sealtype_options.append((e.id_sealtype, e.sealtype_name))
 
@@ -81,4 +85,43 @@ class CollectionForm(forms.Form):
 	mapchoice = forms.ChoiceField(choices=mapchoices, required=False)
 	timechoice = forms.ChoiceField(choices=timegroup_options2, required=False)
 	# classname = forms.ChoiceField(label='Digisig Class', choices=classname_options, required=False)
-	sealtypechoice = forms.ChoiceField(choices=sealtype_options, required=False)	
+	sealtypechoice = forms.ChoiceField(choices=sealtype_options, required=False)
+
+
+#Form for quering seal descriptions
+
+collections_options = [('30000287', 'All Collections')]
+
+for e in Collection.objects.order_by('collection_shorttitle').annotate(numdescriptions=Count('sealdescription')):
+
+	if (e.numdescriptions > 0):
+		collections_options.append((e.id_collection, e.collection_shorttitle))
+
+class SealdescriptionForm(forms.Form):
+	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
+	collection = forms.ChoiceField(choices=collections_options, required=False)
+	cataloguecode = forms.CharField(label='Entry', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: P281'}))
+	#cataloguedescription = forms.CharField(label='Description', max_length=100, required=False)
+	cataloguemotif = forms.CharField(label='Motif Description', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: lily'}))
+	cataloguename = forms.CharField(label='Person/Entity', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: John son of Robert'}))
+
+
+#Form for Actor search
+
+Choices = [('0', 'None'), ('1', 'Individual'), ('2', 'Corporate')]
+
+personclass_options = []
+personorder_options = []
+
+for e in Groupclass.objects.order_by('groupclass'):
+	personclass_options.append((e.fk_group_class, e.groupclass))
+
+for e in Grouporder.objects.order_by('grouporder'):
+	personorder_options.append((e.fk_group_order, e.grouporder))
+
+class PeopleForm(forms.Form):
+	name = forms.CharField(label='id_name', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: John'}))
+	group = forms.ChoiceField(choices=Choices, required=False)
+	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
+	personclass = forms.ChoiceField(choices=personclass_options, required=False)
+	personorder = forms.ChoiceField(choices=personorder_options, required=False) 

@@ -6,7 +6,6 @@ from django.core.paginator import Paginator
 from time import time
 
 
-
 def mapgenerator3(regiondisplayset):
 	## data for region map
 	# make circles data -- defaults -- note that this code is very similar to the function mapdata2
@@ -39,9 +38,6 @@ def mapgenerator3(regiondisplayset):
 	mapdic["features"] = regionlist
 
 	return(mapdic)
-
-
-
 
 
 ### generate the collection info data for chart-- 'Percentage of seals by class',
@@ -404,13 +400,13 @@ def sealsearchfilter(manifestation_object, form):
 
 	return(manifestation_object, qpagination)
 
-def sealsearchpagination(manifestation_object, qpagination):
+def defaultpagination(pagination_object, qpagination):
 
-	manifestation_object = Paginator(manifestation_object, 10).page(qpagination)
-	totalrows = manifestation_object.paginator.count
-	totaldisplay = str(manifestation_object.start_index()) + "-" + str(manifestation_object.end_index())
+	pagination_object = Paginator(pagination_object, 10).page(qpagination)
+	totalrows = pagination_object.paginator.count
+	totaldisplay = str(pagination_object.start_index()) + "-" + str(pagination_object.end_index())
 
-	return(manifestation_object, totalrows, totaldisplay, qpagination)
+	return(pagination_object, totalrows, totaldisplay, qpagination)
 
 # information for presenting a seal manifestation {{should be defunct?}}
 def sealsearchmanifestationmetadata(manifestation_object):

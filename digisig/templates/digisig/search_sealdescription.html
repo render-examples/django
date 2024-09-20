@@ -87,7 +87,7 @@
 				</tr>
 				<tr>
 					<th>Reference</th>
-					<td><a href="{% url 'entity' digisig_entity_number=sealdescription.fk_collection %}">{{sealdescription.collection_shorttitle}}</a>, <a href="{% url 'entity' digisig_entity_number=sealdescription.id_sealdescription %}">{{sealdescription.sealdescription_identifier}}</a>
+					<td><a href="{% url 'entity' digisig_entity_number=sealdescription.fk_collection.id_collection %}">{{sealdescription.fk_collection.collection_shorttitle}}</a>, <a href="{% url 'entity' digisig_entity_number=sealdescription.id_sealdescription %}">{{sealdescription.sealdescription_identifier}}</a>
 					{% if sealdescription.catalogue_pagenumber != null %}
 					, p.{{sealdescription.catalogue_pagenumber}}
 					{% endif %}
@@ -142,7 +142,7 @@
 			{% endif %}
 				<tr>
 					<th class="finalrow">Description of</th>
-					<td><a href="{% url 'entity' digisig_entity_number=sealdescription.fk_seal %}">Seal details</a></td>
+					<td><a href="{% url 'entity' digisig_entity_number=sealdescription.fk_seal.id_seal %}">Seal details</a></td>
 				</tr>
 			</table>
 		</div>

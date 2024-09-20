@@ -56,12 +56,12 @@ def search(request, searchtype):
 	if searchtype == "actors":
 		pagetitle = 'title'
 
-		individual_object = Digisigindividualview.objects.all().order_by('group_name', 'descriptor_name')
+		individual_object = Individual.objects.all().order_by('fk_group__group_name', 'fk_descriptor_name')
 
 		if request.method == "POST":
 			form = PeopleForm(request.POST)
 			if form.is_valid():
-				challengeurl(request, searchtype, form)
+				# challengeurl(request, searchtype, form)
 				qname = form.cleaned_data['name']   
 				qpagination = form.cleaned_data['pagination']
 				qgroup = form.cleaned_data['group']
@@ -94,26 +94,11 @@ def search(request, searchtype):
 			form = PeopleForm()
 			qpagination = 1
 
-
-	# preparing the data for individual_object
-		qpaginationend = int(qpagination) * 10
-		qpaginationstart = int(qpaginationend) -9 
-		totalrows = len(individual_object)
-
-		# if the dataset is less than the page limit
-		if qpaginationend > totalrows:
-			qpaginationend = totalrows
-
-		if totalrows > 1:
-			if qpaginationend < 10:
-				print(totalrows)
-			else:
-				individual_object = individual_object[qpaginationstart:qpaginationend]
-		totaldisplay = str(qpaginationstart) + " - " + str(qpaginationend)
+		individual_object, totalrows, totaldisplay, qpagination = defaultpagination(individual_object, qpagination) 
 
 		pagecountercurrent = qpagination
-		pagecounternext = int(qpagination)+1
-		pagecounternextnext = int(qpagination)+2
+		pagecounternext = qpagination + 1
+		pagecounternextnext = qpagination +2		
 
 	# this code prepares the list of links to associated seals for each individual
 		sealindividual = []
@@ -213,14 +198,14 @@ def search(request, searchtype):
 
 			if form.is_valid(): 
 				manifestation_object, qpagination = sealsearchfilter(manifestation_object, form)
-				manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)
+				manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
 
 			else:
-				manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)			
+				manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)			
 
 		else:
 			form = ManifestationForm()
-			manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)			
+			manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)			
 
 		pagecountercurrent = qpagination 
 		pagecounternext = qpagination + 1
@@ -260,26 +245,22 @@ def search(request, searchtype):
 		print("Compute Time:", time()-starttime)
 		return HttpResponse(template.render(context, request))
 
-
-
 ###### Search Seal Descriptions ##########
 
 	if searchtype == "sealdescriptions":
 
-		sealdescription_object = Digisigsealdescriptionview.objects.all()
+		sealdescription_object = Sealdescription.objects.all().select_related('fk_collection').select_related('fk_seal')
 		pagetitle = 'Seal Descriptions'
 
 		if request.method == 'POST':
 			form = SealdescriptionForm(request.POST)
 			if form.is_valid():
-				challengeurl(request, searchtype, form)
+				# challengeurl(request, searchtype, form)
 				qcollection = form.cleaned_data['collection']   
 				qcataloguecode = form.cleaned_data['cataloguecode']
 				qcataloguemotif = form.cleaned_data['cataloguemotif']
 				qcataloguename = form.cleaned_data['cataloguename']
 				qpagination = form.cleaned_data['pagination']
-
-				rows = sealdescription_object.count()
 
 				if qcollection.isdigit():
 					if int(qcollection) > 0:
@@ -304,13 +285,20 @@ def search(request, searchtype):
 
 				form = SealdescriptionForm(request.POST)
 
-
-
 		else:
 			form = SealdescriptionForm()
 			qpagination = 1
 
-		pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, sealdescription_object = paginatorJM(qpagination, sealdescription_object)
+		sealdescription_object, totalrows, totaldisplay, qpagination = defaultpagination(sealdescription_object, qpagination) 
+
+		# Paginator(sealdescription_object, 10).page(qpagination)
+		# totalrows = sealdescription_object.paginator.count
+		# totaldisplay = str(sealdescription_object.start_index()) + "-" + str(sealdescription_object.end_index())
+		pagecountercurrent = qpagination
+		pagecounternext = qpagination + 1
+		pagecounternextnext = qpagination +2		
+
+		# pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, sealdescription_object = paginatorJM(qpagination, sealdescription_object)
 
 		context = {
 			'pagetitle': pagetitle,
@@ -403,6 +391,26 @@ def search(request, searchtype):
 def information(request, infotype):
 
 	print (infotype)
+
+########################### Collections #########################
+	if infotype == "collections":
+
+		#default
+		digisig_entity_number= 30000287
+
+		#adjust values if form submitted
+		if request.method == 'POST':
+			form = CollectionForm(request.POST)
+			
+			if form.is_valid():
+				collectionstr = form.cleaned_data['collection']
+				#make sure values are not empty then try and convert to ints
+				if len(collectionstr) > 0:
+					digisig_entity_number = int(collectionstr)
+
+		targetphrase = "/page/collection/" + str(digisig_entity_number)
+		return redirect(targetphrase)
+
 
 ############ Terminology ###############
 
@@ -645,8 +653,6 @@ def collection_page(request, digisig_entity_number):
 		collection_dic["totalsealdescriptions"] = sealdescription_set.count()
 		collection_dic["totalseals"] = sealdescription_set.distinct('fk_seal').count()
 
-
-
 	else:
 		collection_dic["collection_title"] = collection.collection_title
 		pagetitle = collection.collection_title
@@ -655,10 +661,6 @@ def collection_page(request, digisig_entity_number):
 			'sealdescription_identifier').count()
 		collection_dic["totalseals"] = sealdescription_set.distinct(
 			'fk_seal').count()
-
-
-
-		
 
 	print("Compute Time2:", time()-starttime)
 	### generate the collection info data for chart 1
@@ -679,7 +681,6 @@ def collection_page(request, digisig_entity_number):
 	# placecount = Locationname.objects.exclude(
 	# 	locationreference__fk_locationstatus=2).filter(
 	# 	locationreference__fk_event__part__fk_part__fk_support__gt=1).count()
-
 
 	# print (placecount)
 
@@ -726,7 +727,6 @@ def collection_page(request, digisig_entity_number):
 			data2.append((r.num_cases / totalcases) * 100)
 			labels2.append(r.term_name)
 
-
 	print("Compute Time3a:", time()-starttime)
 	### generate the collection info data for chart 3  -- 'Percentage of seals by period',
 
@@ -744,11 +744,6 @@ def collection_page(request, digisig_entity_number):
 	# make circles data -- defaults -- note that this code is very similar to the function mapdata2
 	#data for region map 
 
-
-	# regiondisplayset = Regiondisplay.objects.filter(
-	# 	region__location__locationname__locationreference__fk_locationstatus=1)
-
-
 	if (qcollection == 30000287):
 		regiondisplayset = Regiondisplay.objects.filter(
 			region__location__locationname__locationreference__fk_locationstatus=1).annotate(
@@ -763,8 +758,6 @@ def collection_page(request, digisig_entity_number):
 			numregions=Count(
 				'region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')).values(
 		'id_regiondisplay', 'id_regiondisplay', 'regiondisplay_label', 'numregions', 'regiondisplay_long', 'regiondisplay_lat')
-
-
 
 	print("Compute Time3e:", time()-starttime)
 
@@ -820,7 +813,6 @@ def collection_page(request, digisig_entity_number):
 		
 	template = loader.get_template('digisig/collection.html') 
 
-	print (collection_dic)
 	print("Compute Time5:", time()-starttime)                  
 	return HttpResponse(template.render(context, request))
 
