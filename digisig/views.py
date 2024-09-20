@@ -652,7 +652,7 @@ def collection_page(request, digisig_entity_number):
 		collection_dic["totalsealdescriptions"] = sealdescription_set.distinct(
 			'sealdescription_identifier').count()
 		collection_dic["totalseals"] = sealdescription_set.distinct(
-			'fk_seals').count()
+			'fk_seal').count()
 
 	print("Compute Time2:", time()-starttime)
 	### generate the collection info data for chart 1
