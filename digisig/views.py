@@ -56,7 +56,11 @@ def search(request, searchtype):
 	if searchtype == "actors":
 		pagetitle = 'title'
 
-		individual_object = Individual.objects.all().order_by('fk_group__group_name', 'fk_descriptor_name')
+		individual_object = individualsearch(request)
+		individual_object = individual_object.all().order_by('fk_group__group_name', 'fk_descriptor_name')
+		individual_object = individual_object.annotate(fullname=(('fk_group') + ('fk_descriptor_title') + ('fk_descriptor_name') + ('fk_descriptor_prefix1') +('fk_descriptor_descriptor1')
+			+ ('fk_separator_1') + ('fk_descriptor_prefix2') + ('fk_descriptor_descriptor2') + ('fk_descriptor_prefix3') + ('fk_descriptor_descriptor3') + ('fk_group__fk_group_order')
+			+ ('fk_group__fk_group_class')))
 
 		if request.method == "POST":
 			form = PeopleForm(request.POST)
@@ -100,16 +104,24 @@ def search(request, searchtype):
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2		
 
-	# this code prepares the list of links to associated seals for each individual
-		sealindividual = []
-		for e in individual_object:
-			testvalue = e.id_individual
-			testseal = Seal.objects.filter(
-				fk_individual_realizer=testvalue)
 
-			for f in testseal:
-				current_id_seal = f.id_seal
-				sealindividual.append((testvalue, current_id_seal))
+		print (individual_object)
+	# this code prepares the list of links to associated seals for each individual
+		# individualtestlist = individual_object.values_list("id_individual", flat=True)
+		# Seal
+
+
+
+
+		# sealindividual = []
+		# for e in individual_object:
+		# 	testvalue = e.id_individual
+		# 	testseal = Seal.objects.filter(
+		# 		fk_individual_realizer=testvalue)
+
+		# 	for f in testseal:
+		# 		current_id_seal = f.id_seal
+		# 		sealindividual.append((testvalue, current_id_seal))
 
 		context = {
 			'pagetitle': pagetitle,
@@ -249,7 +261,7 @@ def search(request, searchtype):
 
 	if searchtype == "sealdescriptions":
 
-		sealdescription_object = Sealdescription.objects.all().select_related('fk_collection').select_related('fk_seal')
+		sealdescription_object = Sealdescription.objects.all().select_related('fk_collection').select_related('fk_seal').order_by('id_sealdescription')
 		pagetitle = 'Seal Descriptions'
 
 		if request.method == 'POST':
@@ -290,15 +302,9 @@ def search(request, searchtype):
 			qpagination = 1
 
 		sealdescription_object, totalrows, totaldisplay, qpagination = defaultpagination(sealdescription_object, qpagination) 
-
-		# Paginator(sealdescription_object, 10).page(qpagination)
-		# totalrows = sealdescription_object.paginator.count
-		# totaldisplay = str(sealdescription_object.start_index()) + "-" + str(sealdescription_object.end_index())
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2		
-
-		# pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, sealdescription_object = paginatorJM(qpagination, sealdescription_object)
 
 		context = {
 			'pagetitle': pagetitle,
@@ -573,6 +579,8 @@ def actor_page(request, digisig_entity_number):
 	starttime = time()
 
 	individual_object = individualsearch(digisig_entity_number)
+
+	individuaL_object = individual_object.get(id_individual=digisig_entity_number)
 
 	pagetitle= namecompiler(individual_object)
 
