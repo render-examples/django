@@ -144,7 +144,7 @@ def collectiondata(collectionid, sealcount):
 
 
 
-def individualsearch(digisig_entity_number):
+def individualsearch():
 
 	individual_object = Individual.objects.select_related(
 	'fk_group').select_related(
@@ -158,7 +158,7 @@ def individualsearch(digisig_entity_number):
 	'fk_descriptor_prefix3').select_related(
 	'fk_descriptor_descriptor3').select_related(
 	'fk_group__fk_group_order').select_related(
-	'fk_group__fk_group_class').get(id_individual=digisig_entity_number)
+	'fk_group__fk_group_class')
 
 	return(individual_object)
 

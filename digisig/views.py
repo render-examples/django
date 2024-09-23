@@ -9,6 +9,7 @@ from django.db.models import Prefetch
 from django.db.models import Q
 from django.db.models import Count
 from django.db.models import Sum
+from django.db.models.functions import Concat
 
 from .models import *
 from .forms import * 
@@ -56,11 +57,8 @@ def search(request, searchtype):
 	if searchtype == "actors":
 		pagetitle = 'title'
 
-		individual_object = individualsearch(request)
+		individual_object = individualsearch()
 		individual_object = individual_object.all().order_by('fk_group__group_name', 'fk_descriptor_name')
-		individual_object = individual_object.annotate(fullname=(('fk_group') + ('fk_descriptor_title') + ('fk_descriptor_name') + ('fk_descriptor_prefix1') +('fk_descriptor_descriptor1')
-			+ ('fk_separator_1') + ('fk_descriptor_prefix2') + ('fk_descriptor_descriptor2') + ('fk_descriptor_prefix3') + ('fk_descriptor_descriptor3') + ('fk_group__fk_group_order')
-			+ ('fk_group__fk_group_class')))
 
 		if request.method == "POST":
 			form = PeopleForm(request.POST)
@@ -105,7 +103,13 @@ def search(request, searchtype):
 		pagecounternextnext = qpagination +2		
 
 
+
+		individual_object = individual_object.annotate(fullname=Concat('fk_group','fk_descriptor_title','fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1',
+			,'fk_separator_1','fk_descriptor_prefix2','fk_descriptor_descriptor2','fk_descriptor_prefix3','fk_descriptor_descriptor3'))
+
 		print (individual_object)
+
+
 	# this code prepares the list of links to associated seals for each individual
 		# individualtestlist = individual_object.values_list("id_individual", flat=True)
 		# Seal
