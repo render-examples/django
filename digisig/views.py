@@ -10,6 +10,8 @@ from django.db.models import Q
 from django.db.models import Count
 from django.db.models import Sum
 from django.db.models.functions import Concat
+from django.db.models import CharField
+
 
 from .models import *
 from .forms import * 
@@ -58,8 +60,7 @@ def search(request, searchtype):
 		pagetitle = 'title'
 
 		individual_object = individualsearch()
-		individual_object = individual_object.all().order_by('fk_group__group_name', 'fk_descriptor_name')
-		individual_object = individual_object.annotate(fullname=Concat('fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1'))
+		individual_object = individual_object.order_by('fk_group__group_name', 'fk_descriptor_name')
 
 		if request.method == "POST":
 			form = PeopleForm(request.POST)
@@ -104,21 +105,23 @@ def search(request, searchtype):
 		pagecounternextnext = qpagination +2		
 
 
+		individual_set = {}
+
+		for i in individual_object:
+			individual_info = {}
+			individual_info['actor_name'] = namecompiler(i)
+			individual_info['id_individual'] = i.id_individual
+
+			individual_set[i.id_individual] = individual_info
 
 		# individual_object = individual_object.annotate(fullname=Concat('fk_group','fk_descriptor_title','fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1',
 		# 	,'fk_separator_1','fk_descriptor_prefix2','fk_descriptor_descriptor2','fk_descriptor_prefix3','fk_descriptor_descriptor3'))
 
-
-
-		print (individual_object)
-
+		print (individual_set)
 
 	# this code prepares the list of links to associated seals for each individual
 		# individualtestlist = individual_object.values_list("id_individual", flat=True)
 		# Seal
-
-
-
 
 		# sealindividual = []
 		# for e in individual_object:
@@ -132,7 +135,7 @@ def search(request, searchtype):
 
 		context = {
 			'pagetitle': pagetitle,
-			'individual_object': individual_object,
+			'individual_set': individual_set,
 			#'sealindividual': sealindividual,
 			'totalrows': totalrows,
 			'totaldisplay': totaldisplay,
@@ -585,9 +588,8 @@ def actor_page(request, digisig_entity_number):
 
 	starttime = time()
 
-	individual_object = individualsearch(digisig_entity_number)
-
-	individuaL_object = individual_object.get(id_individual=digisig_entity_number)
+	individual_object = individualsearch()
+	individual_object = individual_object.get(id_individual=digisig_entity_number)
 
 	pagetitle= namecompiler(individual_object)
 
@@ -599,7 +601,7 @@ def actor_page(request, digisig_entity_number):
 
 	#hack to deal with cases where there are too many seals for the form to handle
 	qpagination = 1
-	manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)
+	manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
 
 	manifestation_set={}
 

@@ -74,25 +74,12 @@
 			</div>
 		</div>
 	
-
 		<div class="searchresults">
-		{% for individual in individual_object %}
+		{% for actor, value in individual_set.items %}
 			<div>
-					{% if individual.id_individual != 10000019 %}<a href="{% url 'entity' digisig_entity_number=individual.id_individual %}">{% endif %}
-						{% if individual.group_name != null %}{{individual.group_name}}{% endif %}
-						{% if individual.groupclass != null %} ({{individual.groupclass}}){% endif %}
-						{% if individual.grouporder != null %}: {{individual.grouporder}}{% endif %}
-						{% if individual.descriptor_title != null %}{{individual.descriptor_title}}{% endif %}
-						{% if individual.descriptor_name != null %}{{individual.descriptor_name}}{% endif %}
-						{% if individual.prefix1 != null %}{{individual.prefix1}}{% endif %}
-						{% if individual.descriptor1 != null %}{{individual.descriptor1}}{% endif %}
-						{% if individual.prefix2 != null %}{{individual.prefix2}}{% endif %}
-						{% if individual.descriptor2 != null %}{{individual.descriptor2}}{% endif %}
-						{% if individual.prefix3 != null %}{{individual.prefix3}}{% endif %}
-						{% if individual.descriptor3 != null %}{{individual.descriptor3}}{% endif %}
-					{% if person_object.id_individual != 10000019 %}</a>{% endif %}
-		</div>
-		<div></div>
+				<a href="{% url 'entity' digisig_entity_number=value.id_individual %}">{{value.actor_name}}</a>
+			</div>
+			<div></div>
 		{% endfor %}
 
 		<div>
