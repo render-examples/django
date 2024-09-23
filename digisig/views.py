@@ -59,6 +59,7 @@ def search(request, searchtype):
 
 		individual_object = individualsearch()
 		individual_object = individual_object.all().order_by('fk_group__group_name', 'fk_descriptor_name')
+		individual_object = individual_object.annotate(fullname=Concat('fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1'))
 
 		if request.method == "POST":
 			form = PeopleForm(request.POST)
@@ -104,8 +105,10 @@ def search(request, searchtype):
 
 
 
-		individual_object = individual_object.annotate(fullname=Concat('fk_group','fk_descriptor_title','fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1',
-			,'fk_separator_1','fk_descriptor_prefix2','fk_descriptor_descriptor2','fk_descriptor_prefix3','fk_descriptor_descriptor3'))
+		# individual_object = individual_object.annotate(fullname=Concat('fk_group','fk_descriptor_title','fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1',
+		# 	,'fk_separator_1','fk_descriptor_prefix2','fk_descriptor_descriptor2','fk_descriptor_prefix3','fk_descriptor_descriptor3'))
+
+
 
 		print (individual_object)
 
@@ -130,7 +133,7 @@ def search(request, searchtype):
 		context = {
 			'pagetitle': pagetitle,
 			'individual_object': individual_object,
-			'sealindividual': sealindividual,
+			#'sealindividual': sealindividual,
 			'totalrows': totalrows,
 			'totaldisplay': totaldisplay,
 			'form': form,
