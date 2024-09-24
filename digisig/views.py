@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.db.models import Sum
 # from django.db.models.functions import Concat
 # from django.db.models import CharField
-
+from django.core import serializers
 
 from .models import *
 from .forms import * 
@@ -160,7 +160,7 @@ def search(request, searchtype):
 		series = 0
 		shelfmark = ""
 		searchphrase = ""
-		pagination = 1
+		qpagination = 1
 
 		if request.method == "POST":
 			form = ItemForm(request.POST)
@@ -171,7 +171,7 @@ def search(request, searchtype):
 				if form.cleaned_data['series'].isdigit(): series = int(form.cleaned_data['series'])
 				if len(form.cleaned_data['shelfmark']) > 0: shelfmark = form.cleaned_data['shelfmark']
 				if len(form.cleaned_data['searchphrase']) > 0: searchphrase = form.cleaned_data['searchphrase']
-				pagination = int(form.cleaned_data['pagination'])
+				qpagination = int(form.cleaned_data['pagination'])
 
 		else:
 			form = ItemForm()
@@ -183,8 +183,60 @@ def search(request, searchtype):
 		# code prepares the array of series and repositories to pass to the frontend
 		series_object= seriesset()
 
-		itemset, Repositorycases, Seriescases, Shelfmarkcases, Phrasecases, pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows \
-		= itemsearch(repository, series, shelfmark, searchphrase, pagination)
+		# itemset, Repositorycases, Seriescases, Shelfmarkcases, Phrasecases, pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows \
+		# = itemsearch(repository, series, shelfmark, searchphrase, pagination)
+
+		itemset = {}
+		Repositorycases = 0
+		Seriescases = 0
+		Shelfmarkcases = 0
+		Phrasecases = 0
+
+		part_object = Part.objects.all().order_by(
+			"fk_item__fk_repository", "fk_item__fk_series", "fk_item__classmark_number3", "fk_item__classmark_number2", "fk_item__classmark_number1").select_related(
+			'fk_item__fk_repository')
+
+		# take the series in preference to the repository
+
+		if series > 0:
+			part_object = part_object.filter(fk_item__fk_series=series)
+
+		elif repository > 0:
+			part_object = part_object.filter(fk_item__fk_repository=repository)
+
+		else:
+			print ("No repository or series specified")
+
+		if len(shelfmark) > 0:
+			part_object = part_object.filter(fk_item__shelfmark__icontains=shelfmark)
+
+		if len(searchphrase) > 0:
+			part_object = part_object.filter(part_description__icontains=searchphrase)
+
+		part_object, totalrows, totaldisplay, qpagination = defaultpagination(part_object, qpagination)
+		pagecountercurrent = qpagination 
+		pagecounternext = qpagination + 1
+		pagecounternextnext = qpagination +2
+
+		partset = []
+		for p in part_object.object_list:
+			partset.append(p.id_part)
+
+		representation_part = Representation.objects.filter(fk_digisig__in=partset).select_related('fk_connection')
+
+		for i in part_object:
+			part_dic = {}
+			part_dic["id_item"] = i.fk_item.id_item
+			part_dic["shelfmark"] = i.fk_item.shelfmark
+			part_dic["repository"] = i.fk_item.fk_repository.repository_fulltitle
+			itemset[i.id_part] = part_dic
+
+		for r in representation_part:
+			connection = r.fk_connection
+			itemset[r.fk_digisig]["connection"] = connection.thumb
+			itemset[r.fk_digisig]["medium"] = r.representation_filename
+			itemset[r.fk_digisig]["thumb"] = r.representation_thumbnail_hash
+			itemset[r.fk_digisig]["id_representation"] = r.id_representation 
 
 		context = {
 			'pagetitle': pagetitle,
@@ -192,11 +244,11 @@ def search(request, searchtype):
 			'totalrows': totalrows,
 			'totaldisplay': totaldisplay,
 			'form': form,
-			'Repositorycases': Repositorycases,
-			'Seriescases': Seriescases,
-			'Shelfmarkcases': Shelfmarkcases,
+			# 'Repositorycases': Repositorycases,
+			# 'Seriescases': Seriescases,
+			# 'Shelfmarkcases': Shelfmarkcases,
 			'series_object': series_object,
-			'Phrasecases': Phrasecases,
+			# 'Phrasecases': Phrasecases,
 			'pagecountercurrent': pagecountercurrent,
 			'pagecounternext': pagecounternext,
 			'pagecounternextnext': pagecounternextnext,
@@ -349,7 +401,6 @@ def search(request, searchtype):
 
 			form = PlaceForm(request.POST)
 			if form.is_valid():
-				challengeurl(request, searchtype, form)
 				qregion = form.cleaned_data['region']
 				qcounty = form.cleaned_data['county']   
 				qpagination = form.cleaned_data['pagination']
@@ -375,7 +426,11 @@ def search(request, searchtype):
 			qpagination = 1
 
 		placeset = placeset.annotate(count=Count('locationname__locationreference'))
-		pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, placeset = paginatorJM(qpagination, placeset)
+
+		placeset, totalrows, totaldisplay, qpagination = defaultpagination(placeset, qpagination) 
+		pagecountercurrent = qpagination
+		pagecounternext = qpagination + 1
+		pagecounternextnext = qpagination +2		
 
 		if len(placeset) > 0:
 			place_dict, center_long, center_lat = mapgenerator2(placeset)

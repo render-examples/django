@@ -2,88 +2,60 @@ from digisig.models import *
 from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
 from django.core.paginator import Paginator
+from django.core import serializers
 
+import statistics
 from time import time
 
 
 
+def mapgenerator2(location_object):
+	center_lat = []
+	center_long = []
+
+	mapdic = {"type": "FeatureCollection"}
+	properties = {}
+	geometry = {}
+	location = {}
+	placelist = []
+	lat_values = []
+	long_values = []
+
+	for loc in location_object:
+		value1 = loc.id_location
+		value2 = loc.location
+		value3 = loc.count
+		value4 = loc.longitude
+		value5 = loc.latitude
+
+		if type(loc.longitude) == int or type(loc.longitude) == float:
+			lat_values.append(loc.latitude)
+		if type(loc.latitude) == int or type(loc.latitude) == float:
+			long_values.append(loc.longitude)
+
+		popupcontent = '<a href="entity/' + str(value1) + '">' + str(value2) + '</a>'
+
+		if value3 > 0:
+			popupcontent = popupcontent + ' ' + str(value3)
+
+		properties = {"id_location": value1, "location": value2, "count": value3, "popupContent": popupcontent}
+		geometry = {"type": "Point", "coordinates": [value4, value5]}
+		location = {"type": "Feature", "properties": properties, "geometry": geometry}
+		placelist.append(location)
+
+	mapdic["features"] = placelist
+
+	center_long = statistics.median(long_values)
+	center_lat = statistics.median(lat_values)
+
+	return(mapdic, center_long, center_lat)
+
+
 
 def seriesset():
-	# code prepares the array of series and repositories to pass to the frontend
-	# series_set = Series.objects.all()
-	# series_object = []
-	# for g in series_set:
-	# 	series_object.append((g.pk_series, g.fk_repository))
-
 	series_object = serializers.serialize('json', Series.objects.all(), fields=('pk_series','fk_repository'))
 
 	return (series_object)
-
-
-def itemsearch(repository, series, shelfmark, searchphrase, qpagination):
-
-	itemset = {}
-	Repositorycases = 0
-	Seriescases = 0
-	Shelfmarkcases = 0
-	Phrasecases = 0
-
-	item_object = Item.objects.all().order_by("fk_repository", "fk_series", "classmark_number3", "classmark_number2", "classmark_number1")
-
-
-	# take the series in preference to the repository
-
-	if series > 0:
-		item_object = item_object.filter(fk_series=series)
-		Seriescases = len(item_object)
-
-	elif repository > 0:
-		item_object = item_object.filter(fk_repository=repository)
-		Repositorycases = len(item_object)
-
-	else:
-		print ("No repository or series specified")
-
-	if len(shelfmark) > 0:
-		item_object = item_object.filter(shelfmark__icontains=shelfmark)
-		Shelfmarkcases = len(item_object)
-
-	if len(searchphrase) > 0:
-		item_object = item_object.filter(part__part_description__icontains=searchphrase)
-		Phrasecases = len(item_object)
-
-	item_object, totalrows, totaldisplay, qpagination = defaultpagination(item_object, qpagination)
-	pagecountercurrent = qpagination 
-	pagecounternext = qpagination + 1
-	pagecounternextnext = qpagination +2
-
-	# pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, item_object = paginatorJM(pagination, item_object)
-
-	for i in item_object:
-		item_dic = {}
-		item_dic["id_item"] = i.id_item
-		item_dic["shelfmark"] = i.shelfmark
-		item_dic["repository"] = i.fk_repository.repository_fulltitle
-
-		try:
-			partset = Part.objects.filter(fk_item=i.id_item).values("id_part")
-			representation_part = Representation.objects.filter(fk_digisig__in=partset)[:1]
-
-			for r in representation_part:
-				connection = r.fk_connection
-				item_dic["connection"] = connection.thumb
-				item_dic["medium"] = r.representation_filename
-				item_dic["thumb"] = r.representation_thumbnail_hash
-				item_dic["id_representation"] = r.id_representation 
-
-		except:
-			print("No image available")
-
-		itemset[i.id_item] = item_dic
-
-	return (itemset, Repositorycases, Seriescases, Shelfmarkcases, Phrasecases, pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows)
-
-
 
 
 def mapgenerator3(regiondisplayset):
