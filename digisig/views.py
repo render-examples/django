@@ -1076,7 +1076,7 @@ def place_page(request, digisig_entity_number):
 
 	#note that is should pick up cases where manifestations are associated with secondary places?
 	manifestation_object = manifestation_object.filter(
-			fk_support__fk_part__fk_event__locationreference__fk_locationname__fk_location__id_location=digisig_entity_number).distinct()
+			fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location=digisig_entity_number).distinct()
 
 	qpagination = 1
 
@@ -1092,7 +1092,7 @@ def place_page(request, digisig_entity_number):
 		form = PageCycleForm()
 
 	## these pagecounters are going to break on pages that are small lists
-	manifestation_object, totalrows, totaldisplay, qpagination = sealsearchpagination(manifestation_object, qpagination)
+	manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
 	pagecountercurrent = qpagination 
 	pagecounternext = qpagination + 1
 	pagecounternextnext = qpagination +2

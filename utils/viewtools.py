@@ -9,6 +9,42 @@ from time import time
 
 
 
+def mapgenerator(location_object, count_in):
+	#Establishing the Map data
+	longitude=""
+	latitude=""
+	location=""
+	location_dict = ""
+	additionalformat = ""
+
+	mapdic = {"type": "FeatureCollection"}
+	properties = {}
+	geometry = {}
+	location = {}
+	placelist = []
+
+	value1 = location_object.id_location
+	value2 = location_object.location
+	value3 = count_in
+	value4 = location_object.longitude
+	value5 = location_object.latitude
+
+	popupcontent = '<a href="entity/' + str(value1) + '">' + str(value2) + '</a>'
+
+	if count_in > 0:
+		popupcontent = popupcontent + ' ' + str(value3)
+
+	properties = {"id_location": value1, "location": value2, "count": value3, "popupContent": popupcontent}
+	geometry = {"type": "Point", "coordinates": [value4, value5]}
+	location = {"type": "Feature", "properties": properties, "geometry": geometry}
+	placelist.append(location)
+
+	mapdic["features"] = placelist
+
+	return(mapdic)
+
+
+
 def mapgenerator2(location_object):
 	center_lat = []
 	center_long = []

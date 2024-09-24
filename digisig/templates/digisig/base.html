@@ -92,7 +92,31 @@
 	        <a href="{% url 'search' searchtype='items' %}">Items</a>
 	    </div>
 	  </div> 
-
+    <div class="subnav">
+      <button class="subnavbtn">Analyze <i class="fas fa-caret-down"></i></button>
+      <div class="subnav-content">
+          <a href="{% url 'analyze' analysistype='dates' %}">Dates</a>
+          <a href="{% url 'analyze' analysistype='time' %}">Time</a>
+      </div>
+    </div> 
+    <div class="subnav">
+      <button class="subnavbtn">Information <i class="fas fa-caret-down"></i></button>
+      <div class="subnav-content">
+          <a href="{% url 'information' infotype='help' %}">Help</a>
+          <a href="{% url 'information' infotype='terminology' %}">Terminology</a>
+          <a href="{% url 'information' infotype='collections' %}">Collections</a>
+          <a href="{% url 'information' infotype='machinelearning' %}">Matrices</a>
+      </div>
+    </div>
+    <div class="subnav">
+      <button class="subnavbtn">About <i class="fas fa-caret-down"></i></button>
+      <div class="subnav-content">
+          <a href="{% url 'about' %}">About</a>
+          <a href="{% url 'information' infotype='contributors' %}">Contributors</a>
+          <a href="{% url 'information' infotype='changelog' %}">Change Log</a>
+          <a href="{% url 'information' infotype='contact' %}">Contact</a>
+      </div>
+    </div>
   </div>  
 </nav>
 
