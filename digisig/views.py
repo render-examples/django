@@ -9,8 +9,8 @@ from django.db.models import Prefetch
 from django.db.models import Q
 from django.db.models import Count
 from django.db.models import Sum
-from django.db.models.functions import Concat
-from django.db.models import CharField
+# from django.db.models.functions import Concat
+# from django.db.models import CharField
 
 
 from .models import *
@@ -117,7 +117,7 @@ def search(request, searchtype):
 		# individual_object = individual_object.annotate(fullname=Concat('fk_group','fk_descriptor_title','fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1',
 		# 	,'fk_separator_1','fk_descriptor_prefix2','fk_descriptor_descriptor2','fk_descriptor_prefix3','fk_descriptor_descriptor3'))
 
-		print (individual_set)
+		# print (individual_set)
 
 	# this code prepares the list of links to associated seals for each individual
 		# individualtestlist = individual_object.values_list("id_individual", flat=True)
@@ -166,7 +166,7 @@ def search(request, searchtype):
 			form = ItemForm(request.POST)
 
 			if form.is_valid():
-				challengeurl(request, searchtype, form)
+				# challengeurl(request, searchtype, form)
 				if form.cleaned_data['repository'].isdigit(): repository = int(form.cleaned_data['repository']) 
 				if form.cleaned_data['series'].isdigit(): series = int(form.cleaned_data['series'])
 				if len(form.cleaned_data['shelfmark']) > 0: shelfmark = form.cleaned_data['shelfmark']

@@ -7,7 +7,20 @@ from time import time
 
 
 
-def itemsearch(repository, series, shelfmark, searchphrase, pagination):
+
+def seriesset():
+	# code prepares the array of series and repositories to pass to the frontend
+	# series_set = Series.objects.all()
+	# series_object = []
+	# for g in series_set:
+	# 	series_object.append((g.pk_series, g.fk_repository))
+
+	series_object = serializers.serialize('json', Series.objects.all(), fields=('pk_series','fk_repository'))
+
+	return (series_object)
+
+
+def itemsearch(repository, series, shelfmark, searchphrase, qpagination):
 
 	itemset = {}
 	Repositorycases = 0
@@ -39,7 +52,12 @@ def itemsearch(repository, series, shelfmark, searchphrase, pagination):
 		item_object = item_object.filter(part__part_description__icontains=searchphrase)
 		Phrasecases = len(item_object)
 
-	pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, item_object = paginatorJM(pagination, item_object)
+	item_object, totalrows, totaldisplay, qpagination = defaultpagination(item_object, qpagination)
+	pagecountercurrent = qpagination 
+	pagecounternext = qpagination + 1
+	pagecounternextnext = qpagination +2
+
+	# pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, item_object = paginatorJM(pagination, item_object)
 
 	for i in item_object:
 		item_dic = {}
