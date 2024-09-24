@@ -1,0 +1,54 @@
+{% extends "sealquery/base.html" %}
+
+{% load static %}
+{% block content %}
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+  <div class="main-title">
+    <h1>Contact</h1>
+  </div>
+
+  <div class="mainpage"></div>
+
+  <div class="entity_main">
+
+<!--     <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <div class="form-actions">
+          <button type="submit">Send</button>
+        </div>
+    </form>
+ -->
+
+      <form id="form" action="/contact" method="post" style="width: 300px">
+          {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="fieldWrapper">
+          {{ form.name.errors }}
+          <label for="{{ form.name.id_for_label }}">Email</label>
+          {{ form.from_email }}
+        </div>
+        <div class="fieldWrapper" >   
+          {{ form.name.errors }}
+          <label for="{{ form.group.id_for_label }}">Subject</label>
+          {{ form.subject }}
+        </div>
+        <div class="fieldWrapper">    
+          {{ form.name.errors }}
+          <label for="{{ form.personclass.id_for_label }}">Message</label><br>
+          {{ form.message }}
+        </div>
+
+        <div class="fieldWrapper">
+            <input class="submit" type="submit" value="Submit">
+        </div>
+      </form>
+
+  </div>
+
+
+{% endblock %}

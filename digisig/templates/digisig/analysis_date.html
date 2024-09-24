@@ -1,0 +1,325 @@
+{% extends "sealquery/base.html" %}
+
+{% load static %}
+{% block content %}
+
+	<div class="search-people-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>Seal Dating Tool</h1>
+	</div>
+
+	<div class="mainpage"></div>
+
+	<div class="guidance-bar">
+		<div class="div-caption">
+			Guidance Notes<button id="guidancebutton1" onclick="tbtoggle('guidance', 'guidancebutton1')" class="entity">+</button>
+		</div>
+	</div>
+
+	<div class="guidance" id="guidance" style="display:none;">
+		<p>17 March 2023</p>
+		<h3>Introduction</h3>
+		<p>Welcome to the experimental <a href="{% url 'term_page' digisig_entity_number=10001287 %}">seal</a> dating tool!</p>
+		<p>I built this tool in March 2023 while investigating the feasibility of using existing archival seal catalogues to create an automated system to assist cataloguers dating medieval <a href="{% url 'term_page' digisig_entity_number=10001317 %}">seal matrices</a>.</p>
+		<h3>How to use this tool</h3>
+		<p>Enter the size, <a href="{% url 'information' infotype='terminology' %}">shape and class</a> of the seal in the form on the left and hit submit.</p>
+		<p>The website will return a predicted date, a graph, and possibly some <a href="{% url 'term_page' digisig_entity_number=10001307 %}">seal impressions</a> that (hopefully!) resemble the seal matrix you are trying to date.</p>
+		<h3>How does it work?</h3> 
+		<p>To make predictions, the website uses a decision tree. The website takes the information you submit and uses the decision tree to situate your seal in a group of seals that are similar to the seal you described in the form. I created the decision tree using an algorithm trained on data from DIGISIG. For further information about the training data, <a href="{% url 'information' infotype='machinelearning' %}" target="_blank">please visit this page</a>.</p> 
+		<h3>How do I evalute the prediction?</h3>
+		<p>Start by looking at the graph.</p> 
+		<p>The graph gives you information about the group of seals in which the website has placed your seal. The predicted date is the typical date of the seals in the group. However, each group of seals includes seals of different dates. The shape of the graph shows you how likely it is that your seal is earlier or later than the predicted date.</p>
+		<p>Below, in 'Result details', you can find further information.</p>
+		<p>The decisions that the website used to place your seal in the group are listed in 'Decision path'.</p> 
+		<p>If there are seals in the group that match the shape and class of the seal you described in the form, up to ten cases are listed in 'Similar seals'. These seals may help you identify seals that have similar features to the seal you are trying to date.</p>
+		<p>Please note that the website only returns 'similar seals' if there are seals in the prediction group that match <a href="{% url 'information' infotype='terminology' %}">shape and class</a> of the seal you submitted in your query.</p>
+		<h3>Can I use this tool in my research?</h3>
+		<p>I hope this tool is helpful in your research! However, the tool is experimental. Use with caution and check back periodically for updates/ improvements.</p> 
+	</div>
+
+	<div class="results-bar">
+		<div class="div-caption">
+			Dating tool <button id="resultsbutton1" onclick="tbtoggle('results', 'resultsbutton1')" class="entity">-</button>
+		</div>
+	</div>
+
+	<div class="results" id="results">
+		<div class="searchfilter">		
+			<div class="filter">
+				<h2>Seal Features</h2>
+				<form id="form" action="/analyze/dates" method="post">
+			    	{% csrf_token %}
+					{{ form.non_field_errors }}
+		<!-- 			<div style="display: none" class="fieldWrapper">
+						{{ form.pagination.errors }}
+						<label for="{{ form.pagination.id_for_label }}">pagination</label>
+						{{ form.pagination}}
+					</div> -->
+					<div class="fieldWrapper">		
+						{{ form.shape.errors }}
+						<label for="{{ form.shape.id_for_label }}">Shape</label>
+						{{ form.shape }}
+					</div>
+					<div class="fieldWrapper" >		
+						{{ form.classname.errors }}
+						<label for="{{ form.classname.id_for_label }}">Class</label>
+						{{ form.classname }}
+					</div>
+					<div class="fieldWrapper">		
+						{{ form.face_vertical.errors }}
+						<label for="{{ form.face_vertical.id_for_label }}">Vertical (mm)</label>
+						{{ form.face_vertical }}
+					</div>
+					<div class="fieldWrapper">		
+						{{ form.face_horizontal.errors }}
+						<label for="{{ form.face_horizontal.id_for_label }}">Horizontal (mm)</label>
+						{{ form.face_horizontal }}
+					</div>
+					<div class="fieldWrapper">
+				    	<input class="submit" type="submit" value="Submit">
+			    	</div>
+			    	<div class="fieldWrapper">
+			    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
+			    	</div>
+				</form>
+			</div>
+		</div>
+	
+		<div>
+			<div>
+				<h4><a class="headingbtn">Prediction: {{resultrange}}</a></h4>
+			</div>
+			<div>
+				<canvas id="Chart1"></canvas>
+			</div>
+		</div>
+
+
+		
+	</div>
+	
+	<div class="results-bar2">
+		<div class="div-caption">
+			Result details <button id="resultsbutton2" onclick="tbtoggle('results3', 'resultsbutton2')" class="entity">-</button>
+		</div>
+	</div>
+
+	<div class="results3" id="results3">
+		<div>
+		{% if decisiontreedic != null %}
+			<div class="heading">
+				<h4><a class="headingbtn" >Decision path</a></h4>
+			</div>
+
+			<div>
+				<table>
+					<tr>
+						<th>Node</th>
+						<th>Question</th>
+						<th>Answer</th>
+					{% for key1, value1 in decisiontreedic.items %}
+					
+					<tr>
+						<td style="width:10%">{{value1.node}}</td>
+						<td style="width:70%">
+							Is
+							{% if value1.feature == 16 %}
+								{{value1.featurename}} greater than {{value1.threshold}} mm<sup>2</sup>?
+							{% else %} 
+								it shape/class '{{value1.featurename}}'?
+							{% endif %} 
+						</td>
+						
+						<td>
+							{% if value1.inequality == ">" %} Yes
+							{% else %} No
+							{% endif %} 
+						</td>
+					</tr>
+					{% endfor %}
+					<tr> 
+						<td>{{finalnodevalue}}</td>
+						<td>Prediction: {{resultrange}}</td> 
+				</table>
+			</div>
+		{% endif %}
+		</div>
+
+		<div>
+			<div class="heading">
+				<h4><a class="headingbtn" >Similar seals</a></h4>
+			</div>
+
+		{% for m in manifestation_set.values %}
+
+			<div class="heading">
+				<h4><a class="headingbtn" href="{% url 'entity' digisig_entity_number=m.id_manifestation %}">{{m.imagestate_term}}</a></h4>
+			</div>
+		
+			<div>
+			<table>
+				<tr>
+					<th class="indent">Held by </th>
+					<td>{{m.repository_fulltitle}}</td>
+
+					<td rowspan="5">
+						{% if m.representation_thumbnail != null %}
+						<figure>
+							<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{m.thumb}}{{m.representation_thumbnail_hash}}" alt="{{m.id_representation}}" onclick="image({{forloop.counter}})">
+						</figure>
+
+						<!-- The Modal -->
+						<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
+						  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
+						  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{m.medium}}{{m.representation_filename_hash}}" alt="{{m.id_representation}}">
+						  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' m.id_representation %}">Representation details</a></div>
+						</div>
+						{% endif %}
+					</td>
+	
+				</tr>
+				<tr>
+					<th class="indent">Part of item</th>
+					<td><a href="{% url 'entity' digisig_entity_number=m.id_item %}">{{m.shelfmark}}</a>
+							{% if m.number != 'Undetermined'%}(seal {{m.number}}){% endif %}
+					</td>
+				</tr>
+
+				{% if m.label_manifestation_repository != null %}
+				<tr>
+							<th class="indent">Reference<a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+							<td>{{m.label_manifestation_repository}}
+							</td>
+				</tr>
+				{% endif %}
+
+				<tr>
+				{% if m.repository_location != null %}
+							<th class="indent">Region </th>
+							<td>{{m.repository_location}}</td>
+				{% endif %}
+				</tr>
+					
+				<tr>
+				{% if m.repository_startdate != null %}
+					<th class="indent">Date</th>
+					<td>{{m.repository_startdate}}
+					{% if m.repository_enddate != null %}- {{m.repository_enddate}}{% endif %}</td>
+				{% endif %}
+				</tr>
+
+				<tr>
+					<th class="indent">Example of </th>
+					<td><a href="{% url 'entity' digisig_entity_number=m.id_seal %}">Seal details</a></td>
+				</tr>
+
+				{% if m.sealdescriptions != null %}				
+					{% for d in m.sealdescriptions %}
+						<tr>
+							<th class="indent">Described in</th>
+							<td><a href="{% url 'entity' digisig_entity_number=d.id_sealdescription %}">{{d.fk_collection}} (no. {{d.sealdescription_identifier}})</a></td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+
+
+			</table>
+			</div>
+
+		{% endfor %}
+
+		</div>
+
+
+
+	</div>
+
+
+
+
+<script>
+
+
+// if the form data is changed then reset the page counter back to 1
+	document.getElementById("form").addEventListener("input", formupdate_event);
+	function formupdate_event() {
+		document.getElementById("id_pagination").value = 1;
+	}
+
+// clear all user inputs from the select boxes in the form 
+	function myFunction() {
+		document.getElementById("id_pagination").value = 1; 
+		document.getElementById("id_name").value = '';
+		document.getElementById("id_group").value = '0'; 
+		document.getElementById("id_personclass").value = '';
+		document.getElementById("id_personorder").value = '';
+	   	document.getElementById('id_personclass').style="opacity:0.6";
+	   	document.getElementById('id_personorder').style="opacity:0.6";
+		document.getElementById("id_personclass").disabled = true;	    	
+		document.getElementById("id_personorder").disabled = true;
+	}
+
+// allow the user to progress to the subsequent page 
+	function page_button(numberofpages) {
+		var pagevalue = document.getElementById("id_pagination").value;
+		pagevalue = parseInt(pagevalue) + numberofpages;
+		document.getElementById("id_pagination").value = pagevalue;
+		document.getElementById("form").submit(); 
+	}
+
+var ctx = document.getElementById('Chart1').getContext('2d');
+var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'line',
+    // The data for our dataset
+    data: {
+        labels: [ {% for i in labels %} '{{i}}', {% endfor %} ],
+        datasets: [{
+            label: 'Cases by period',
+            backgroundColor: "#8e5ea2",
+            borderColor: "#8e5ea2",
+            data: [ {% for i in data1 %} {{i}}, {% endfor %} ]
+        		}]
+        },
+    options: {
+
+    	title: {
+            display: true,
+            text: 'Percentage of total cases per year'
+    	},
+
+    	legend: {
+            display: true,
+            labels: {},
+         	position: 'right',
+        },
+
+    	scales: {
+					xAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Year'
+						}
+					}],
+					yAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Percentage'
+						}
+					}]
+				}
+			},
+});
+
+
+
+
+
+</script>
+
+{% endblock %}

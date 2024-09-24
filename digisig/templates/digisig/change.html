@@ -1,0 +1,33 @@
+{% extends "sealquery/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>Changes, Patches, and Updates</h1>
+	</div>
+
+	<div class="mainpage"></div>
+
+
+	<div class="entity_main">
+
+		<table>
+		{% for change in change_object %}
+			<tr>
+				<th style="min-height:40px;">{% ifchanged change.change_date %}
+						{{change.change_date|date:"d/m/y"}}
+					{% endifchanged %}
+				</th>
+				<td>●</td><td>{{change.change}}</td>
+			</tr>
+		{% endfor %}
+		</table>
+	</div>
+
+{% endblock %}

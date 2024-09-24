@@ -1,0 +1,114 @@
+{% extends "sealquery/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+
+	<div class="main-title">
+		<h1>Help</h1>
+	</div>
+
+	<div class="mainpage"></div>
+
+	<div class="sidebar">
+		<h3>Topics</h3>
+		<ul>
+		<li>Discover</li>
+			<ul>
+				<li>Exhibition</li>
+				<li>Map</li>
+			</ul>
+		<li>Search</li>
+			<ul>
+				<li>Seal Impressions, Matrices, and Casts</li>
+				<ul>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001387 %}">Repository</a></li>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001397 %}">Series</a></li>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001347 %}">Place</a></li>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001377 %}">Support Type</a></li>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001457 %}">Representation</a></li>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001467 %}">Period</a></li>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001477 %}">Shape</a></li>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001487 %}">Identifier</a></li>
+					<li><a href="{% url 'term_page' digisig_entity_number=10001497 %}">Class</a></li>
+						<ul>
+							{% for term in class_object %}
+							<li><a href="{% url 'term_page' digisig_entity_number=term.id_term %}">{{class.term_name}}</li></a>
+							{% endfor %}
+						</ul>
+				</ul>
+				<li>Seal Descriptions</li>
+				<li>Actors</li>
+				<li>Places</li>
+			</ul>
+		<li>Analyze</li>
+			<ul>
+				<li>Datasets</li>
+				<li>London</li>
+			</ul>
+		</ul>
+	</div>
+
+	<div class="midbar">
+
+	<h3>Search Seal Impressions, Matrices and Casts</h3>
+		<p>Users can access records for <a href="{% url 'term_page' digisig_entity_number=10001307 %}">seal impressions,</a> <a href="{% url 'term_page' digisig_entity_number=10001317 %}">matrices,</a> and <a href="{% url 'term_page' digisig_entity_number=10001327 %}">casts</a>, which are collectively termed <a href="{% url 'term_page' digisig_entity_number=10001297 %}">manifestations</a>, and locate related <a href="{% url 'term_page' digisig_entity_number=10001547 %}">item</a>, <a href="{% url 'term_page' digisig_entity_number=10001287 %}">seal</a>, and <a href="{% url 'term_page' digisig_entity_number=10001287 %}">seal description</a> records. Users can limit the results using eight filters.</p>
+		<ul>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001387 %}">Repository</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001397 %}">Series</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001347 %}">Place</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001377 %}">Support Type</a></li>
+				<ul>
+					{% for term in nature_object %}
+					<li><a href="{% url 'term_page' digisig_entity_number=term.id_term %}">{{term.term_name}}</a></li>
+					{% endfor %}
+				</ul>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001457 %}">Representation</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001467 %}">Period</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001477 %}">Shape</a></li>
+				<ul>
+					{% for term in shape_object %}
+					<li><a href="{% url 'term_page' digisig_entity_number=term.id_term %}">{{term.term_name}}</a></li>
+					{% endfor %}
+				</ul>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001487 %}">Identifier</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001497 %}">Class</a></li>
+				<ul>
+					{% for term in class_object %}
+					<li><a href="{% url 'term_page' digisig_entity_number=term.id_term %}">{{term.term_name}}</a></li>
+					{% endfor %}
+				</ul>
+		</ul>
+
+	<h3>Search Seal Descriptions</h3>
+		<p>Seal descriptions search enables users to access the entries in published catalogues, card catalogues, finding aids and other such <a href="{% url 'term_page' digisig_entity_number=10001507 %}">reference works</a> that describe <a href="{% url 'term_page' digisig_entity_number=10001287 %}">seals</a>. In some cases, there are multiple entries for a single seal, as some seals have been catalogued separately multiple times. A user can limit the seal description search results using three filters.</p> 
+		<ul>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001507 %}">Reference work</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001517 %}">Entry Identifier</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001537 %}">Entry Title</a></li>
+		</ul>
+
+	<h3>Search Actors</h3>
+		<p>Actor search enables users to find people and corporate entities that had seals. A user can limit the actor search results using four filters.</p> 
+		<ul>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001507 %}">Name</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001517 %}">Actor Type</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001537 %}">Corporate Actor Class</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001537 %}">Corporate Actor Order</a></li>
+		</ul>
+
+	<h3>Search Places</h3>
+		<p>Place search enables users to find places that are associated with seals and to limit the search results using two filters.</p> 
+		<ul>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001507 %}">County</a></li>
+			<li><a href="{% url 'term_page' digisig_entity_number=10001517 %}">Place Name</a></li>
+		</ul>
+
+	</div>
+
+{% endblock %}
