@@ -6,6 +6,68 @@ from django.core.paginator import Paginator
 from time import time
 
 
+
+def itemsearch(repository, series, shelfmark, searchphrase, pagination):
+
+	itemset = {}
+	Repositorycases = 0
+	Seriescases = 0
+	Shelfmarkcases = 0
+	Phrasecases = 0
+
+	item_object = Item.objects.all().order_by("fk_repository", "fk_series", "classmark_number3", "classmark_number2", "classmark_number1")
+
+
+	# take the series in preference to the repository
+
+	if series > 0:
+		item_object = item_object.filter(fk_series=series)
+		Seriescases = len(item_object)
+
+	elif repository > 0:
+		item_object = item_object.filter(fk_repository=repository)
+		Repositorycases = len(item_object)
+
+	else:
+		print ("No repository or series specified")
+
+	if len(shelfmark) > 0:
+		item_object = item_object.filter(shelfmark__icontains=shelfmark)
+		Shelfmarkcases = len(item_object)
+
+	if len(searchphrase) > 0:
+		item_object = item_object.filter(part__part_description__icontains=searchphrase)
+		Phrasecases = len(item_object)
+
+	pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows, item_object = paginatorJM(pagination, item_object)
+
+	for i in item_object:
+		item_dic = {}
+		item_dic["id_item"] = i.id_item
+		item_dic["shelfmark"] = i.shelfmark
+		item_dic["repository"] = i.fk_repository.repository_fulltitle
+
+		try:
+			partset = Part.objects.filter(fk_item=i.id_item).values("id_part")
+			representation_part = Representation.objects.filter(fk_digisig__in=partset)[:1]
+
+			for r in representation_part:
+				connection = r.fk_connection
+				item_dic["connection"] = connection.thumb
+				item_dic["medium"] = r.representation_filename
+				item_dic["thumb"] = r.representation_thumbnail_hash
+				item_dic["id_representation"] = r.id_representation 
+
+		except:
+			print("No image available")
+
+		itemset[i.id_item] = item_dic
+
+	return (itemset, Repositorycases, Seriescases, Shelfmarkcases, Phrasecases, pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows)
+
+
+
+
 def mapgenerator3(regiondisplayset):
 	## data for region map
 	# make circles data -- defaults -- note that this code is very similar to the function mapdata2

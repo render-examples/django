@@ -125,3 +125,41 @@ class PeopleForm(forms.Form):
 	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
 	personclass = forms.ChoiceField(choices=personclass_options, required=False)
 	personorder = forms.ChoiceField(choices=personorder_options, required=False) 
+
+
+
+#Nb: a search seal form uses a limited number of series and repositories -- but need all for this form
+series_all_options = [('', 'None')]
+repositories_all_options = [('', 'None')]
+
+for e in Series.objects.exclude(series_name__istartswith="z").order_by('fk_repository'):
+	repository = e.fk_repository
+	appendvalue = repository.repository + " : " + e.series_name
+	series_all_options.append((e.pk_series, appendvalue))
+
+for e in Repository.objects.order_by('repository_fulltitle'):
+	repositories_options.append((e.fk_repository, e.repository_fulltitle))
+
+class ItemForm(forms.Form):
+	series = forms.ChoiceField(label='series', choices=series_all_options, required=False, initial={'': 'None'})
+	repository = forms.ChoiceField(label='repositories', choices=repositories_options, required=False, initial={'': 'None'})
+	shelfmark = forms.CharField(label='shelfmark', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: 867'}))
+	searchphrase = forms.CharField(label='searchphrase', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: Matilda'}))
+	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
+
+
+# Form for place search
+county_options = [('0', 'None')]
+regionoptions = [('0', 'None')]
+
+for e in Region.objects.filter(location__isnull=False).filter(fk_locationtype=4).order_by('region_label').distinct('region_label'):
+	county_options.append((e.pk_region, e.region_label))
+
+for e in Regiondisplay.objects.filter(region__location__isnull=False).order_by('regiondisplay_label').distinct('regiondisplay_label'):
+	regionoptions.append((e.id_regiondisplay, e.regiondisplay_label))
+
+class PlaceForm(forms.Form):
+	county = forms.ChoiceField(choices=county_options, required=False)
+	region = forms.ChoiceField(choices=regionoptions, required=False)
+	location_name = forms.CharField(label='location_name', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: Bruges'}))	
+	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
