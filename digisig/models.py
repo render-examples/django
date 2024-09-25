@@ -1222,7 +1222,8 @@ class Representation(models.Model):
     fk_manifestation = models.ForeignKey('Manifestation', models.DO_NOTHING, related_name='fk_manifestation', db_column='fk_manifestation', blank=True, null=True) 
     representation_filename_hash = models.TextField(blank=True, null=True)
     representation_thumbnail_hash = models.TextField(blank=True, null=True)
-
+    fk_part = models.ForeignKey('Part', models.DO_NOTHING, related_name='fk_part_representation', db_column='fk_part', blank=True, null=True)
+    fk_sealdescription = models.ForeignKey('Sealdescription', models.DO_NOTHING, related_name='fk_sealdescription_representation', db_column='fk_sealdescription', blank=True, null=True)
 
 
     #https://stackoverflow.com/questions/2443752/django-display-image-in-admin-interface

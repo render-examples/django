@@ -21,6 +21,12 @@ from utils.viewtools import *
 
 import json
 
+# Table of Contents
+	# index
+	# about
+	# exhibit
+
+
 # Create your views here.
 def index(request):
 	# return render(request, 'digisig/index.html', {})
@@ -61,7 +67,57 @@ def about(request):
 	return HttpResponse(template.render(context, request))
 
 
+#### Exhibit 
 
+def exhibit(request):
+	starttime = time()
+	pagetitle = 'title'
+
+	# create the set of RTIs
+	representation_set = {}
+
+	# select all representations that are RTIs....
+	rti_set = Representation.objects.filter(fk_representation_type=2).values('fk_digisig', 'id_representation')
+
+	rti_set_filter =rti_set.values('fk_digisig')
+
+	rti_set_targets = rti_set.values_list('fk_digisig', 'id_representation', named=True)
+
+	representation_objects = Representation.objects.filter(
+		fk_digisig__in=rti_set_filter, primacy=1).select_related(
+		'fk_connection').values('fk_connection__thumb', 'representation_thumbnail_hash', 'fk_connection__medium', 'representation_filename_hash', 'fk_digisig')
+
+	for r in representation_objects:
+		representation_dic = r
+
+		for l in rti_set_targets:
+			if l.fk_digisig == r['fk_digisig']:
+				r['id_num'] = l.id_representation
+				representation_set[l.id_representation] = representation_dic
+				break
+
+		# targetobject = representation_objects.get(fk_digisig=r['fk_digisig'])
+		# representation_dic["thumb"] = targetobject['fk_connection__thumb']
+		# representation_dic["representation_thumbnail"] = targetobject['representation_thumbnail_hash'] 
+		# representation_dic["medium"] = targetobject['fk_connection__medium']
+		# representation_dic["representation_filename"] = targetobject['representation_filename_hash']
+
+		# targetvalue = rti_set.get(fk_digisig=r.fk_digisig)
+		# representation_dic["id_num"] = str(targetvalue.id_representation)
+
+	print (representation_set)
+
+
+
+	context = {
+	'pagetitle': pagetitle,
+	'representation_set': representation_set,
+	}
+
+	template = loader.get_template('digisig/exhibit.html')
+
+	print("Compute Time:", time()-starttime)					
+	return HttpResponse(template.render(context, request))
 
 
 ########################### Discover ############################
@@ -165,48 +221,6 @@ def discover(request, discovertype):
 			}
 
 		return HttpResponse(template.render(context, request))
-
-
-
-
-########################### Exhibit #########################
-
-def exhibit(request):
-	starttime = time()
-	pagetitle = 'title'
-
-	# create the set of RTIs
-	representation_set = {}
-
-	# select all representations that are RTIs....
-	representation_object = Representation.objects.filter(fk_representation_type=2)
-
-###### this is new code August 8th
-	for r in representation_object:
-		representation_dic = {}
-
-		try:
-			thumbnailRTI_object = get_object_or_404(Representation, fk_digisig=r.fk_digisig, primacy=1)
-
-		except:
-			thumbnailRTI_object = r
-
-		representation_dic["thumb"] = thumbnailRTI_object.fk_connection.thumb
-		representation_dic["representation_thumbnail"] = thumbnailRTI_object.representation_thumbnail_hash 
-		representation_dic["medium"] = thumbnailRTI_object.fk_connection.medium
-		representation_dic["representation_filename"] = thumbnailRTI_object.representation_filename_hash
-		representation_dic["id_num"] = str(r.id_representation)
-		representation_set[r.id_representation] = representation_dic
-
-	context = {
-	'pagetitle': pagetitle,
-	'representation_set': representation_set,
-	}
-
-	template = loader.get_template('digisig/exhibit.html')
-
-	print("Compute Time:", time()-starttime)					
-	return HttpResponse(template.render(context, request))
 
 
 
@@ -900,9 +914,6 @@ def search(request, searchtype):
 		template = loader.get_template('digisig/search_place.html')
 		print("Compute Time:", time()-starttime)
 		return HttpResponse(template.render(context, request))
-
-
-
 
 
 ######################### information ################################
