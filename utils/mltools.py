@@ -1,8 +1,6 @@
 ### ML tools ###
 ## https://stackoverflow.com/questions/15917116/split-django-models-and-modelforms-in-separate-file
 
-
-
 import os
 from django.conf import settings
 

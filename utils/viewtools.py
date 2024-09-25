@@ -5,7 +5,202 @@ from django.core.paginator import Paginator
 from django.core import serializers
 
 import statistics
+import math
+import os
+from django.conf import settings
+
 from time import time
+
+
+
+def mlmodelget():
+	#url = os.path.join(settings.STATIC_ROOT, 'ml/2023_feb20_ml_tree')
+	#url = os.path.join(settings.STATIC_ROOT, 'ml/ml_tree')
+
+	print (settings.STATIC_URL)
+
+	url = os.path.join(settings.STATIC_URL, 'ml/ml_tree')
+
+	print (url)
+	print (os.listdir(settings.STATIC_URL))
+
+	with open(url, 'rb') as file:	
+		mlmodel = pickle.load(file)
+
+	return(mlmodel)
+
+
+def mlshowpath (mlmodel, df):
+	node_indicator = mlmodel.decision_path(df)
+	leaf_id = mlmodel.apply(df)
+	feature = mlmodel.tree_.feature
+	threshold = mlmodel.tree_.threshold
+	n_nodes = mlmodel.tree_.node_count
+
+	sample_id = 0
+	# obtain ids of the nodes `sample_id` goes through, i.e., row `sample_id`
+	node_index = node_indicator.indices[
+	    node_indicator.indptr[sample_id] : node_indicator.indptr[sample_id + 1]
+	]
+
+	#print ("node_index", node_index)
+
+	# feature names
+	i = -1
+	featurenames = []
+	for col in df.columns:
+	    i = i + 1
+	    #print (i, col)
+
+	    if col == "size_area":
+	    	col = "size"
+	    featurenames.append(col)
+
+	decisiontreetext= []
+	decisiontreedic= {}
+	for node_id in node_index:
+	    
+	    # continue to the next node if it is a leaf node
+	    if leaf_id[sample_id] == node_id:
+	        continue 
+
+	    value = df.iat[0,feature[node_id]]
+	    
+	    if value <= threshold[node_id]:
+	        threshold_sign = "<="
+	    else:
+	        threshold_sign = ">"
+
+	    decisiontreetext.append(
+	        "decision node {node} : {featurename}({value}) "
+	        "{inequality} {threshold}".format(
+	            node=node_id,
+	            sample=sample_id,
+	            feature=feature[node_id],
+	            featurename=featurenames[feature[node_id]],
+	            value = df.iat[0,feature[node_id]],
+	            #value=X2[sample_id, feature[node_id]],
+	            inequality=threshold_sign,
+	            threshold=threshold[node_id],
+	        )
+	    )
+
+	    decisiontreedic[node_id] = {
+	    	"node": node_id,
+	    	"inequality": threshold_sign,
+	    	"feature": feature[node_id],
+	    	"featurename": featurenames[feature[node_id]],
+	    	"value": df.iat[0,feature[node_id]],
+	    	"inequality":threshold_sign,
+	    	"threshold": round(threshold[node_id], 2)
+	    }
+
+	return (node_index, decisiontreedic)
+
+
+
+
+def faceupdater(shapecode, height, width):
+
+	print (shapecode, height, width)
+	returnarea = 0
+
+	if height == None:
+		return(returnarea)
+
+	if width == None:
+		return(returnarea)
+
+	if height > 0:
+		if width > 0:
+			#round
+			if shapecode == 1:
+				radius1 = height/2
+				returnarea = math.pi * (radius1 **2)
+
+			# Pointed Oval
+			if shapecode == 2:
+				radius1 = ((height * 1.06)/ 2)
+				width1 = width/2
+				returnarea = (((radius1**2) * (math.acos((radius1-width1) / radius1)))-((radius1-width1) * (math.sqrt((2*radius1*width1)-(width1**2))))) *2
+
+			# Rounded Oval
+			if shapecode == 3:
+				returnarea = roundedoval(height, width)
+
+			# Scutiform
+			if shapecode == 4:
+				returnarea = ((height/2) * width) + ((height/2) * (width/2))
+
+			# Unknown
+			if shapecode == 5:
+				returnarea = roundedoval(height, width)
+
+			# Triangle pointing up
+			if shapecode == 6:
+				returnarea = (height * (width/2))
+
+			# Square
+			if shapecode == 7:
+				returnarea = (height * width)
+
+			# Lozenge-shaped
+			if shapecode == 8:
+				returnarea = (height * width)/2
+
+			# Quatrofoil
+			if shapecode == 9:
+				heightvalue = height/2
+				returnarea = ((heightvalue**2) + 2 * ((math.pi * (heightvalue**2) /4)))
+
+			# Drop-shaped
+			if shapecode == 10:
+				returnarea = roundedoval(height, width)
+
+			# Undetermined
+			if shapecode == 11:
+				returnarea = 0
+
+			# Triangle pointing down
+			if shapecode == 12:
+				returnarea = (height * (width/2))
+
+			# Rectangular
+			if shapecode == 13:
+				returnarea = (height * width)
+
+			# Hexagonal
+			if shapecode == 14:
+				## note that hexagons might measured from either the angle or a flat side
+				## run calculation with the smallest dimension -- not the angles. https://www.math.net/area-of-a-hexagon
+				testdimension = width
+				if height < width:
+					testdimension = height
+				returnarea = (math.sqrt(3)/2) * (testdimension**2)
+
+			# Octagonal
+			if shapecode == 15:
+				returnarea = 2*((height/(1+math.sqrt(2)))**2)*(1+math.sqrt(2))
+
+			# Abnormal shape
+			if shapecode == 16:
+				returnarea = roundedoval(height, width)
+
+			# Kite-shaped
+			if shapecode == 17:
+				returnarea = roundedoval(height, width)
+
+	returnarea = round(returnarea,2)
+	
+	return(returnarea)
+
+def roundedoval(height, width):
+	radius1 = height/2
+	width1 = width/2
+	returnarea = math.pi * radius1 * width1	
+
+	return(returnarea)
+
 
 
 
