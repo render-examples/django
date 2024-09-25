@@ -155,25 +155,25 @@ def geteventitem(event1):
 
 	return (eventset)
 
-def getquantiles(timegroupcases):
+# def getquantiles(timegroupcases):
 
-	timelist = []
-	for t in timegroupcases:
+# 	timelist = []
+# 	for t in timegroupcases:
 
-		try:
-			timelist.append(int(t.date_origin))
+# 		try:
+# 			timelist.append(int(t.date_origin))
 
-		except:
-			print ("exception", t)
+# 		except:
+# 			print ("exception", t)
 
-	quantileset = statistics.quantiles(timelist, n=6)
+# 	quantileset = statistics.quantiles(timelist, n=6)
 
-	print ("timelist", timelist)
-	print ("quantileset", quantileset)
+# 	print ("timelist", timelist)
+# 	print ("quantileset", quantileset)
 
-	resultrange = "c." + str(int(quantileset[0])) + "-" + str(int(quantileset[4]))
+# 	resultrange = "c." + str(int(quantileset[0])) + "-" + str(int(quantileset[4]))
 
-	return (resultrange)
+# 	return (resultrange)
 
 # handle range dates -- if range, then determine midpoint and precision
 def datetester(date1, date2):
