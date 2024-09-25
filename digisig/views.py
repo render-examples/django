@@ -391,7 +391,107 @@ def analyze(request, analysistype):
 		template = loader.get_template('digisig/analysis_time.html')
 		return HttpResponse(template.render(context, request))
 
+###### Dates ##########
+	if analysistype == "dates":
 
+		#default values
+		pagetitle = 'dates'
+		resulttext = ''
+		resultrange= ''
+		decisiontreetext = ''
+		decisiontreedic = ''
+		finalnodevalue = ''
+		labels = []
+		data1 = []
+		representationset = []
+		manifestation_set = []
+
+		if request.method == "POST":
+			form = DateForm(request.POST)
+			if form.is_valid():
+				qclass = form.cleaned_data['classname']
+				qshape = form.cleaned_data['shape']	
+				qvertical = form.cleaned_data['face_vertical']
+				qhorizontal = form.cleaned_data['face_horizontal']
+				# qpagination = form.cleaned_data['pagination']
+
+				if qclass.isdigit():
+					if int(qclass) > 0:
+						qclass = int(qclass)
+						class_object = get_object_or_404(Classification, id_class=qclass)
+						print (class_object)
+
+				if qshape.isdigit():
+					qshape = int(qshape)
+					if int(qshape) > 0:
+						qshape = int(qshape)
+						shape_object = get_object_or_404(Shape, pk_shape=qshape)
+						print (shape_object)
+
+				if qvertical > 0:
+					if qhorizontal > 0:
+						resultarea = faceupdater(qshape, qvertical, qhorizontal)
+
+				# fetch the current model
+				mlmodel = mlmodelget()
+				# pass model and features of seal to function that predicts the date
+				result, result1, resulttext, finalnodevalue, df = mlpredictcase(class_object, shape_object, resultarea, mlmodel)
+
+				# get information about decision path
+				decisionpathout, decisiontreedic = mlshowpath(mlmodel, df)
+
+				# print ("result", result)
+				# print ("result1", result1)
+				# print ("resulttext", resulttext)
+				# print ("finalnodevalue", finalnodevalue)
+				# print ("decisionpathout", decisionpathout)
+				# print ("decisiontreedic", decisiontreedic)
+
+				#find other seals assigned to this decision tree group
+				timegroupcases = Seal.objects.filter(date_prediction_node=finalnodevalue).order_by("date_origin")
+
+				resultrange = getquantiles(timegroupcases)
+
+				### experimental method of generating period bands 2023/11/11
+				# timelist = []
+				# for t in timegroupcases:
+				# 	timelist.append(int(t.date_origin))
+				# quantileset = statistics.quantiles(timelist, n=6)
+				# resultrange = "c." + str(int(quantileset[0])) + "-" + str(int(quantileset[4]))
+
+				labels, data1 = temporaldistribution(timegroupcases)
+
+				#identify a subset of seal to display as suggestions
+				seal_set = timegroupcases.filter(face__fk_shape=shape_object).filter(face__fk_class=class_object)[:10].values("id_seal")
+				manifestation_possibilities = Manifestation.objects.filter(fk_face__fk_seal__in=seal_set)[:10]				
+				manifestation_set = manifestationmetadata(manifestation_possibilities)
+
+				#representationset = mlsealselectinfo(subset)
+
+				form = DateForm(request.POST)
+
+		else:
+			form = DateForm()
+
+		# print (decisiontreetext)
+		# print (type(decisiontreetext))
+		# print (decisiontreetext[1])
+
+		context = {
+			'pagetitle': pagetitle,
+			'form': form,
+			'resulttext': resulttext,
+			'resultrange': resultrange,
+			'labels': labels,
+			'data1': data1,
+			'representationset': representationset,
+			'manifestation_set': manifestation_set,
+			'decisiontreedic': decisiontreedic,
+			'finalnodevalue': finalnodevalue,
+			}
+
+		template = loader.get_template('digisig/analysis_date.html')
+		return HttpResponse(template.render(context, request))
 
 
 

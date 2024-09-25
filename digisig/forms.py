@@ -163,3 +163,12 @@ class PlaceForm(forms.Form):
 	region = forms.ChoiceField(choices=regionoptions, required=False)
 	location_name = forms.CharField(label='location_name', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: Bruges'}))	
 	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
+
+
+# Form for Date search
+
+class DateForm(forms.Form):
+	classname = forms.ChoiceField(label='Digisig Class', choices=classname_options, required=True)
+	shape = forms.ChoiceField(choices=shape_options, required=True, initial={'': 'None'})
+	face_vertical = forms.IntegerField(label='vertical',required=True)
+	face_horizontal = forms.IntegerField(label='horizontal',required=True)	
