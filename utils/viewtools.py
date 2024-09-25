@@ -7,27 +7,184 @@ from django.core import serializers
 import statistics
 import math
 import os
+import pandas as pd 
+
 from django.conf import settings
 
 from time import time
 
 
+def getquantiles(timegroupcases):
 
-def mlmodelget():
-	#url = os.path.join(settings.STATIC_ROOT, 'ml/2023_feb20_ml_tree')
-	#url = os.path.join(settings.STATIC_ROOT, 'ml/ml_tree')
+	timelist = []
+	for t in timegroupcases:
 
-	print (settings.STATIC_URL)
+		try:
+			timelist.append(int(t.date_origin))
 
-	url = os.path.join(settings.STATIC_URL, 'ml/ml_tree')
+		except:
+			print ("exception", t)
 
-	print (url)
-	print (os.listdir(settings.STATIC_URL))
+	quantileset = statistics.quantiles(timelist, n=6)
 
-	with open(url, 'rb') as file:	
-		mlmodel = pickle.load(file)
+	print ("timelist", timelist)
+	print ("quantileset", quantileset)
 
-	return(mlmodel)
+	resultrange = "c." + str(int(quantileset[0])) + "-" + str(int(quantileset[4]))
+
+	return (resultrange)
+
+
+
+def mlpredictcase (class_object, shape_object, case_area, mlmodel):
+
+	data = mldatacase(class_object, shape_object, case_area)
+	df = pd.DataFrame(data)
+
+	result = mlmodel.predict(df)
+	leaf_id = mlmodel.apply(df)
+	finalnode = (list(leaf_id))
+	finalnodevalue = finalnode[0]
+	result1 = result.item(0)
+	resulttext = int(result.item(0))
+
+	return (result, result1, resulttext, finalnodevalue, df)
+
+
+def mldatacase(class_object, shape_object, resultarea):
+
+	data = { 
+		'Round': [shape_object.round],
+		'pointedoval': [shape_object.pointedoval],
+		'roundedoval': [shape_object.roundedoval],
+		'scutiform': [shape_object.scutiform],
+		'trianglepointingup': [shape_object.trianglepointingup],
+		'unknown': [shape_object.unknown],
+		'square': [shape_object.square],
+		'lozenge': [shape_object.lozenge],
+		'drop': [shape_object.drop],
+		'trianglepointingdown': [shape_object.trianglepointingdown],
+		'rectangular': [shape_object.rectangular],
+		'hexagonal': [shape_object.hexagonal],
+		'octagonal': [shape_object.octagonal],
+		'abnormal': [shape_object.abnormal],
+		'kite': [shape_object.kite],
+		'quatrefoil': [shape_object.quatrefoil],
+		'size_area': [resultarea],
+		'animal': [class_object.animal],
+		'human': [class_object.human],
+		'objects': [class_object.object_class],
+		'device': [class_object.device],
+		'beast': [class_object.beast],
+		'bird': [class_object.bird],
+		'fish': [class_object.fish],
+		'insect': [class_object.insect],
+		'bust': [class_object.bust],
+		'hand': [class_object.hand],
+		'boat': [class_object.boat],
+		'building': [class_object.building],
+		'container': [class_object.container],
+		'equipment': [class_object.equipment],
+		'naturalproduct': [class_object.naturalproduct],
+		'irregular': [class_object.irregular],
+		'radial': [class_object.radial],
+		'lattice': [class_object.lattice],
+		'fulllength': [class_object.fulllength],
+		'symbol': [class_object.symbol],
+		'hawkhunting': [class_object.hawkhunting],
+		'pelicaninpiety': [class_object.pelicaninpiety],
+		'headondish': [class_object.headondish],
+		'twoheads': [class_object.twoheads],
+		'crossedhands': [class_object.crossedhands],
+		'handholdingitem': [class_object.handholdingitem],
+		'seated': [class_object.seated],
+		'standing': [class_object.standing],
+		'riding': [class_object.riding],
+		'crucified': [class_object.crucified],
+		'apparel': [class_object.apparel],
+		'crenellation': [class_object.crenellation],
+		'tool': [class_object.tool],
+		'weapon': [class_object.weapon],
+		'Shell': [class_object.shell],
+		'wheatsheaf': [class_object.wheatsheaf],
+		'stylizedlily': [class_object.stylizedlily],
+		'crosses': [class_object.crosses],
+		'heart': [class_object.heart],
+		'merchantmark': [class_object.merchantmark],
+		'texts': [class_object.texts],
+		'handholdingbird': [class_object.handholdingbird],
+		'halflength': [class_object.halflength],
+		'crescent': [class_object.crescent],
+		'beastbody': [class_object.beastbody],
+		'beasthead': [class_object.beasthead],
+		'doubleheadedeagle': [class_object.doubleheadedeagle],
+		'horseshoe': [class_object.horseshoe],
+		'twobirdsdrinking': [class_object.twobirdsdrinking],
+		'animalequipment': [class_object.animalequipment],
+		'transport': [class_object.transport],
+		'halflengthwomanholdingchild': [class_object.halflengthwomanholdingchild],
+		'halflengthwoman': [class_object.halflengthwoman],
+		'halflengthman': [class_object.halflengthman],
+		'swine': [class_object.swine],
+		'boarhead': [class_object.boarhead],
+		'centaur': [class_object.centaur],
+		'dragon': [class_object.dragon],
+		'hare': [class_object.hare],
+		'lion': [class_object.lion],
+		'lionhead': [class_object.lionhead],
+		'mermaid': [class_object.mermaid],
+		'squirrel': [class_object.squirrel],
+		'stag': [class_object.stag],
+		'staghead': [class_object.staghead],
+		'unicorn': [class_object.unicorn],
+		'unicornhead': [class_object.unicornhead],
+		'wolf': [class_object.wolf],
+		'wolfhead': [class_object.wolfhead],
+		'standingwoman': [class_object.standingwoman],
+		'standingman': [class_object.standingman],
+		'armouredmanequestrian': [class_object.armouredmanequestrian],
+		'seatedwomanholdingchild': [class_object.seatedwomanholdingchild],
+		'axe': [class_object.axe],
+		'shears': [class_object.shears],
+		'arrow': [class_object.arrow],
+		'spear': [class_object.spear],
+		'sword': [class_object.sword],
+		'banner': [class_object.banner],
+		'shield': [class_object.shield],
+		'christogram': [class_object.christogram],
+		'lionfighting': [class_object.lionfighting],
+		'sheep': [class_object.sheep],
+		'griffin': [class_object.griffin],
+		'hammer': [class_object.hammer],
+		'standingwomanholdingchild': [class_object.standingwomanholdingchild],
+		'hareonhound': [class_object.hareonhound],
+		'lambandstaff': [class_object.lambandstaff],
+		'lionsleeping': [class_object.lionsleeping],
+		'standingliturgicalapparel': [class_object.standingliturgicalapparel],
+		'manfightinganimal': [class_object.manfightinganimal],
+		'bowandarrow': [class_object.bowandarrow],
+		'spearandpennon': [class_object.spearandpennon],
+		'seatedman': [class_object.seatedman],
+		}
+
+	return (data)
+
+
+# def mlmodelget():
+# 	#url = os.path.join(settings.STATIC_ROOT, 'ml/2023_feb20_ml_tree')
+# 	#url = os.path.join(settings.STATIC_ROOT, 'ml/ml_tree')
+
+
+# 	url = os.path.join(settings.STATIC_ROOT, 'ml/ml_faceobjectset')
+# 	url = os.path.join(settings.STATIC_URL, 'ml/ml_tree')
+
+# 	print (url)
+# 	print (os.listdir(settings.STATIC_URL))
+
+# 	with open(url, 'rb') as file:	
+# 		mlmodel = pickle.load(file)
+
+# 	return(mlmodel)
 
 
 def mlshowpath (mlmodel, df):
