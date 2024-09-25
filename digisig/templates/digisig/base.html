@@ -81,7 +81,13 @@
   <div class="navbar" id="navbar">
 
     <div class="subnav"> <a href="{% url 'index' %}">Home</a> </div>
-
+    <div class="subnav">
+      <button class="subnavbtn">Discover <i class="fas fa-caret-down"></i></button>
+      <div class="subnav-content">
+        <a href="{% url 'exhibit' %}">Exhibition</a>
+        <a href="{% url 'discover' discovertype='map' %}">Map</a>
+      </div>
+    </div> 
 	  <div class="subnav">
 	    <button class="subnavbtn">Search <i class="fas fa-caret-down"></i></button>
 	    <div class="subnav-content">

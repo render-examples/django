@@ -50,6 +50,352 @@ def index(request):
 	return HttpResponse(template.render(context, request))
 
 
+#### ABOUT
+def about(request):
+
+	pagetitle = 'title'
+	context = {
+		'pagetitle': pagetitle,
+	}
+	template = loader.get_template('digisig/about.html')					
+	return HttpResponse(template.render(context, request))
+
+
+
+########################### Discover ############################
+
+def discover(request, discovertype):
+
+	if discovertype == "map":
+
+		pagetitle = 'Map'
+
+		#default
+		qcollection= 30000287
+		qmapchoice = 1
+		mapdic = []
+		regiondisplayset = []
+		region_dict = []
+		mapcounties = []
+		location_dict = []
+
+		#adjust values if form submitted
+		if request.method == 'POST':
+			form = CollectionForm(request.POST)
+			
+			if form.is_valid():
+				collectionstr = form.cleaned_data['collection']
+				#make sure values are not empty then try and convert to ints
+				if len(collectionstr) > 0:
+					qcollection = int(collectionstr)
+
+				mapchoicestr = form.cleaned_data['mapchoice']
+				if len(mapchoicestr) > 0:
+					qmapchoice = int(mapchoicestr)
+
+		#map points
+		if (qmapchoice == 1):
+			if (qcollection == 30000287):
+				locationset = Location.objects.filter(
+					Q(locationname__locationreference__fk_locationstatus=1)).annotate(count=Count('locationname__locationreference__fk_event__part__fk_part__fk_support'))
+
+			else:
+				#data for location map
+				locationset = Location.objects.filter(
+					Q(locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection)).annotate(count=Count('locationname__locationreference__fk_event__part__fk_part__fk_support'))
+
+			location_dict, center_long, center_lat = mapgenerator2(locationset)
+
+		#map counties
+		elif (qmapchoice == 2):
+			#if collection is set then limit the scope of the dataset
+			if (qcollection == 30000287):
+				#data for map counties
+				placeset = Region.objects.filter(fk_locationtype=4, 
+					location__locationname__locationreference__fk_locationstatus=1
+					).annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+
+			else:
+				#data for map counties
+				placeset = Region.objects.filter(fk_locationtype=4, 
+					location__locationname__locationreference__fk_locationstatus=1, 
+					location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+					).annotate(numplaces=Count('location__locationname__locationreference'))
+
+			## data for colorpeth map
+			mapcounties1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
+			mapcounties = json.loads(mapcounties1.jsonfiletxt)
+
+			for i in mapcounties:
+				if i == "features":
+					for b in mapcounties[i]:
+						j = b["properties"]
+						countyvalue = j["HCS_NUMBER"]
+						countyname = j["NAME"]
+						numberofcases = placeset.filter(fk_his_countylist=countyvalue)
+						for i in numberofcases:
+							j["cases"] = i.numplaces
+
+		#map regions
+		else:
+			if (qcollection == 30000287):
+				regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1
+					).annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+
+			else:
+				#data for region map 
+				regiondisplayset = Regiondisplay.objects.filter( 
+					region__location__locationname__locationreference__fk_locationstatus=1, 
+					region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+					).annotate(numregions=Count('region__location__locationname__locationreference'))
+
+			region_dict = mapgenerator3(regiondisplayset)
+
+		form = CollectionForm(initial={'collection': qcollection, 'mapchoice': qmapchoice})		
+
+		template = loader.get_template('digisig/map.html')
+		context = {
+			'pagetitle': pagetitle,
+			'location_dict': location_dict,
+			'counties_dict': mapcounties,
+			'region_dict': region_dict,
+			'form': form,
+			}
+
+		return HttpResponse(template.render(context, request))
+
+
+
+
+########################### Exhibit #########################
+
+def exhibit(request):
+	starttime = time()
+	pagetitle = 'title'
+
+	# create the set of RTIs
+	representation_set = {}
+
+	# select all representations that are RTIs....
+	representation_object = Representation.objects.filter(fk_representation_type=2)
+
+###### this is new code August 8th
+	for r in representation_object:
+		representation_dic = {}
+
+		try:
+			thumbnailRTI_object = get_object_or_404(Representation, fk_digisig=r.fk_digisig, primacy=1)
+
+		except:
+			thumbnailRTI_object = r
+
+		representation_dic["thumb"] = thumbnailRTI_object.fk_connection.thumb
+		representation_dic["representation_thumbnail"] = thumbnailRTI_object.representation_thumbnail_hash 
+		representation_dic["medium"] = thumbnailRTI_object.fk_connection.medium
+		representation_dic["representation_filename"] = thumbnailRTI_object.representation_filename_hash
+		representation_dic["id_num"] = str(r.id_representation)
+		representation_set[r.id_representation] = representation_dic
+
+	context = {
+	'pagetitle': pagetitle,
+	'representation_set': representation_set,
+	}
+
+	template = loader.get_template('digisig/exhibit.html')
+
+	print("Compute Time:", time()-starttime)					
+	return HttpResponse(template.render(context, request))
+
+
+
+############################ Analyze #############################
+
+def analyze(request, analysistype):
+
+	print (analysistype)
+
+	if analysistype == "time":
+
+		pagetitle = 'Time'
+
+		#default
+		qcollection= 30000287
+		qmapchoice = 1
+		qtimechoice = 7
+		qclasschoice = 1
+		qsealtypechoice = 4
+		mapdic = []
+		regiondisplayset = []
+		region_dict = []
+		mapcounties = []
+		location_dict = []
+
+		#adjust values if form submitted
+		if request.method == 'POST':
+			form = CollectionForm(request.POST)
+			
+			if form.is_valid():
+				collectionstr = form.cleaned_data['collection']
+				#make sure values are not empty then try and convert to ints
+				if len(collectionstr) > 0:
+					qcollection = int(collectionstr)
+
+				mapchoicestr = form.cleaned_data['mapchoice']
+				if len(mapchoicestr) > 0:
+					qmapchoice = int(mapchoicestr)
+
+				timechoicestr = form.cleaned_data['timechoice']
+				if len(timechoicestr) > 0:
+					qtimechoice = int(timechoicestr)
+
+				sealtypechoicestr = form.cleaned_data['sealtypechoice']
+				if len(sealtypechoicestr) > 0:
+					qsealtypechoice = int(sealtypechoicestr)
+
+		#map points
+		totalcases = 0
+
+		#the queries deal with variations in the data differently -- undetermined locations, or ones to regions, won't show on all maps
+		#to post correct totals, need to run query separately (which is inefficient)
+
+		if (qcollection == 30000287):
+			manifestationset = Manifestation.objects.all()
+
+		else:
+			manifestationset = Manifestation.objects.filter(fk_face__fk_seal__sealdescription__fk_collection=qcollection)
+
+		if (qtimechoice > 0):
+			manifestationset = manifestationset.filter(fk_face__fk_seal__fk_timegroupc=qtimechoice)
+
+		totalcasesfromperiod = len(manifestationset)
+
+		if (qsealtypechoice > 0):
+			manifestationset = manifestationset.filter(fk_face__fk_seal__fk_sealtype=qsealtypechoice)
+
+		totalcases = len(manifestationset)
+
+			# for m in manifestationset:
+			# 	locationvalue = Location.objects.filter(
+			# 		Q(locationname__locationreference__fk_locationstatus=1),
+			# 		Q(locationname__locationreference__fk_event__part__fk_part__fk_support=m.id_manifestation))
+			# 	print (locationvalue)
+
+		if (qmapchoice == 1):
+
+			if (qcollection == 30000287):
+				locationset = Location.objects.filter(
+					Q(locationname__locationreference__fk_locationstatus=1),
+					Q(locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_timegroupc=qtimechoice),
+					Q(locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealtype=qsealtypechoice)
+					).annotate(count=Count('locationname__locationreference__fk_event__part__fk_part__fk_support'))
+
+			else:
+				locationset = Location.objects.filter(
+					Q(locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection),
+					Q(locationname__locationreference__fk_locationstatus=1),
+					Q(locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_timegroupc=qtimechoice),
+					Q(locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealtype=qsealtypechoice)
+					).annotate(count=Count('locationname__locationreference__fk_event__part__fk_part__fk_support'))
+
+			if (totalcases > 0):	
+				location_dict, center_long, center_lat = mapgenerator2(locationset)
+
+			representedcases = totalcases
+
+		#map counties
+		elif (qmapchoice == 2):
+			#if collection is set then limit the scope of the dataset
+			if (qcollection == 30000287):
+				#data for map counties
+				placeset = Region.objects.filter(fk_locationtype=4, 
+					location__locationname__locationreference__fk_locationstatus=1,
+					location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_timegroupc=qtimechoice,
+					location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealtype=qsealtypechoice
+					).annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+
+			else:
+				#data for map counties
+				placeset = Region.objects.filter(fk_locationtype=4, 
+					location__locationname__locationreference__fk_locationstatus=1,
+					location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_timegroupc=qtimechoice,
+					location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealtype=qsealtypechoice, 
+					location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+					).annotate(numplaces=Count('location__locationname__locationreference'))
+
+			placecases = 0
+			for p in placeset:
+				placecases = placecases + p.numplaces
+
+			representedcases = placecases
+
+
+			## data for colorpeth map
+			mapcounties1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
+			mapcounties = json.loads(mapcounties1.jsonfiletxt)
+
+			for i in mapcounties:
+				if i == "features":
+					for b in mapcounties[i]:
+						j = b["properties"]
+						countyvalue = j["HCS_NUMBER"]
+						countyname = j["NAME"]
+						numberofcases = placeset.filter(fk_his_countylist=countyvalue)
+						for i in numberofcases:
+							j["cases"] = i.numplaces
+
+		#map regions
+		else:
+			if (qcollection == 30000287):
+				regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1,
+					region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_timegroupc=qtimechoice,
+					region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealtype=qsealtypechoice
+					).annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+
+			else:
+				#data for region map 
+				regiondisplayset = Regiondisplay.objects.filter( 
+					region__location__locationname__locationreference__fk_locationstatus=1,
+					region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_timegroupc=qtimechoice,
+					region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealtype=qsealtypechoice, 
+					region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+					).annotate(numregions=Count('region__location__locationname__locationreference'))
+
+			region_dict = mapgenerator3(regiondisplayset)
+
+			regioncases = 0
+			for r in regiondisplayset:
+				regioncases = regioncases + r.numregions
+
+			representedcases = regioncases
+
+
+		if totalcases > 0:
+			percenttotal = (representedcases/totalcases)
+		else:
+			percenttotal = "n/a" 
+
+		form = CollectionForm(initial={'collection': qcollection, 'mapchoice': qmapchoice, 'timechoice': qtimechoice, 'sealtypechoice': qsealtypechoice})
+
+		context = {
+			'pagetitle': pagetitle,
+			'location_dict': location_dict,
+			'counties_dict': mapcounties,
+			'region_dict': region_dict,
+			'totalcases': totalcases,
+			'totalcasesfromperiod': totalcasesfromperiod,
+			'representedcases': representedcases,
+			'percenttotal': percenttotal,
+			'form': form,
+			}
+
+		template = loader.get_template('digisig/analysis_time.html')
+		return HttpResponse(template.render(context, request))
+
+
+
+
+
+
 #################### Search #########################
 def search(request, searchtype):
 	starttime = time()
