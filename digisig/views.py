@@ -62,6 +62,8 @@ def about(request):
 
 
 
+
+
 ########################### Discover ############################
 
 def discover(request, discovertype):
@@ -909,6 +911,55 @@ def information(request, infotype):
 
 	print (infotype)
 
+	if infotype == "changelog":
+		pagetitle = 'title'
+
+		change_object = Changes.objects.all().order_by('-change_date')
+		context = {
+			'pagetitle': pagetitle,
+			'change_object': change_object,
+		}
+
+		template = loader.get_template('digisig/change.html')					
+		return HttpResponse(template.render(context, request))
+
+
+############## Help ###############
+	if infotype == "help":
+		pagetitle = 'title'
+
+		template = loader.get_template('digisig/help.html')
+		class_object = Terminology.objects.filter(
+			term_deprecated=0).order_by('term_name')
+		shape_object = Terminology.objects.filter(digisig_column='shape').order_by('term_name')
+		nature_object = Terminology.objects.filter(digisig_column='nature').order_by('term_name')
+
+
+		print (class_object, shape_object)
+		context = {
+			'pagetitle': pagetitle,
+			'class_object': class_object,
+			'shape_object': shape_object,
+			'nature_object': nature_object,
+			}
+		return HttpResponse(template.render(context, request))
+
+
+
+
+########################### Contributors #########################
+	if infotype == "contributors":
+
+		pagetitle = 'title'
+		context = {
+			'pagetitle': pagetitle,
+		}
+
+		template = loader.get_template('digisig/contributors.html')					
+		return HttpResponse(template.render(context, request))
+
+
+
 ########################### Collections #########################
 	if infotype == "collections":
 
@@ -1057,6 +1108,209 @@ def information(request, infotype):
 			}
 		template = loader.get_template('digisig/terminology.html')                    
 		return HttpResponse(template.render(context, request))
+
+
+################################ ML ######################################
+
+	if infotype == "machinelearning_info":
+
+		start_time = datetime.now()
+
+		pagetitle = 'ML'
+
+		time1 = gettime(start_time)
+
+		url = os.path.join(settings.STATIC_ROOT, 'ml/ml_faceobjectset')
+		with open(url, 'rb') as file:	
+			face_objectset = pickle.load(file)
+
+		#face_objectset = mltrainset()
+
+		time1b = gettime(start_time)
+
+		facecount= face_objectset.count()
+
+		time1c = gettime(start_time)
+
+		## data for class distribution
+		data2, labels2 = classdistributionv2(face_objectset)
+
+		time2 = gettime(start_time)
+
+		## data for temporal distribution
+		seallist = face_objectset.values_list("fk_seal", flat=True)
+		time2a = gettime(start_time)
+		sealset = Seal.objects.filter(id_seal__in=seallist)
+		time2b = gettime(start_time)
+		data3, labels3 = datedistribution(sealset)
+
+		data3 = data3[:6]
+		labels3 = labels3[:6]
+
+		time3 = gettime(start_time)
+
+		## data for spatial distribution
+		regiondisplayset = Regiondisplay.objects.filter(
+			region__location__locationname__locationreference__fk_locationstatus=1,
+			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__in=face_objectset
+			).annotate(numregions=Count('region__location__locationname__locationreference'))
+
+		region_dict = mapgenerator3(regiondisplayset)
+
+		time4 = gettime(start_time)
+
+		## data for actor distribution
+		printgroupset = Printgroup.objects.annotate(numcases=Count('fk_printgroup', filter=Q(fk_printgroup__face__in=face_objectset))).order_by('printgroup_order')
+		data5 = []
+		labels5 = []
+
+
+		for g in printgroupset:
+			if (g.numcases > 0):
+				percentagedata = (g.numcases/facecount)*100 
+				# if percentagedata > 1:
+				data5.append(percentagedata)
+				labels5.append(g.printgroup)
+
+
+		time5 = gettime(start_time)
+
+		print (time1, time1b, time1c, time2, time2a, time2b, time3, time4, time5)
+
+		template = loader.get_template('digisig/machinelearning_info.html')
+
+		loadtime = gettime(start_time)
+
+		context = {
+			'pagetitle': pagetitle,
+			'face_objectset': face_objectset,
+			'facenumbercount': facecount,
+			'labels2': labels2,
+			'data2': data2,
+			'data3': data3,
+			'labels3': labels3,
+			'region_dict': region_dict,
+			'data5': data5,
+			'labels5': labels5,
+			'loadtime': loadtime,
+			}
+
+		return HttpResponse(template.render(context, request))
+
+
+	if infotype == "machinelearning":
+
+		pagetitle = 'ML'
+
+		form = MLpredictionForm(initial={'classification': 10000487})
+		qcollection = 30000047
+		qclassification = 10000487
+
+		#adjust values if form submitted
+		if request.method == 'POST':
+			form = MLpredictionForm(request.POST)
+
+			if form.is_valid():
+				qclassification = int(form.cleaned_data['classification'])
+				qcollection = int(form.cleaned_data['collection2'])
+
+		seal_set = Seal.objects.filter(fk_sealsealdescription__fk_collection=qcollection).filter(fk_seal_face__fk_class=qclassification)
+
+		data1 = []
+		data2 = []
+		labels = []
+		event_seal = []
+
+		if len(seal_set) > 0:
+			for s in seal_set:
+
+				### 1/7/2024 -- attempting to put human readable labels -- not working yet -- javascript fails on string with quotes
+				sealdescription_entry = Sealdescription.objects.get(Q(fk_collection=qcollection) & Q(fk_seal=s.id_seal))
+
+				event_seal = Event.objects.get(part__fk_part__fk_support__fk_face__fk_seal=s.id_seal)
+
+				try:
+					start = event_seal.repository_startdate
+					end = event_seal.repository_enddate
+					starty = start.year
+					endy = end.year
+
+					try:
+						start2 = event_seal.startdate
+						end2 = event_seal.enddate
+
+						if start2.year > 0 :
+							data1.append([starty, endy])
+							# data2.append(liney)
+							data2.append([start2.year, end2.year])
+							#labels.append(event_seal.pk_event)
+							labels.append(s.id_seal)
+
+					except:
+
+						print ("fail2", event_seal)
+
+					if starty > 1500:
+						print ("fail", event_seal, start, end, starty, endy, start2, end2)
+
+				except:
+
+					print ("fail1", event_seal)
+
+						# try:
+						# 	labels.append(sealdescription_entry.sealdescription_identifier)
+						# except:
+						# 	labels.append(s.id_seal)
+
+				# try:
+				# 	event_seal = Event.objects.get(part__fk_part__fk_support__fk_face__fk_seal=s.id_seal)
+				# 	start = event_seal.repository_startdate
+				# 	end = event_seal.repository_enddate
+				# 	# line = event_seal.startdate
+				# 	start2 = event_seal.startdate
+				# 	end2 = event_seal.enddate
+
+				# 	try:
+				# 		starty = start.year
+				# 		endy = end.year
+				# 		# liney = line.year
+
+				# 		data1.append([starty, endy])
+				# 		# data2.append(liney)
+				# 		data2.append([start2.year, end2.year])
+				# 		#labels.append(event_seal.pk_event)
+				# 		labels.append(s.id_seal)
+
+				# 		# try:
+				# 		# 	labels.append(sealdescription_entry.sealdescription_identifier)
+				# 		# except:
+				# 		# 	labels.append(s.id_seal)
+				# 	except:
+				# 		print ("fault")
+
+
+				# 	if (s.id.seal == 10413111):
+				# 		print ("case found") 
+				# 		print (start, end, start2, end2, starty, endy)
+
+				# except:
+				# 	print ("no event", s.id_seal)
+
+		template = loader.get_template('digisig/machinelearning.html')
+
+		context = {
+			'pagetitle': pagetitle,
+			'event_object': event_seal,
+			'labels': labels,
+			'data1': data1,
+			'data2': data2,
+			'form': form,
+			}
+
+		return HttpResponse(template.render(context, request))
+
+
+
 
 
 ############################## ENTITY #########################
