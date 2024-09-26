@@ -432,132 +432,132 @@ def representation_photographs(representation_select):
 # 	return (itemset, Repositorycases, Seriescases, Shelfmarkcases, Phrasecases, pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows)
 
 
-def temporaldistribution(timegroupcases):
-	#prepare the temporal groups of seals for graph
-	timegroupset = TimegroupC.objects.filter(pk_timegroup_c__lt=15).order_by('pk_timegroup_c')
-	timecount = {}
+# def temporaldistribution(timegroupcases):
+# 	#prepare the temporal groups of seals for graph
+# 	timegroupset = TimegroupC.objects.filter(pk_timegroup_c__lt=15).order_by('pk_timegroup_c')
+# 	timecount = {}
 
-	# set the number in each group to 0
-	for t in timegroupset:
-		timecount.update({t.timegroup_c_range: 0})
+# 	# set the number in each group to 0
+# 	for t in timegroupset:
+# 		timecount.update({t.timegroup_c_range: 0})
 
-	# how many seals belong in each temporal group?
-	for case in timegroupcases:
+# 	# how many seals belong in each temporal group?
+# 	for case in timegroupcases:
 
-		origindate = case.date_origin
-		if origindate < 1500 and origindate > 999:
-			targettimegroup = case.fk_timegroupc
+# 		origindate = case.date_origin
+# 		if origindate < 1500 and origindate > 999:
+# 			targettimegroup = case.fk_timegroupc
 
-			if targettimegroup.pk_timegroup_c <15:
-				#number of cases for each time period
-				timegroupupdate = targettimegroup.timegroup_c_range
-				timecount[timegroupupdate] += 1
+# 			if targettimegroup.pk_timegroup_c <15:
+# 				#number of cases for each time period
+# 				timegroupupdate = targettimegroup.timegroup_c_range
+# 				timecount[timegroupupdate] += 1
 
-	#
-	labels = []
-	data = []
+# 	#
+# 	labels = []
+# 	data = []
 
-	# determine how many seals should go in each temporal group
-	for key, value in timecount.items():
-		labels.append(key)
-		data.append(value)
+# 	# determine how many seals should go in each temporal group
+# 	for key, value in timecount.items():
+# 		labels.append(key)
+# 		data.append(value)
 
-	return (labels, data)
+# 	return (labels, data)
 
 
-def faceupdater(shapecode, height, width):
+# def faceupdater(shapecode, height, width):
 
-	print (shapecode, height, width)
-	returnarea = 0
+# 	print (shapecode, height, width)
+# 	returnarea = 0
 
-	if height == None:
-		return(returnarea)
+# 	if height == None:
+# 		return(returnarea)
 
-	if width == None:
-		return(returnarea)
+# 	if width == None:
+# 		return(returnarea)
 
-	if height > 0:
-		if width > 0:
-			#round
-			if shapecode == 1:
-				radius1 = height/2
-				returnarea = math.pi * (radius1 **2)
+# 	if height > 0:
+# 		if width > 0:
+# 			#round
+# 			if shapecode == 1:
+# 				radius1 = height/2
+# 				returnarea = math.pi * (radius1 **2)
 
-			# Pointed Oval
-			if shapecode == 2:
-				radius1 = ((height * 1.06)/ 2)
-				width1 = width/2
-				returnarea = (((radius1**2) * (math.acos((radius1-width1) / radius1)))-((radius1-width1) * (math.sqrt((2*radius1*width1)-(width1**2))))) *2
+# 			# Pointed Oval
+# 			if shapecode == 2:
+# 				radius1 = ((height * 1.06)/ 2)
+# 				width1 = width/2
+# 				returnarea = (((radius1**2) * (math.acos((radius1-width1) / radius1)))-((radius1-width1) * (math.sqrt((2*radius1*width1)-(width1**2))))) *2
 
-			# Rounded Oval
-			if shapecode == 3:
-				returnarea = roundedoval(height, width)
+# 			# Rounded Oval
+# 			if shapecode == 3:
+# 				returnarea = roundedoval(height, width)
 
-			# Scutiform
-			if shapecode == 4:
-				returnarea = ((height/2) * width) + ((height/2) * (width/2))
+# 			# Scutiform
+# 			if shapecode == 4:
+# 				returnarea = ((height/2) * width) + ((height/2) * (width/2))
 
-			# Unknown
-			if shapecode == 5:
-				returnarea = roundedoval(height, width)
+# 			# Unknown
+# 			if shapecode == 5:
+# 				returnarea = roundedoval(height, width)
 
-			# Triangle pointing up
-			if shapecode == 6:
-				returnarea = (height * (width/2))
+# 			# Triangle pointing up
+# 			if shapecode == 6:
+# 				returnarea = (height * (width/2))
 
-			# Square
-			if shapecode == 7:
-				returnarea = (height * width)
+# 			# Square
+# 			if shapecode == 7:
+# 				returnarea = (height * width)
 
-			# Lozenge-shaped
-			if shapecode == 8:
-				returnarea = (height * width)/2
+# 			# Lozenge-shaped
+# 			if shapecode == 8:
+# 				returnarea = (height * width)/2
 
-			# Quatrofoil
-			if shapecode == 9:
-				heightvalue = height/2
-				returnarea = ((heightvalue**2) + 2 * ((math.pi * (heightvalue**2) /4)))
+# 			# Quatrofoil
+# 			if shapecode == 9:
+# 				heightvalue = height/2
+# 				returnarea = ((heightvalue**2) + 2 * ((math.pi * (heightvalue**2) /4)))
 
-			# Drop-shaped
-			if shapecode == 10:
-				returnarea = roundedoval(height, width)
+# 			# Drop-shaped
+# 			if shapecode == 10:
+# 				returnarea = roundedoval(height, width)
 
-			# Undetermined
-			if shapecode == 11:
-				returnarea = 0
+# 			# Undetermined
+# 			if shapecode == 11:
+# 				returnarea = 0
 
-			# Triangle pointing down
-			if shapecode == 12:
-				returnarea = (height * (width/2))
+# 			# Triangle pointing down
+# 			if shapecode == 12:
+# 				returnarea = (height * (width/2))
 
-			# Rectangular
-			if shapecode == 13:
-				returnarea = (height * width)
+# 			# Rectangular
+# 			if shapecode == 13:
+# 				returnarea = (height * width)
 
-			# Hexagonal
-			if shapecode == 14:
-				## note that hexagons might measured from either the angle or a flat side
-				## run calculation with the smallest dimension -- not the angles. https://www.math.net/area-of-a-hexagon
-				testdimension = width
-				if height < width:
-					testdimension = height
-				returnarea = (math.sqrt(3)/2) * (testdimension**2)
+# 			# Hexagonal
+# 			if shapecode == 14:
+# 				## note that hexagons might measured from either the angle or a flat side
+# 				## run calculation with the smallest dimension -- not the angles. https://www.math.net/area-of-a-hexagon
+# 				testdimension = width
+# 				if height < width:
+# 					testdimension = height
+# 				returnarea = (math.sqrt(3)/2) * (testdimension**2)
 
-			# Octagonal
-			if shapecode == 15:
-				returnarea = 2*((height/(1+math.sqrt(2)))**2)*(1+math.sqrt(2))
+# 			# Octagonal
+# 			if shapecode == 15:
+# 				returnarea = 2*((height/(1+math.sqrt(2)))**2)*(1+math.sqrt(2))
 
-			# Abnormal shape
-			if shapecode == 16:
-				returnarea = roundedoval(height, width)
+# 			# Abnormal shape
+# 			if shapecode == 16:
+# 				returnarea = roundedoval(height, width)
 
-			# Kite-shaped
-			if shapecode == 17:
-				returnarea = roundedoval(height, width)
+# 			# Kite-shaped
+# 			if shapecode == 17:
+# 				returnarea = roundedoval(height, width)
 
-	returnarea = round(returnarea,2)
+# 	returnarea = round(returnarea,2)
 	
-	return(returnarea)
+# 	return(returnarea)
 
 def roundedoval(height, width):
 	radius1 = height/2
