@@ -317,72 +317,72 @@ def mlsealselectinfo (subset):
 	return (representationset)		
 
 
-def mlshowpath (mlmodel, df):
-	node_indicator = mlmodel.decision_path(df)
-	leaf_id = mlmodel.apply(df)
-	feature = mlmodel.tree_.feature
-	threshold = mlmodel.tree_.threshold
-	n_nodes = mlmodel.tree_.node_count
+# def mlshowpath (mlmodel, df):
+# 	node_indicator = mlmodel.decision_path(df)
+# 	leaf_id = mlmodel.apply(df)
+# 	feature = mlmodel.tree_.feature
+# 	threshold = mlmodel.tree_.threshold
+# 	n_nodes = mlmodel.tree_.node_count
 
-	sample_id = 0
-	# obtain ids of the nodes `sample_id` goes through, i.e., row `sample_id`
-	node_index = node_indicator.indices[
-	    node_indicator.indptr[sample_id] : node_indicator.indptr[sample_id + 1]
-	]
+# 	sample_id = 0
+# 	# obtain ids of the nodes `sample_id` goes through, i.e., row `sample_id`
+# 	node_index = node_indicator.indices[
+# 	    node_indicator.indptr[sample_id] : node_indicator.indptr[sample_id + 1]
+# 	]
 
-	#print ("node_index", node_index)
+# 	#print ("node_index", node_index)
 
-	# feature names
-	i = -1
-	featurenames = []
-	for col in df.columns:
-	    i = i + 1
-	    #print (i, col)
+# 	# feature names
+# 	i = -1
+# 	featurenames = []
+# 	for col in df.columns:
+# 	    i = i + 1
+# 	    #print (i, col)
 
-	    if col == "size_area":
-	    	col = "size"
-	    featurenames.append(col)
+# 	    if col == "size_area":
+# 	    	col = "size"
+# 	    featurenames.append(col)
 
-	decisiontreetext= []
-	decisiontreedic= {}
-	for node_id in node_index:
+# 	decisiontreetext= []
+# 	decisiontreedic= {}
+# 	for node_id in node_index:
 	    
-	    # continue to the next node if it is a leaf node
-	    if leaf_id[sample_id] == node_id:
-	        continue 
+# 	    # continue to the next node if it is a leaf node
+# 	    if leaf_id[sample_id] == node_id:
+# 	        continue 
 
-	    value = df.iat[0,feature[node_id]]
+# 	    value = df.iat[0,feature[node_id]]
 	    
-	    if value <= threshold[node_id]:
-	        threshold_sign = "<="
-	    else:
-	        threshold_sign = ">"
+# 	    if value <= threshold[node_id]:
+# 	        threshold_sign = "<="
+# 	    else:
+# 	        threshold_sign = ">"
 
-	    decisiontreetext.append(
-	        "decision node {node} : {featurename}({value}) "
-	        "{inequality} {threshold}".format(
-	            node=node_id,
-	            sample=sample_id,
-	            feature=feature[node_id],
-	            featurename=featurenames[feature[node_id]],
-	            value = df.iat[0,feature[node_id]],
-	            #value=X2[sample_id, feature[node_id]],
-	            inequality=threshold_sign,
-	            threshold=threshold[node_id],
-	        )
-	    )
+# 	    decisiontreetext.append(
+# 	        "decision node {node} : {featurename}({value}) "
+# 	        "{inequality} {threshold}".format(
+# 	            node=node_id,
+# 	            sample=sample_id,
+# 	            feature=feature[node_id],
+# 	            featurename=featurenames[feature[node_id]],
+# 	            value = df.iat[0,feature[node_id]],
+# 	            #value=X2[sample_id, feature[node_id]],
+# 	            inequality=threshold_sign,
+# 	            threshold=threshold[node_id],
+# 	        )
+# 	    )
 
-	    decisiontreedic[node_id] = {
-	    	"node": node_id,
-	    	"inequality": threshold_sign,
-	    	"feature": feature[node_id],
-	    	"featurename": featurenames[feature[node_id]],
-	    	"value": df.iat[0,feature[node_id]],
-	    	"inequality":threshold_sign,
-	    	"threshold": round(threshold[node_id], 2)
-	    }
+# 	    decisiontreedic[node_id] = {
+# 	    	"node": node_id,
+# 	    	"inequality": threshold_sign,
+# 	    	"feature": feature[node_id],
+# 	    	"featurename": featurenames[feature[node_id]],
+# 	    	"value": df.iat[0,feature[node_id]],
+# 	    	"inequality":threshold_sign,
+# 	    	"threshold": round(threshold[node_id], 2)
+# 	    }
 
-	return (node_index, decisiontreedic)
+# 	return (node_index, decisiontreedic)
 
 
 
