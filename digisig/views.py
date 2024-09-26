@@ -512,6 +512,8 @@ def analyze(request, analysistype):
 		# print (type(decisiontreetext))
 		# print (decisiontreetext[1])
 
+		print (labels, data1)
+
 		context = {
 			'pagetitle': pagetitle,
 			'form': form,
