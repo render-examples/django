@@ -488,7 +488,7 @@ def analyze(request, analysistype):
 				labels, data1 = temporaldistribution(timegroupcases)
 
 				#identify a subset of seal to display as suggestions
-				seal_set = timegroupcases.filter(face__fk_shape=shape_object).filter(face__fk_class=class_object)[:10].values("id_seal")
+				seal_set = timegroupcases.filter(fk_seal_face__fk_shape=shape_object).filter(fk_seal_face__fk_class=class_object)[:10].values("id_seal")
 				manifestation_possibilities = Manifestation.objects.filter(fk_face__fk_seal__in=seal_set)[:10]				
 				manifestation_set = manifestationmetadata(manifestation_possibilities)
 
