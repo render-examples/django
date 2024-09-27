@@ -3,6 +3,10 @@
 {% load static %}
 {% block content %}
 
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1"></script>
+
 	<div class="search-people-banner"></div>
 	<div class="sidepanel-left"></div>
 	<div class="sidepanel-right"></div>
@@ -97,8 +101,6 @@
 			</div>
 		</div>
 
-
-		
 	</div>
 	
 	<div class="results-bar2">
@@ -215,16 +217,6 @@
 					<th class="indent">Example of </th>
 					<td><a href="{% url 'entity' digisig_entity_number=m.id_seal %}">Seal details</a></td>
 				</tr>
-
-				{% if m.sealdescriptions != null %}				
-					{% for d in m.sealdescriptions %}
-						<tr>
-							<th class="indent">Described in</th>
-							<td><a href="{% url 'entity' digisig_entity_number=d.id_sealdescription %}">{{d.fk_collection}} (no. {{d.sealdescription_identifier}})</a></td>
-						</tr>
-					{% endfor %}
-				{% endif %}
-
 
 			</table>
 			</div>
