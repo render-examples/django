@@ -489,7 +489,14 @@ def analyze(request, analysistype):
 					fk_face__fk_seal__in=seal_set)[:10].select_related(
 					'fk_face__fk_seal').select_related(
 					'fk_face__fk_class').select_related(
-					'fk_support__fk_part__fk_item__fk_repository')				
+					'fk_support__fk_part__fk_item__fk_repository').select_related(
+					'fk_support__fk_number_currentposition').select_related(
+					'fk_support__fk_part__fk_event').select_related(
+					'fk_support__fk_supportstatus').select_related(
+					'fk_position').select_related(
+					'fk_support__fk_attachment').select_related(
+					'fk_support__fk_nature').select_related(
+					'fk_imagestate')		
 
 				## prepare the data for each displayed seal manifestation
 
