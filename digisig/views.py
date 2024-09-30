@@ -444,8 +444,12 @@ def analyze(request, analysistype):
 				# pass model and features of seal to function that predicts the date
 				result, result1, resulttext, finalnodevalue, df = mlpredictcase(class_object, shape_object, resultarea, mlmodel)
 
+				print ("P1")
+
 				# get information about decision path
 				decisionpathout, decisiontreedic = mlshowpath(mlmodel, df)
+
+				print ("P2")
 
 				#find other seals assigned to this decision tree group
 				timegroupcases = Seal.objects.filter(
@@ -454,29 +458,58 @@ def analyze(request, analysistype):
 					'fk_timegroupc').values(
 					'date_origin', 'id_seal', 'fk_timegroupc', 'fk_timegroupc__timegroup_c_range', 'fk_seal_face__fk_shape', 'fk_seal_face__fk_class')
 
+				print ("P3")
+
 				resultrange, resultset = getquantiles(timegroupcases)
+
+				print ("P4")
 
 				labels, data1 = temporaldistribution(timegroupcases)
 
-				sealtargets = timegroupcases.values_list('id_seal')
+				print ("P5")
+
+				sealtargets = timegroupcases.values_list('id_seal', flat='True')
+
+				print ("P6")
 
 				# #identify a subset of seal to display as suggestions
-				seal_set = Representation.objects.filter(fk_manifestation__fk_face__fk_seal__in=sealtargets)
+				seal_set = Representation.objects.filter(
+					primacy=1).filter(
+					fk_manifestation__fk_face__fk_seal__in=sealtargets).filter(
+					fk_manifestation__fk_face__fk_shape=shape_object).filter(
+					fk_manifestation__fk_face__fk_class=class_object).select_related(
+					'fk_connection').select_related(
+					'fk_manifestation__fk_face__fk_seal').select_related(
+					'fk_manifestation__fk_support__fk_part__fk_item__fk_repository').select_related(
+					'fk_manifestation__fk_support__fk_number_currentposition').select_related(
+					'fk_manifestation__fk_support__fk_attachment').select_related(
+					'fk_manifestation__fk_support__fk_supportstatus').select_related(
+					'fk_manifestation__fk_support__fk_nature').select_related(
+					'fk_manifestation__fk_imagestate').select_related(
+					'fk_manifestation__fk_position').select_related(
+					'fk_manifestation__fk_support__fk_part__fk_event').order_by(
+					'fk_manifestation')
 
+				seal_set, totalrows, totaldisplay, qpagination = defaultpagination(seal_set, 1)
 
-		# partset = []
-		# for p in part_object.object_list:
-		# 	partset.append(p.id_part)
+				print (seal_set)
 
-		# representation_part = Representation.objects.filter(fk_digisig__in=partset).select_related('fk_connection')
-
-				# #identify a subset of seal to display as suggestions
-				# seal_set = timegroupcases.filter(fk_seal_face__fk_shape=shape_object).filter(fk_seal_face__fk_class=class_object)[:10].values("id_seal")
-
-				# manifestation_possibilities = sealsearch()
-				# manifestation_possibilities = manifestation_possibilities.filter(
-				# 	fk_face__fk_seal__in=seal_set)
-				# manifestation_possibilities, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_possibilities, 1)
+				manifestation_set = {}
+				
+				for s in seal_set:
+					manifestation_dic = {}
+					connection = s.fk_connection
+					manifestation_dic["thumb"] = connection.thumb
+					manifestation_dic["medium"] = connection.medium
+					manifestation_dic["representation_thumbnail_hash"] = s.representation_thumbnail_hash
+					manifestation_dic["representation_filename_hash"] = s.representation_filename_hash 
+					manifestation_dic["id_representation"] = s.id_representation
+					
+					manifestation_dic["id_item"] = s.fk_manifestation.fk_support.fk_part.fk_item.id_item
+					manifestation_dic["id_manifestation"] = s.fk_manifestation.id_manifestation
+					manifestation_dic["id_seal"] = s.fk_manifestation.fk_face.fk_seal.id_seal
+					
+					manifestation_set[s.fk_manifestation.id_manifestation] = manifestation_dic
 
 				# ## prepare the data for each displayed seal manifestation
 
@@ -502,7 +535,7 @@ def analyze(request, analysistype):
 		# print (type(decisiontreetext))
 		# print (decisiontreetext[1])
 
-		print (labels, data1)
+		#print (labels, data1)
 
 		context = {
 			'pagetitle': pagetitle,
@@ -511,7 +544,7 @@ def analyze(request, analysistype):
 			'resultrange': resultrange,
 			'labels': labels,
 			'data1': data1,
-			'representationset': representationset,
+			# 'representationset': representationset,
 			'manifestation_set': manifestation_set,
 			'decisiontreedic': decisiontreedic,
 			'finalnodevalue': finalnodevalue,
