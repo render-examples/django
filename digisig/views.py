@@ -435,14 +435,11 @@ def analyze(request, analysistype):
 					if qhorizontal > 0:
 						resultarea = faceupdater(qshape, qvertical, qhorizontal)
 
-				print ("step1")
-
 				try:
 					# fetch the current model
 
 					url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
 
-					print ("step2", url)
 
 					with open(url, 'rb') as file:	
 						mlmodel = pickle.load(file)
@@ -452,21 +449,14 @@ def analyze(request, analysistype):
 					# fetch the current model
 					url = os.path.join(settings.BASE_DIR, 'staticfiles/ml/ml_tree')
 
-					print ("step2b", url)
-
 					with open(url, 'rb') as file:	
 						mlmodel = pickle.load(file)
-
 
 				# pass model and features of seal to function that predicts the date
 				result, result1, resulttext, finalnodevalue, df = mlpredictcase(class_object, shape_object, resultarea, mlmodel)
 
-				print ("P1")
-
 				# get information about decision path
 				decisionpathout, decisiontreedic = mlshowpath(mlmodel, df)
-
-				print ("P2")
 
 				#find other seals assigned to this decision tree group
 				timegroupcases = Seal.objects.filter(
@@ -475,19 +465,9 @@ def analyze(request, analysistype):
 					'fk_timegroupc').values(
 					'date_origin', 'id_seal', 'fk_timegroupc', 'fk_timegroupc__timegroup_c_range', 'fk_seal_face__fk_shape', 'fk_seal_face__fk_class')
 
-				print ("P3")
-
 				resultrange, resultset = getquantiles(timegroupcases)
-
-				print ("P4")
-
 				labels, data1 = temporaldistribution(timegroupcases)
-
-				print ("P5")
-
 				sealtargets = timegroupcases.values_list('id_seal', flat='True')
-
-				print ("P6")
 
 				# #identify a subset of seal to display as suggestions
 				seal_set = Representation.objects.filter(
@@ -508,8 +488,6 @@ def analyze(request, analysistype):
 					'fk_manifestation')
 
 				seal_set, totalrows, totaldisplay, qpagination = defaultpagination(seal_set, 1)
-
-				print ("almost there")
 
 				manifestation_set = {}
 				
@@ -541,7 +519,7 @@ def analyze(request, analysistype):
 		# print (type(decisiontreetext))
 		# print (decisiontreetext[1])
 
-		print (manifestation_set)
+		# print (manifestation_set)
 		#print (labels, data1)
 
 		context = {
