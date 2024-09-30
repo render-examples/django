@@ -454,31 +454,42 @@ def analyze(request, analysistype):
 					'fk_timegroupc').values(
 					'date_origin', 'id_seal', 'fk_timegroupc', 'fk_timegroupc__timegroup_c_range', 'fk_seal_face__fk_shape', 'fk_seal_face__fk_class')
 
-				resultrange = getquantiles(timegroupcases)
+				resultrange, resultset = getquantiles(timegroupcases)
 
 				labels, data1 = temporaldistribution(timegroupcases)
 
+				sealtargets = timegroupcases.values_list('id_seal')
 
-				#identify a subset of seal to display as suggestions
-				seal_set = timegroupcases.filter(fk_seal_face__fk_shape=shape_object).filter(fk_seal_face__fk_class=class_object)[:10].values("id_seal")
+				# #identify a subset of seal to display as suggestions
+				seal_set = Representation.objects.filter(fk_manifestation__fk_face__fk_seal__in=sealtargets)
 
-				manifestation_possibilities = sealsearch()
-				manifestation_possibilities = manifestation_possibilities.filter(
-					fk_face__fk_seal__in=seal_set)
-				manifestation_possibilities, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_possibilities, 1)
 
-				## prepare the data for each displayed seal manifestation
+		# partset = []
+		# for p in part_object.object_list:
+		# 	partset.append(p.id_part)
 
-				manifestation_set = {}
+		# representation_part = Representation.objects.filter(fk_digisig__in=partset).select_related('fk_connection')
 
-				for e in manifestation_possibilities:
-					manifestation_dic = {}
-					manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-					manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-					manifestation_dic = manifestation_fetchlocations(e, manifestation_dic)
-					manifestation_dic = manifestation_fetchstandardvalues(e, manifestation_dic)
+				# #identify a subset of seal to display as suggestions
+				# seal_set = timegroupcases.filter(fk_seal_face__fk_shape=shape_object).filter(fk_seal_face__fk_class=class_object)[:10].values("id_seal")
 
-					manifestation_set[e.id_manifestation] = manifestation_dic
+				# manifestation_possibilities = sealsearch()
+				# manifestation_possibilities = manifestation_possibilities.filter(
+				# 	fk_face__fk_seal__in=seal_set)
+				# manifestation_possibilities, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_possibilities, 1)
+
+				# ## prepare the data for each displayed seal manifestation
+
+				# manifestation_set = {}
+
+				# for e in manifestation_possibilities:
+				# 	manifestation_dic = {}
+				# 	manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+				# 	manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+				# 	manifestation_dic = manifestation_fetchlocations(e, manifestation_dic)
+				# 	manifestation_dic = manifestation_fetchstandardvalues(e, manifestation_dic)
+
+				# 	manifestation_set[e.id_manifestation] = manifestation_dic
 
 				#representationset = mlsealselectinfo(subset)
 
@@ -508,8 +519,6 @@ def analyze(request, analysistype):
 
 		template = loader.get_template('digisig/analysis_date.html')
 		return HttpResponse(template.render(context, request))
-
-
 
 
 #################### Search #########################

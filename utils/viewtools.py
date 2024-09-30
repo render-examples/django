@@ -29,10 +29,9 @@ def temporaldistribution(timegroupcases):
 		if case['date_origin'] < 1500 and case['date_origin'] > 999:
 			if case['fk_timegroupc'] < 15:
 				#number of cases for each time period
-				timegroupupdate = targettimegroup.timegroup_c_range
+				timegroupupdate = case['fk_timegroupc__timegroup_c_range']
 				timecount[timegroupupdate] += 1
 
-	#
 	labels = []
 	data = []
 
