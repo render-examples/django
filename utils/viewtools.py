@@ -62,7 +62,7 @@ def getquantiles(timegroupcases):
 
 	resultrange = "c." + str(int(quantileset[0])) + "-" + str(int(quantileset[4]))
 
-	return (resultrange)
+	return (resultrange, timelist)
 
 
 
