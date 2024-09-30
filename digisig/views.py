@@ -437,13 +437,23 @@ def analyze(request, analysistype):
 
 				print ("step1")
 
-				# fetch the current model
-				url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
+				try:
+					# fetch the current model
+					url = os.path.join(settings.BASE_DIR, 'staticfiles\\ml\\ml_tree')
 
-				print ("step2", url)
+					print ("step2b", url)
 
-				with open(url, 'rb') as file:	
-					mlmodel = pickle.load(file)
+					with open(url, 'rb') as file:	
+						mlmodel = pickle.load(file)
+
+				except:
+					# fetch the current model
+					url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
+
+					print ("step2", url)
+
+					with open(url, 'rb') as file:	
+						mlmodel = pickle.load(file)
 
 				# pass model and features of seal to function that predicts the date
 				result, result1, resulttext, finalnodevalue, df = mlpredictcase(class_object, shape_object, resultarea, mlmodel)
