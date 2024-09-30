@@ -14,9 +14,6 @@ from django.conf import settings
 from time import time
 
 
-
-
-
 def temporaldistribution(timegroupcases):
 	#prepare the temporal groups of seals for graph
 	timegroupset = TimegroupC.objects.filter(pk_timegroup_c__lt=15).order_by('pk_timegroup_c')
@@ -29,11 +26,8 @@ def temporaldistribution(timegroupcases):
 	# how many seals belong in each temporal group?
 	for case in timegroupcases:
 
-		origindate = case.date_origin
-		if origindate < 1500 and origindate > 999:
-			targettimegroup = case.fk_timegroupc
-
-			if targettimegroup.pk_timegroup_c <15:
+		if case['date_origin'] < 1500 and case['date_origin'] > 999:
+			if case['fk_timegroupc'] < 15:
 				#number of cases for each time period
 				timegroupupdate = targettimegroup.timegroup_c_range
 				timecount[timegroupupdate] += 1
@@ -56,15 +50,15 @@ def getquantiles(timegroupcases):
 	for t in timegroupcases:
 
 		try:
-			timelist.append(int(t.date_origin))
+			timelist.append(int(t['date_origin']))
 
 		except:
 			print ("exception", t)
 
 	quantileset = statistics.quantiles(timelist, n=6)
 
-	print ("timelist", timelist)
-	print ("quantileset", quantileset)
+	# print ("timelist", timelist)
+	# print ("quantileset", quantileset)
 
 	resultrange = "c." + str(int(quantileset[0])) + "-" + str(int(quantileset[4]))
 
