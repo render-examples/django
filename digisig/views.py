@@ -439,6 +439,17 @@ def analyze(request, analysistype):
 
 				try:
 					# fetch the current model
+
+					url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
+
+					print ("step2", url)
+
+					with open(url, 'rb') as file:	
+						mlmodel = pickle.load(file)
+
+				except:
+					print ("exception occurred")
+					# fetch the current model
 					url = os.path.join(settings.BASE_DIR, 'staticfiles/ml/ml_tree')
 
 					print ("step2b", url)
@@ -446,14 +457,6 @@ def analyze(request, analysistype):
 					with open(url, 'rb') as file:	
 						mlmodel = pickle.load(file)
 
-				except:
-					# fetch the current model
-					url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
-
-					print ("step2", url)
-
-					with open(url, 'rb') as file:	
-						mlmodel = pickle.load(file)
 
 				# pass model and features of seal to function that predicts the date
 				result, result1, resulttext, finalnodevalue, df = mlpredictcase(class_object, shape_object, resultarea, mlmodel)
@@ -486,65 +489,48 @@ def analyze(request, analysistype):
 
 				print ("P6")
 
-				# #identify a subset of seal to display as suggestions
-				seal_set = Representation.objects.filter(
-					primacy=1).filter(
-					fk_manifestation__fk_face__fk_seal__in=sealtargets).filter(
-					fk_manifestation__fk_face__fk_shape=shape_object).filter(
-					fk_manifestation__fk_face__fk_class=class_object).select_related(
-					'fk_connection').select_related(
-					'fk_manifestation__fk_face__fk_seal').select_related(
-					'fk_manifestation__fk_support__fk_part__fk_item__fk_repository').select_related(
-					'fk_manifestation__fk_support__fk_number_currentposition').select_related(
-					'fk_manifestation__fk_support__fk_attachment').select_related(
-					'fk_manifestation__fk_support__fk_supportstatus').select_related(
-					'fk_manifestation__fk_support__fk_nature').select_related(
-					'fk_manifestation__fk_imagestate').select_related(
-					'fk_manifestation__fk_position').select_related(
-					'fk_manifestation__fk_support__fk_part__fk_event').order_by(
-					'fk_manifestation')
+				# # #identify a subset of seal to display as suggestions
+				# seal_set = Representation.objects.filter(
+				# 	primacy=1).filter(
+				# 	fk_manifestation__fk_face__fk_seal__in=sealtargets).filter(
+				# 	fk_manifestation__fk_face__fk_shape=shape_object).filter(
+				# 	fk_manifestation__fk_face__fk_class=class_object).select_related(
+				# 	'fk_connection').select_related(
+				# 	'fk_manifestation__fk_face__fk_seal').select_related(
+				# 	'fk_manifestation__fk_support__fk_part__fk_item__fk_repository').select_related(
+				# 	'fk_manifestation__fk_support__fk_number_currentposition').select_related(
+				# 	'fk_manifestation__fk_support__fk_attachment').select_related(
+				# 	'fk_manifestation__fk_support__fk_supportstatus').select_related(
+				# 	'fk_manifestation__fk_support__fk_nature').select_related(
+				# 	'fk_manifestation__fk_imagestate').select_related(
+				# 	'fk_manifestation__fk_position').select_related(
+				# 	'fk_manifestation__fk_support__fk_part__fk_event').order_by(
+				# 	'fk_manifestation')
 
-				seal_set, totalrows, totaldisplay, qpagination = defaultpagination(seal_set, 1)
+				# seal_set, totalrows, totaldisplay, qpagination = defaultpagination(seal_set, 1)
 
-				print (seal_set)
+				print ("almost there")
 
 				manifestation_set = {}
 				
-				for s in seal_set:
-					manifestation_dic = {}
-					connection = s.fk_connection
-					manifestation_dic["thumb"] = connection.thumb
-					manifestation_dic["medium"] = connection.medium
-					manifestation_dic["representation_thumbnail_hash"] = s.representation_thumbnail_hash
-					manifestation_dic["representation_filename_hash"] = s.representation_filename_hash 
-					manifestation_dic["id_representation"] = s.id_representation
-					
-					manifestation_dic["id_item"] = s.fk_manifestation.fk_support.fk_part.fk_item.id_item
-					manifestation_dic["id_manifestation"] = s.fk_manifestation.id_manifestation
-					manifestation_dic["id_seal"] = s.fk_manifestation.fk_face.fk_seal.id_seal
-					manifestation_dic["repository_fulltitle"] = s.fk_manifestation.fk_support.fk_part.fk_item.fk_repository.repository_fulltitle
-					manifestation_dic["number"] = s.fk_manifestation.fk_support.fk_number_currentposition.number
-					manifestation_dic["imagestate_term"] = s.fk_manifestation.fk_imagestate
-
-
-					manifestation_set[s.fk_manifestation.id_manifestation] = manifestation_dic
-
-				# ## prepare the data for each displayed seal manifestation
-
-				# manifestation_set = {}
-
-				# for e in manifestation_possibilities:
+				# for s in seal_set:
 				# 	manifestation_dic = {}
-				# 	manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-				# 	manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-				# 	manifestation_dic = manifestation_fetchlocations(e, manifestation_dic)
-				# 	manifestation_dic = manifestation_fetchstandardvalues(e, manifestation_dic)
+				# 	connection = s.fk_connection
+				# 	manifestation_dic["thumb"] = connection.thumb
+				# 	manifestation_dic["medium"] = connection.medium
+				# 	manifestation_dic["representation_thumbnail_hash"] = s.representation_thumbnail_hash
+				# 	manifestation_dic["representation_filename_hash"] = s.representation_filename_hash 
+				# 	manifestation_dic["id_representation"] = s.id_representation	
+				# 	manifestation_dic["id_item"] = s.fk_manifestation.fk_support.fk_part.fk_item.id_item
+				# 	manifestation_dic["id_manifestation"] = s.fk_manifestation.id_manifestation
+				# 	manifestation_dic["id_seal"] = s.fk_manifestation.fk_face.fk_seal.id_seal
+				# 	manifestation_dic["repository_fulltitle"] = s.fk_manifestation.fk_support.fk_part.fk_item.fk_repository.repository_fulltitle
+				# 	manifestation_dic["number"] = s.fk_manifestation.fk_support.fk_number_currentposition.number
+				# 	manifestation_dic["imagestate_term"] = s.fk_manifestation.fk_imagestate
 
-				# 	manifestation_set[e.id_manifestation] = manifestation_dic
+				# 	manifestation_set[s.fk_manifestation.id_manifestation] = manifestation_dic
 
-				#representationset = mlsealselectinfo(subset)
-
-				form = DateForm(request.POST)
+				# form = DateForm(request.POST)
 
 		else:
 			form = DateForm()
