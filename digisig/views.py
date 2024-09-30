@@ -439,7 +439,7 @@ def analyze(request, analysistype):
 
 				try:
 					# fetch the current model
-					url = os.path.join(settings.BASE_DIR, 'staticfiles\\ml\\ml_tree')
+					url = os.path.join(settings.BASE_DIR, 'staticfiles/ml/ml_tree')
 
 					print ("step2b", url)
 
@@ -522,7 +522,11 @@ def analyze(request, analysistype):
 					manifestation_dic["id_item"] = s.fk_manifestation.fk_support.fk_part.fk_item.id_item
 					manifestation_dic["id_manifestation"] = s.fk_manifestation.id_manifestation
 					manifestation_dic["id_seal"] = s.fk_manifestation.fk_face.fk_seal.id_seal
-					
+					manifestation_dic["repository_fulltitle"] = s.fk_manifestation.fk_support.fk_part.fk_item.fk_repository.repository_fulltitle
+					manifestation_dic["number"] = s.fk_manifestation.fk_support.fk_number_currentposition.number
+					manifestation_dic["imagestate_term"] = s.fk_manifestation.fk_imagestate
+
+
 					manifestation_set[s.fk_manifestation.id_manifestation] = manifestation_dic
 
 				# ## prepare the data for each displayed seal manifestation
