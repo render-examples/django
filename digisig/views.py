@@ -435,8 +435,12 @@ def analyze(request, analysistype):
 					if qhorizontal > 0:
 						resultarea = faceupdater(qshape, qvertical, qhorizontal)
 
+				print ("step1")
+
 				# fetch the current model
 				url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
+
+				print ("step2", url)
 
 				with open(url, 'rb') as file:	
 					mlmodel = pickle.load(file)
