@@ -192,16 +192,16 @@
 
 				{% if m.label_manifestation_repository != null %}
 				<tr>
-							<th class="indent">Reference<a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
-							<td>{{m.label_manifestation_repository}}
-							</td>
+					<th class="indent">Reference<a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					<td>{{m.label_manifestation_repository}}
+					</td>
 				</tr>
 				{% endif %}
 
 				<tr>
 				{% if m.repository_location != null %}
-							<th class="indent">Region </th>
-							<td>{{m.repository_location}}</td>
+					<th class="indent">Region </th>
+					<td>{{m.repository_location}}</td>
 				{% endif %}
 				</tr>
 					

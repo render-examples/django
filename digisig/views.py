@@ -447,13 +447,6 @@ def analyze(request, analysistype):
 				# get information about decision path
 				decisionpathout, decisiontreedic = mlshowpath(mlmodel, df)
 
-				# print ("result", result)
-				# print ("result1", result1)
-				# print ("resulttext", resulttext)
-				# print ("finalnodevalue", finalnodevalue)
-				# print ("decisionpathout", decisionpathout)
-				# print ("decisiontreedic", decisiontreedic)
-
 				#find other seals assigned to this decision tree group
 				timegroupcases = Seal.objects.filter(
 					date_prediction_node=finalnodevalue).order_by(
@@ -463,29 +456,16 @@ def analyze(request, analysistype):
 
 				resultrange = getquantiles(timegroupcases)
 
-				### experimental method of generating period bands 2023/11/11
-				# timelist = []
-				# for t in timegroupcases:
-				# 	timelist.append(int(t.date_origin))
-				# quantileset = statistics.quantiles(timelist, n=6)
-				# resultrange = "c." + str(int(quantileset[0])) + "-" + str(int(quantileset[4]))
-
 				labels, data1 = temporaldistribution(timegroupcases)
+
 
 				#identify a subset of seal to display as suggestions
 				seal_set = timegroupcases.filter(fk_seal_face__fk_shape=shape_object).filter(fk_seal_face__fk_class=class_object)[:10].values("id_seal")
-				manifestation_possibilities = Manifestation.objects.filter(
-					fk_face__fk_seal__in=seal_set)[:10].select_related(
-					'fk_face__fk_seal').select_related(
-					'fk_face__fk_class').select_related(
-					'fk_support__fk_part__fk_item__fk_repository').select_related(
-					'fk_support__fk_number_currentposition').select_related(
-					'fk_support__fk_part__fk_event').select_related(
-					'fk_support__fk_supportstatus').select_related(
-					'fk_position').select_related(
-					'fk_support__fk_attachment').select_related(
-					'fk_support__fk_nature').select_related(
-					'fk_imagestate')		
+
+				manifestation_possibilities = sealsearch()
+				manifestation_possibilities = manifestation_possibilities.filter(
+					fk_face__fk_seal__in=seal_set)
+				manifestation_possibilities, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_possibilities, 1)
 
 				## prepare the data for each displayed seal manifestation
 
