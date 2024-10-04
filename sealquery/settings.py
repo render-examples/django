@@ -18,7 +18,6 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -29,7 +28,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default='django-insecure-99_+4yj_7)po_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ["www.digisig.org", "digisig.org", "127.0.0.1", ".localhost"]
+#ALLOWED_HOSTS = ["www.digisig.org", "digisig.org", "127.0.0.1", ".localhost"]
+ALLOWED_HOSTS = ["*"]
+
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -42,6 +43,7 @@ INTERNAL_IPS = ["127.0.0.1"]
 INSTALLED_APPS = [
     'render.apps.RenderConfig',
     'digisig.apps.DigisigConfig',
+    'witness.apps.WitnessConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
