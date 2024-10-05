@@ -10,5 +10,6 @@ from .views import index
 urlpatterns = [
 	#path("witness/", index, name="index")
 	path('', index, name='index'),
+    path('graph', views.graph, name='graph'),
 # ] + debug_toolbar_urls()
 ]

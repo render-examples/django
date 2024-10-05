@@ -46,3 +46,9 @@ def index(request):
         }
 
     return HttpResponse(template.render(context, request))
+
+
+def graph(request):
+
+    context = {}
+    return HttpResponse(template.render(context, request))
