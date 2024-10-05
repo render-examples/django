@@ -15,5 +15,4 @@ class VirtualHostMiddleware:
         # order matters!
         response = self.get_response(request)
 
-        print ("response:", host)
         return response
