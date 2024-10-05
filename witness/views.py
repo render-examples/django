@@ -1,17 +1,17 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.urls import reverse
 from datetime import datetime
 from time import time
+# from django.core.paginator import Paginator
 from django.db.models import Prefetch
-# from django.db.models import Q
-# from django.db.models import Count
-# from django.db.models import Sum
-# from django.core import serializers
+from django.db.models import Q
+from django.db.models import Count
+from django.db.models import Sum
+# from django.db.models.functions import Concat
+# from django.db.models import CharField
+from django.core import serializers
 
 from .models import *
 from .forms import * 
@@ -50,5 +50,21 @@ def index(request):
 
 def graph(request):
 
-    context = {}
+    # node1 = 
+
+    # nodes_dic = {}
+
+
+    #     properties = {"id_location": value1, "location": value2, "count": value3, "popupContent": popupcontent}
+    #     geometry = {"type": "Point", "coordinates": [value4, value5]}
+    #     location = {"type": "Feature", "properties": properties, "geometry": geometry}
+    #     placelist.append(location)
+
+    # mapdic["features"] = placelist
+
+
+    graphdata = {"nodes": [{"id": "id1","name": "name1","val": 1},{"id": "id2","name": "name2","val": 10},],"links": [{"source": "id1","target": "id2"},]}
+
+    template = loader.get_template('witness/graph.html')
+    context = {'graphdata': graphdata}
     return HttpResponse(template.render(context, request))
