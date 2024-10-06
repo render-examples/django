@@ -8,9 +8,11 @@
 <body>
   <div id="3d-graph"></div>
 
+  {{ graphdata|json_script:"graphdata" }}
+
   <script>
     // Random tree
-    const N = 300;
+    const N = 5;
     const gData = {
       nodes: [...Array(N).keys()].map(i => ({ id: i })),
       links: [...Array(N).keys()]
@@ -21,6 +23,7 @@
         }))
     };
 
+    console.log(gData)
 // // the set of series and repository numbers
 //     const graph_data = JSON.parse('{{graphdata|safe }}');
 
@@ -28,5 +31,11 @@
     const Graph = ForceGraph3D()
       (document.getElementById('3d-graph'))
         .graphData(gData);
+
+    // const Graph = ForceGraph3D()
+    //   (document.getElementById('3d-graph'))
+    //     .graphData(graphdata);
+
+
   </script>
 </body>
