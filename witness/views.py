@@ -30,15 +30,8 @@ def index(request):
     pagetitle = 'title'
     template = loader.get_template('witness/index.html')
 
-    #### update this to remove databasecall
 
     londoners_total = Individual.objects.filter(fk_individual_event__gt=1).distinct('id_individual').count()
-
-    # manifestation_total = Manifestation.objects.count()
-    # seal_total = Seal.objects.count()
-    # #item_total = Support.objects.distinct('fk_part__fk_item').count()
-    # item_total = 53408
-    # catalogue_total = Sealdescription.objects.count()
 
     context = {
         'pagetitle': pagetitle,
@@ -50,20 +43,10 @@ def index(request):
 
 def graph(request):
 
-    # node1 = 
-
-    # nodes_dic = {}
 
 
-    #     properties = {"id_location": value1, "location": value2, "count": value3, "popupContent": popupcontent}
-    #     geometry = {"type": "Point", "coordinates": [value4, value5]}
-    #     location = {"type": "Feature", "properties": properties, "geometry": geometry}
-    #     placelist.append(location)
 
-    # mapdic["features"] = placelist
-
-
-    graphdata = {nodes: [{"id":"id1","name":"name1","val": 1},{"id":"id2","name":"name2","val": 10}],links:[{"source":"id1","target":"id2"}]}
+    graphdata = {"nodes": [{"id":"id1","name":"name1","val": 1},{"id":"id2","name":"name2","val": 10}],"links":[{"source":"id1","target":"id2"}]}
 
     template = loader.get_template('witness/graph.html')
     context = {'graphdata': graphdata}
