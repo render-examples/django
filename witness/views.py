@@ -43,8 +43,27 @@ def index(request):
 
 def graph(request):
 
+    #linkset1 = Digisigrelationshipview.objects.all().values('fk_individual', 'person2')
 
+    personprimeevents = Referenceindividual.objects.filter(fk_individual=10000029, fk_referencerole=1).values('fk_event')
 
+    personlinks = Referenceindividual.objects.filter(
+        fk_event__in=personprimeevents, fk_referencerole=1).exclude(
+        fk_individual=10000029).values(
+        'fk_individual')
+
+    person_set = Individual.objects.filter(id_individual__in=personlinks)
+
+    phrase1 = '[{"id":10000029,"name":"Thomas","val": 1}"'
+    phrase2 = "["
+
+    for i in person_set:
+        value1 = i.id_individual
+        value2 = i.fk_descriptor
+        value3 = 1
+
+        phrase1 = phrase1 + ',{"id":"' + value1 + '","name":"' + value2 + '","val": 1}'
+        phrase2 = phrase2 + '{"source":' + 10000029,"target":' + value1 +'},'
 
     graphdata = {"nodes": [{"id":"id1","name":"name1","val": 1},{"id":"id2","name":"name2","val": 10}],"links":[{"source":"id1","target":"id2"}]}
 
