@@ -54,17 +54,6 @@ def graph(request):
 
     person_set = Individual.objects.filter(id_individual__in=personlinks)
 
-    phrase1 = '[{"id":10000029,"name":"Thomas","val": 1}"'
-    phrase2 = "["
-
-    for i in person_set:
-        value1 = i.id_individual
-        value2 = i.fk_descriptor
-        value3 = 1
-
-        phrase1 = phrase1 + ',{"id":"' + value1 + '","name":"' + value2 + '","val": 1}'
-        phrase2 = phrase2 + '{"source":' + 10000029,"target":' + value1 +'},'
-
     graphdata = {"nodes": [{"id":"id1","name":"name1","val": 1},{"id":"id2","name":"name2","val": 10}],"links":[{"source":"id1","target":"id2"}]}
 
     template = loader.get_template('witness/graph.html')
