@@ -5,20 +5,33 @@
   <!--<script src="../../dist/3d-force-graph.js"></script>-->
 </head>
 
+
 <body>
   <div id="3d-graph"></div>
 
   {{ graphdata|json_script:"graphdata" }}
 
+  {{ linkslist|json_script:"linklist" }}
+  {{ nodelist|json_script:"nodelist" }}
+
+
   <script>
 
   var graphdata2 = JSON.parse(document.getElementById('graphdata').textContent);
+  var nodes = JSON.parse(document.getElementById('nodelist').textContent);
+  var links = JSON.parse(document.getElementById('linklist').textContent);
 
-  console.log(graphdata2);
+   var obj = new Object();
+   obj.nodes = nodes;
+   obj.links = links;
+
+   console.log(obj)
+
 
     const Graph = ForceGraph3D()
       (document.getElementById('3d-graph'))
-        .graphData(graphdata2);
+        .graphData(obj);
+
 
   </script>
 </body>

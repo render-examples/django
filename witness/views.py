@@ -54,25 +54,33 @@ def graph(request):
     personprimeevents = Referenceindividual.objects.filter(fk_individual=sourcevalue, fk_referencerole=1).values('fk_event')
 
     personlinks = Referenceindividual.objects.filter(
-        fk_event__in=personprimeevents, fk_referencerole=1).values(target=F('fk_individual'))[:5]
+        fk_event__in=personprimeevents, fk_referencerole=1).values(target=F('fk_individual'))
 
-    nodesset= personlinks.annotate(source=Value(sourcevalue, output_field=IntegerField()))
+    links_set= personlinks.annotate(source=Value(sourcevalue, output_field=IntegerField()))
 
-    graphdata["nodes"] = json.dumps(list(nodesset))
+    linkslist = list(links_set)
+
+    print(linkslist)
 
     individual_set = Individual.objects.filter(
-        id_individual__in=personlinks).exclude(id_individual=10000019).values(
+        id_individual__in=personlinks).values(
         id=F('id_individual'), name=F('fullname_original')).annotate(
-        val=Count("id_individual"))[:5]
+        val=Count("id_individual"))
 
-    graphdata["links"] = json.dumps(list(individual_set))
+    nodelist = list(individual_set)
 
-    print (graphdata)
+    #graphdata = {"nodes": [{"id":"id1","name":"name1","val": 1},{"id":"id2","name":"name2","val": 10}],"links":[{"source":"id1","target":"id2"}]}
 
-    # graphdata = {"nodes": [{"id":"id1","name":"name1","val": 1},{"id":"id2","name":"name2","val": 10}],"links":[{"source":"id1","target":"id2"}]}
+    graphdata = {"nodes": [{"id":10000029,"name":"John de Gisors","val": 1},{"id":10001029,"name":"Michael Tovy","val": 10}],"links":[{"source":10000029,"target":10001029}]}
 
-    graphdata = {'nodes': [{"target": 10002629, "source": 10000029}, {"target": 10005089, "source": 10000029}, {"target": 10000069, "source": 10000029}, {"target": 10000329, "source": 10000029}, {"target": 10001029, "source": 10000029}], 'links': [{"id": 10000069, "name": "John de Gisors", "val": 1}, {"id": 10000329, "name": "Michael Tovy", "val": 1}, {"id": 10001029, "name": "Ralph Ashwy, Civis London", "val": 1}, {"id": 10002629, "name": "Robert Montpellier", "val": 1}, {"id": 10005089, "name": "John Calf, Fishmonger", "val": 1}]}
+    # linkslist = {"source":10000029,"target":10001029}
+
+    # nodelist = {"id":10000029,"name":"John de Gisors","val": 1},{"id":10001029,"name":"Michael Tovy","val": 10}
 
     template = loader.get_template('witness/graph.html')
-    context = {'graphdata': graphdata}
+    context = {
+        'graphdata': graphdata,
+        'nodelist': nodelist,
+        'linkslist': linkslist,
+        }
     return HttpResponse(template.render(context, request))
