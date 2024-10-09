@@ -45,22 +45,32 @@ def index(request):
 
 def graph(request):
 
-    #linkset1 = Digisigrelationshipview.objects.all().values('fk_individual', 'person2')
-
-    sourcevalue = 10000029
+    sourcevalue = 3143
 
     graphdata = {}
 
-    personprimeevents = Referenceindividual.objects.filter(fk_individual=sourcevalue, fk_referencerole=1).values('fk_event')
-
     personlinks = Referenceindividual.objects.filter(
-        fk_event__in=personprimeevents, fk_referencerole=1).values(target=F('fk_individual'))
+        fk_referencerole=1).filter(
+        fk_event=sourcevalue).distinct('fk_individual').values('fk_individual')
 
-    links_set= personlinks.annotate(source=Value(sourcevalue, output_field=IntegerField()))
+    peoplelist = list(personlinks)
 
-    linkslist = list(links_set)
+    targetset = peoplelist
 
-    print(linkslist)
+    numberofpeople = len(targetset)
+    linkslist = []
+
+    for x in range(numberofpeople):
+        for y in range(x+1, numberofpeople):
+            person1 = targetset[x]['fk_individual']
+            person2 = targetset[y]['fk_individual']
+            linkslist.append({'source': person1, 'target': person2})
+
+    # print (linkslist)
+
+    # links_set= personlinks.annotate(source=Value(sourcevalue, output_field=IntegerField()))
+
+    # linkslist = list(links_set)
 
     individual_set = Individual.objects.filter(
         id_individual__in=personlinks).values(
@@ -84,3 +94,43 @@ def graph(request):
         'linkslist': linkslist,
         }
     return HttpResponse(template.render(context, request))
+
+
+
+
+    #     #version1
+    # sourcevalue = 10000029
+
+    # graphdata = {}
+
+    # personprimeevents = Referenceindividual.objects.filter(fk_individual=sourcevalue, fk_referencerole=1).values('fk_event')
+
+    # personlinks = Referenceindividual.objects.filter(
+    #     fk_event__in=personprimeevents, fk_referencerole=1).values(target=F('fk_individual'))
+
+    # links_set= personlinks.annotate(source=Value(sourcevalue, output_field=IntegerField()))
+
+    # linkslist = list(links_set)
+
+    # individual_set = Individual.objects.filter(
+    #     id_individual__in=personlinks).values(
+    #     id=F('id_individual'), name=F('fullname_original')).annotate(
+    #     val=Count("id_individual"))
+
+    # nodelist = list(individual_set)
+
+    # #graphdata = {"nodes": [{"id":"id1","name":"name1","val": 1},{"id":"id2","name":"name2","val": 10}],"links":[{"source":"id1","target":"id2"}]}
+
+    # graphdata = {"nodes": [{"id":10000029,"name":"John de Gisors","val": 1},{"id":10001029,"name":"Michael Tovy","val": 10}],"links":[{"source":10000029,"target":10001029}]}
+
+    # # linkslist = {"source":10000029,"target":10001029}
+
+    # # nodelist = {"id":10000029,"name":"John de Gisors","val": 1},{"id":10001029,"name":"Michael Tovy","val": 10}
+
+    # template = loader.get_template('witness/graph.html')
+    # context = {
+    #     'graphdata': graphdata,
+    #     'nodelist': nodelist,
+    #     'linkslist': linkslist,
+    #     }
+    # return HttpResponse(template.render(context, request))
