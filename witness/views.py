@@ -48,8 +48,33 @@ def graph(request):
     parishevents = Location.objects.filter(id_location=50013947).values('locationname__locationreference__fk_event')
 
     reference_set = Referenceindividual.objects.filter(
-        fk_referencerole=1).filter(
-        fk_event__in=parishevents).values('fk_individual', 'fk_event')
+        fk_referencerole=1).exclude(fk_individual=10000019).filter(
+        fk_event__in=parishevents).values('fk_individual', 'fk_event').order_by('pk_referenceindividual')
+
+    reference_dic = {}
+
+    for r in reference_set:
+        if r['fk_event'] in reference_dic:
+            eventid = r['fk_event']
+            reference_dic[eventid].append(r['fk_individual'])
+        else:
+            eventid = r['fk_event']
+            reference_dic[eventid] = [r['fk_individual']]
+
+    for r in reference_dic:
+        numberofpeople = len(reference_dic[r])
+
+        person1 = 
+
+        for x in range(numberofpeople):
+            for y in range(x+1, numberofpeople):
+
+
+                person1 = targetset[x]['fk_individual']
+                person2 = targetset[y]['fk_individual']
+                linkslist.append({'source': person1, 'target': person2})
+
+
 
     personlinks = reference_set.distinct('fk_individual').values('fk_individual')
 
@@ -62,25 +87,6 @@ def graph(request):
 
     linkslist = []
 
-    reference_set2 = reference_set.values_list()
-
-    print (reference_set2)
-
-    for r in parishevents:
-        personlinks = reference_set.filter(
-            fk_event=r["locationname__locationreference__fk_event"]).exclude(fk_individual=10000019).distinct('fk_individual').values('fk_individual')
-
-        peoplelist = list(personlinks)
-
-        targetset = peoplelist
-
-        numberofpeople = len(targetset)
-
-        for x in range(numberofpeople):
-            for y in range(x+1, numberofpeople):
-                person1 = targetset[x]['fk_individual']
-                person2 = targetset[y]['fk_individual']
-                linkslist.append({'source': person1, 'target': person2})
 
     graphdata = {"nodes": [{"id":10000029,"name":"John de Gisors","val": 1},{"id":10001029,"name":"Michael Tovy","val": 10}],"links":[{"source":10000029,"target":10001029}]}
 
@@ -90,7 +96,66 @@ def graph(request):
         'nodelist': nodelist,
         'linkslist': linkslist,
         }
-    return HttpResponse(template.render(context, request))
+
+
+
+
+    # parishevents = Location.objects.filter(id_location=50013947).values('locationname__locationreference__fk_event')
+
+    # reference_set = Referenceindividual.objects.filter(
+    #     fk_referencerole=1).filter(
+    #     fk_event__in=parishevents).values('fk_individual', 'fk_event')
+
+    # reference_dic = {}
+
+    # for r in reference_set:
+    #     if r['fk_event'] in reference_dic:
+    #         eventid = r['fk_event']
+    #         reference_dic[eventid].append(r['fk_individual'])
+    #     else:
+    #         eventid = r['fk_event']
+    #         reference_dic[eventid] = [r['fk_individual']]
+
+    # personlinks = reference_set.distinct('fk_individual').values('fk_individual')
+
+    # individual_set = Individual.objects.filter(
+    #     id_individual__in=personlinks).values(
+    #     id=F('id_individual'), name=F('fullname_original')).annotate(
+    #     val=Count("id_individual"))
+
+    # nodelist = list(individual_set)
+
+    # linkslist = []
+
+    # reference_set2 = reference_set.values_list()
+
+    # # print (reference_set2)
+
+    # for r in parishevents:
+    #     personlinks = reference_set.filter(
+    #         fk_event=r["locationname__locationreference__fk_event"]).exclude(fk_individual=10000019).distinct('fk_individual').values('fk_individual')
+
+    #     peoplelist = list(personlinks)
+
+    #     targetset = peoplelist
+
+    #     numberofpeople = len(targetset)
+
+    #     for x in range(numberofpeople):
+    #         for y in range(x+1, numberofpeople):
+    #             person1 = targetset[x]['fk_individual']
+    #             person2 = targetset[y]['fk_individual']
+    #             linkslist.append({'source': person1, 'target': person2})
+
+    # graphdata = {"nodes": [{"id":10000029,"name":"John de Gisors","val": 1},{"id":10001029,"name":"Michael Tovy","val": 10}],"links":[{"source":10000029,"target":10001029}]}
+
+    # template = loader.get_template('witness/graph.html')
+    # context = {
+    #     'graphdata': graphdata,
+    #     'nodelist': nodelist,
+    #     'linkslist': linkslist,
+    #     }
+    # return HttpResponse(template.render(context, request))
 
 
 
