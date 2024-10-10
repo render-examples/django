@@ -62,9 +62,13 @@ def graph(request):
 
     linkslist = []
 
+    reference_set2 = reference_set.values_list()
+
+    print (reference_set2)
+
     for r in parishevents:
         personlinks = reference_set.filter(
-            fk_event=r["locationname__locationreference__fk_event"]).distinct('fk_individual').values('fk_individual')
+            fk_event=r["locationname__locationreference__fk_event"]).exclude(fk_individual=10000019).distinct('fk_individual').values('fk_individual')
 
         peoplelist = list(personlinks)
 
