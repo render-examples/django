@@ -61,22 +61,19 @@ def graph(request):
             eventid = r['fk_event']
             reference_dic[eventid] = [r['fk_individual']]
 
-    for r in reference_dic:
-        numberofpeople = len(reference_dic[r])
+    linkslist = []
 
-        person1 = 
+    for r in reference_dic:
+        targetset = reference_dic[r]
+        numberofpeople = len(reference_dic[r])
 
         for x in range(numberofpeople):
             for y in range(x+1, numberofpeople):
-
-
-                person1 = targetset[x]['fk_individual']
-                person2 = targetset[y]['fk_individual']
+                person1 = targetset[x]
+                person2 = targetset[y]
                 linkslist.append({'source': person1, 'target': person2})
 
-
-
-    personlinks = reference_set.distinct('fk_individual').values('fk_individual')
+    personlinks = reference_set.values('fk_individual')
 
     individual_set = Individual.objects.filter(
         id_individual__in=personlinks).values(
@@ -84,9 +81,6 @@ def graph(request):
         val=Count("id_individual"))
 
     nodelist = list(individual_set)
-
-    linkslist = []
-
 
     graphdata = {"nodes": [{"id":10000029,"name":"John de Gisors","val": 1},{"id":10001029,"name":"Michael Tovy","val": 10}],"links":[{"source":10000029,"target":10001029}]}
 
@@ -97,7 +91,7 @@ def graph(request):
         'linkslist': linkslist,
         }
 
-
+    return HttpResponse(template.render(context, request))
 
 
     # parishevents = Location.objects.filter(id_location=50013947).values('locationname__locationreference__fk_event')
