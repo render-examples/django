@@ -78,15 +78,12 @@ def graph(request):
     individual_set = Individual.objects.filter(
         id_individual__in=personlinks).values(
         id=F('id_individual'), name=F('fullname_original')).annotate(
-        val=Count("id_individual"))
+        val=Count(id_individual_in=personlinks))
 
     nodelist = list(individual_set)
 
-    graphdata = {"nodes": [{"id":10000029,"name":"John de Gisors","val": 1},{"id":10001029,"name":"Michael Tovy","val": 10}],"links":[{"source":10000029,"target":10001029}]}
-
     template = loader.get_template('witness/graph.html')
     context = {
-        'graphdata': graphdata,
         'nodelist': nodelist,
         'linkslist': linkslist,
         }
