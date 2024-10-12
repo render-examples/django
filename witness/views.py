@@ -77,10 +77,15 @@ def graph(request):
 
     individual_set = Individual.objects.filter(
         id_individual__in=personlinks).values(
-        id=F('id_individual'), name=F('fullname_original')).annotate(
-        val=Count(id_individual_in=personlinks))
+        id=F('id_individual'), name=F('fullname_original'))
 
     nodelist = list(individual_set)
+
+    for n in nodelist:
+        targetperson = n['id']
+        totalhits = personlinks.filter(fk_individual=targetperson).count()
+        n['val'] = totalhits
+
 
     template = loader.get_template('witness/graph.html')
     context = {
