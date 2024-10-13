@@ -73,18 +73,23 @@ def graph(request):
                 person2 = targetset[y]
                 linkslist.append({'source': person1, 'target': person2})
 
-    personlinks = reference_set.values('fk_individual')
+    # personlinks = reference_set.values('fk_individual')
 
-    individual_set = Individual.objects.filter(
-        id_individual__in=personlinks).values(
-        id=F('id_individual'), name=F('fullname_original'))
+    # individual_set = Individual.objects.filter(
+    #     id_individual__in=personlinks).values(
+    #     id=F('id_individual'), name=F('fullname_original'))
+
+    individual_set = reference_set.values(
+        id=F('fk_individual__id_individual'), name=F('fk_individual__fullname_original'), val=(Count('fk_individual'))).distinct()
 
     nodelist = list(individual_set)
 
-    for n in nodelist:
-        targetperson = n['id']
-        totalhits = personlinks.filter(fk_individual=targetperson).count()
-        n['val'] = totalhits
+    print (nodelist)
+
+    # for n in nodelist:
+    #     targetperson = n['id']
+    #     totalhits = personlinks.filter(fk_individual=targetperson).count()
+    #     n['val'] = totalhits
 
 
     template = loader.get_template('witness/graph.html')
