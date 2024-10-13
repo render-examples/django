@@ -45,16 +45,22 @@ def index(request):
 
 def graph(request):
 
+    linkslist = []
+    nodelist = []
+
     parishevents = Location.objects.filter(id_location=50013947).values('locationname__locationreference__fk_event')
 
     reference_set = Referenceindividual.objects.filter(
         fk_referencerole=1).exclude(fk_individual=10000019).filter(
-        fk_event__in=parishevents).values('fk_individual', 'fk_event').order_by('pk_referenceindividual').select_related('fk_individual')
+        fk_event__in=parishevents).values('fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
 
     reference_dic = {}
-    nodelist = []
+    person_dic = {}
+    personlist = []
+    
 
     for r in reference_set:
+
         if r['fk_event'] in reference_dic:
             eventid = r['fk_event']
             reference_dic[eventid].append(r['fk_individual'])
@@ -62,10 +68,24 @@ def graph(request):
             eventid = r['fk_event']
             reference_dic[eventid] = [r['fk_individual']]
 
-         nodelist.append({'id':person1, 'name': nameoriginal, 'val': valuetarget})
+        person = r['fk_individual']
+        nameoriginal = r['fk_individual__fullname_original']
+        valuetarget = 1
 
-    linkslist = []
- 
+        if person in personlist:
+            print ("duplicate")
+            x=personlist.index(person)
+            case = nodelist[x]
+            currentvalue = case['val']
+            nodelist.pop(x)
+            nodelist.insert(x, {'id':person, 'name': nameoriginal, 'val': currentvalue+1})
+
+        else:
+            personlist.append(person)
+            nodelist.append({'id':person, 'name': nameoriginal, 'val': valuetarget})
+
+    print ("hello", personlist[:10])
+
     for r in reference_dic:
         targetset = reference_dic[r]
         numberofpeople = len(reference_dic[r])
@@ -82,18 +102,19 @@ def graph(request):
     #     id_individual__in=personlinks).values(
     #     id=F('id_individual'), name=F('fullname_original'))
 
-    individual_set = reference_set.values(
-        id=F('fk_individual__id_individual'), name=F('fk_individual__fullname_original'), val=(Count('fk_individual'))).distinct()
+    # individual_set = reference_set.values(
+    #     id=F('fk_individual__id_individual'), name=F('fk_individual__fullname_original'), val=(Count('fk_individual'))).distinct()
 
-    nodelist = list(individual_set)
+    # nodelist = list(individual_set)
 
-    print (nodelist)
+    # print (nodelist)
 
     # for n in nodelist:
     #     targetperson = n['id']
     #     totalhits = personlinks.filter(fk_individual=targetperson).count()
     #     n['val'] = totalhits
 
+    # print (nodelist)
 
     template = loader.get_template('witness/graph.html')
     context = {
