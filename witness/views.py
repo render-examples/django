@@ -49,9 +49,10 @@ def graph(request):
 
     reference_set = Referenceindividual.objects.filter(
         fk_referencerole=1).exclude(fk_individual=10000019).filter(
-        fk_event__in=parishevents).values('fk_individual', 'fk_event').order_by('pk_referenceindividual')
+        fk_event__in=parishevents).values('fk_individual', 'fk_event').order_by('pk_referenceindividual').select_related('fk_individual')
 
     reference_dic = {}
+    nodelist = []
 
     for r in reference_set:
         if r['fk_event'] in reference_dic:
@@ -61,8 +62,10 @@ def graph(request):
             eventid = r['fk_event']
             reference_dic[eventid] = [r['fk_individual']]
 
-    linkslist = []
+         nodelist.append({'id':person1, 'name': nameoriginal, 'val': valuetarget})
 
+    linkslist = []
+ 
     for r in reference_dic:
         targetset = reference_dic[r]
         numberofpeople = len(reference_dic[r])
