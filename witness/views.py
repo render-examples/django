@@ -69,11 +69,14 @@ def graph(request):
             reference_dic[eventid] = [r['fk_individual']]
 
         person = r['fk_individual']
+
+        if person == 10000459:
+            print ("found him")
+
         nameoriginal = r['fk_individual__fullname_original']
         valuetarget = 1
 
         if person in personlist:
-            print ("duplicate")
             x=personlist.index(person)
             case = nodelist[x]
             currentvalue = case['val']
@@ -114,7 +117,8 @@ def graph(request):
     #     totalhits = personlinks.filter(fk_individual=targetperson).count()
     #     n['val'] = totalhits
 
-    # print (nodelist)
+    print (nodelist[0])
+    print (linkslist[0])
 
     template = loader.get_template('witness/graph.html')
     context = {
