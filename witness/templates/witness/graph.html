@@ -25,76 +25,25 @@
    obj.nodes = nodes;
    obj.links = links;
 
-    // const Graph = ForceGraph3D()
-    //   (document.getElementById('3d-graph'))
-    //     .graphData(obj)
-    //     .onNodeClick(node => {
-    //       // Aim at node from outside it
-    //       const distance = 40;
-    //       const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
-
-    //       const newPos = node.x || node.y || node.z
-    //         ? { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }
-    //         : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
-
-    //       Graph.cameraPosition(
-    //         newPos, // new position
-    //         node, // lookAt ({ x, y, z })
-    //         3000  // ms transition duration
-    //       );
-    //     });
-
-    // Random tree
-    
-    const highlightNodes = new Set();
-    const highlightLinks = new Set();
-    let hoverNode = null;
-
     const Graph = ForceGraph3D()
       (document.getElementById('3d-graph'))
         .graphData(obj)
-        .nodeColor(node => highlightNodes.has(node) ? node === hoverNode ? 'rgb(255,0,0,1)' : 'rgba(255,160,0,0.8)' : 'rgba(0,255,255,0.6)')
-        .linkWidth(link => highlightLinks.has(link) ? 4 : 1)
-        .linkDirectionalParticles(link => highlightLinks.has(link) ? 4 : 0)
-        .linkDirectionalParticleWidth(4)
-        .onNodeHover(node => {
-          // no state change
-          if ((!node && !highlightNodes.size) || (node && hoverNode === node)) return;
+        .onNodeClick(node => {
+          // Aim at node from outside it
+          const distance = 40;
+          const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
 
-          highlightNodes.clear();
-          highlightLinks.clear();
-          if (node) {
-            highlightNodes.add(node);
-            node.neighbors.forEach(neighbor => highlightNodes.add(neighbor));
-            node.links.forEach(link => highlightLinks.add(link));
-          }
+          const newPos = node.x || node.y || node.z
+            ? { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }
+            : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
 
-          hoverNode = node || null;
-
-          updateHighlight();
-        })
-        .onLinkHover(link => {
-          highlightNodes.clear();
-          highlightLinks.clear();
-
-          if (link) {
-            highlightLinks.add(link);
-            highlightNodes.add(link.source);
-            highlightNodes.add(link.target);
-          }
-
-          updateHighlight();
+          Graph.cameraPosition(
+            newPos, // new position
+            node, // lookAt ({ x, y, z })
+            3000  // ms transition duration
+          );
         });
 
-    function updateHighlight() {
-      // trigger update of highlighted objects in scene
-      Graph
-        .nodeColor(Graph.nodeColor())
-        .linkWidth(Graph.linkWidth())
-        .linkDirectionalParticles(Graph.linkDirectionalParticles());
-    }
-  </script>
+    </script>
 
-
- 
 </body>

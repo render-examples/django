@@ -79,12 +79,12 @@ def graph(request):
             currentvalue = case['val']
             nodelist.pop(x)
             nodelist.insert(x, {'id':person, 'name': nameoriginal, 'val': currentvalue+1})
+            # nodelist.insert(x, {'id':person})
 
         else:
             personlist.append(person)
             nodelist.append({'id':person, 'name': nameoriginal, 'val': valuetarget})
-
-    print ("hello", personlist[:10])
+            # nodelist.append({'id':person})
 
     for r in reference_dic:
         targetset = reference_dic[r]
