@@ -4,12 +4,27 @@
 
 {% block content %}
 
+<style>
+
+#search1 {
+    background-image: url({% static 'digisig/images/sbh_978_v3.jpg' %});
+}
+
+#search2 {
+  background-image: url({% static 'digisig/images/IMGP9870_v3.jpg' %});
+}
+
+#search3 {
+  background-image: url({% static 'digisig/images/SBH1266_v1.jpg' %});
+}
+</style>
+
     <div class="home-banner"></div> 
     <div class="sidepanel-left"></div>
     <div class="sidepanel-right"></div>
 
-    <div class="searchoptions" id="search1"><a href="{% url 'search' searchtype='seals' %}">Search Seals</a></div>
-    <div class="searchoptions" id="search2"><a href="{% url 'search' searchtype='sealdescriptions' %}">Search Seal Descriptions</a></div>
+    <div class="searchoptions" id="search1"><a href="{% url 'search' searchtype='seals' %}">Search People</a></div>
+    <div class="searchoptions" id="search2"><a href="{% url 'search' searchtype='sealdescriptions' %}">Search Parishes</a></div>
     <div class="searchoptions" id="search3"><a href="{% url 'search' searchtype='actors' %}">Search Actors</a></div>
 
     <div id="digisigstats" style="color:black;">

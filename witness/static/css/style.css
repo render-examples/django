@@ -988,7 +988,6 @@ input[type=image] {
 
 #search1 {
 	grid-column: 2/5;
-
 }
 
 #search2 {
@@ -998,6 +997,7 @@ input[type=image] {
 #search3 {
 	grid-column: 8/11;
 }
+
 
 /* main text sections on main page */
 

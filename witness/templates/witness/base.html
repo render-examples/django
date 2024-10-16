@@ -38,7 +38,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	background-image: url({% static "digisig/images/icons/Untitled-1.gif" %});
 	}
 	.home-banner {
-	background-image: url({% static "digisig/images/banner_v3.jpg" %});
+	background-image: url({% static "digisig/images/map_v6.jpg" %}); 
 	}
 	.search-banner {
 	background-image: url({% static "digisig/images/IMGP9307_4.jpg" %});
@@ -62,18 +62,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	background-image: url({% static "digisig/images/SBH1266_v2.jpg" %}); 				
 	}
 
-
-#search1 {
-	background-image: url({% static 'digisig/images/IMGP9307_3b.jpg' %});
-}
-
-#search2 {
-  background-image: url({% static 'digisig/images/IMGP9870_v3.jpg' %});
-}
-
-#search3 {
-  background-image: url({% static 'digisig/images/SBH1266_v1.jpg' %});
-}
 
 </style>
 
@@ -105,11 +93,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	  <div class="subnav">
 	    <button class="subnavbtn">Search <i class="fas fa-caret-down"></i></button>
 	    <div class="subnav-content">
-	        <a href="{% url 'search' searchtype='seals' %}">Seals</a>
-	        <a href="{% url 'search' searchtype='sealdescriptions' %}">Descriptions</a>
-	        <a href="{% url 'search' searchtype='actors' %}">Actors</a>
-	        <a href="{% url 'search' searchtype='places' %}">Places</a>
-	        <a href="{% url 'search' searchtype='items' %}">Items</a>
+	        <a href="{% url 'search' searchtype='seals' %}">People</a>
+	        <a href="{% url 'search' searchtype='sealdescriptions' %}">Parishes</a>
 	    </div>
 	  </div> 
     <div class="subnav">
@@ -125,7 +110,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <a href="{% url 'information' infotype='help' %}">Help</a>
           <a href="{% url 'information' infotype='terminology' %}">Terminology</a>
           <a href="{% url 'information' infotype='collections' %}">Collections</a>
-          <a href="{% url 'information' infotype='machinelearning' %}">Matrices</a>
       </div>
     </div>
     <div class="subnav">
@@ -134,7 +118,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <a href="{% url 'about' %}">About</a>
           <a href="{% url 'information' infotype='contributors' %}">Contributors</a>
           <a href="{% url 'information' infotype='changelog' %}">Change Log</a>
-          <!-- <a href="{% url 'information' infotype='contact' %}">Contact</a> -->
       </div>
     </div>
   </div>  
