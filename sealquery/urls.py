@@ -22,5 +22,4 @@ urlpatterns = [
     #path('', include('render.urls')),
     path('', include('witness.urls')), 
     path('', include('digisig.urls')),
-
 ]

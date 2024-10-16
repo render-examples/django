@@ -43,18 +43,12 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 
-def search(request, searchtype):
+def explore(request, exploretype):
 
     print (request)
     targetphrase = "parish"
 
-    template = loader.get_template('witness/parish.html')
-    context = {
-        }
-
-    return HttpResponse(template.render(context, request))
-
-    # return redirect(targetphrase)
+    return redirect(targetphrase)
 
 def parish(request):
 

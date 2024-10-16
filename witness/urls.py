@@ -10,6 +10,7 @@ from . import views
 urlpatterns = [
 	#path("witness/", index, name="index")
 	path('', views.index, name='index'),
+    path('explore/<str:exploretype>', views.explore, name='explore'),
     path('parish', views.parish, name='parish'),
 # ] + debug_toolbar_urls()
 ]
