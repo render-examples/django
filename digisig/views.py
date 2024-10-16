@@ -543,6 +543,11 @@ def analyze(request, analysistype):
 def search(request, searchtype):
 	starttime = time()
 
+	if searchtype == "parish":
+		print ("what are you doing here?")
+		targetphrase = "parish"
+		return redirect(targetphrase)
+
 ### Actor Search
 
 	if searchtype == "actors":
