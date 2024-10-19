@@ -42,8 +42,50 @@ def index(request):
 
     return HttpResponse(template.render(context, request))
 
-
 def explore(request, exploretype):
+
+    print (request)
+    targetphrase = "parish"
+
+    return redirect(targetphrase)
+
+def search(request, exploretype):
+
+    print (request)
+    targetphrase = "parish"
+
+    return redirect(targetphrase)
+
+
+def information(request, exploretype):
+
+    print (request)
+    targetphrase = "parish"
+
+    return redirect(targetphrase)
+
+def discover(request, exploretype):
+
+    print (request)
+    targetphrase = "parish"
+
+    return redirect(targetphrase)
+
+def analyze(request, exploretype):
+
+    print (request)
+    targetphrase = "parish"
+
+    return redirect(targetphrase)
+
+def about(request, exploretype):
+
+    print (request)
+    targetphrase = "parish"
+
+    return redirect(targetphrase)
+
+def exhibit(request, exploretype):
 
     print (request)
     targetphrase = "parish"
