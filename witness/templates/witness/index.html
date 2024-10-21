@@ -4,50 +4,8 @@
 
 {% block content %}
 
-<style>
-
-#search1 {
-    background-image: url({% static 'digisig/images/sbh_978_v3.jpg' %});
-}
-
-#search2 {
-  background-image: url({% static 'digisig/images/IMGP9870_v3.jpg' %});
-}
-
-#search3 {
-  background-image: url({% static 'digisig/images/SBH1266_v1.jpg' %});
-}
-</style>
-
     <div class="home-banner"></div> 
     <div class="sidepanel-left"></div>
     <div class="sidepanel-right"></div>
-
-    <div class="searchoptions" id="search1"><a href="{% url 'search' searchtype='parish' %}">Explore People</a></div>
-    <div class="searchoptions" id="search2"><a href="{% url 'search' searchtype='parish' %}">Explore Parishes</a></div>
-    <div class="searchoptions" id="search3"><a href="{% url 'search' searchtype='parish' %}">Explore People</a></div>
-
-    <div id="digisigstats" style="color:black;">
-        <h2>Contents</h2>
-        <div id="digisigstatsbox">
-            <div> <span id="statistic">{{seal_total}}</span><br>Seals</div>
-            <div> <span id="statistic">{{londoners_total}}</span><br>Londoners Total</div>
-            <div> <span id="statistic">{{item_total}}</span><br>Items</div>
-            <div> <span id="statistic">{{catalogue_total}}</span><br>Seal Descriptions</div>
-        </div>
-    </div>
-
-    <div id="digisigblock1"></div>
-    <div id="digisigtextblock1">
-        <h2>The Witnessing London Project</h2>
-        <p>Seals</a> are an important part of cultural heritage, but they can be difficult for reseachers to discover and access using the existing reference works, catalogues and finding aids. Digisig helps researchers discover what seals survive, determine where they are located, and find out who has recorded and described them.</p>
-    </div>
-
-    <div id="digisigtextblock2">
-            <h2></h2> 
-        <div class="youtube-container">
-            <iframe class="youtube-iframe" src="https://www.youtube.com/embed/fAmMXzYXaeU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-    </div>
 
 {% endblock %}

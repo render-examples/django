@@ -207,12 +207,12 @@ background-color: #e5ebef;
 .colophon {
 	grid-column: 1/12;
 	grid-row: 1;
-	background-color: #314757;
-	background-position: left;
+	background-color: #000;
+	background-position: right top;
 	background-repeat: no-repeat;
-	background-size: contain;
+	background-size: 100%;
 	text-align: right;
-	height: 50px;
+	height: 40px;
 	z-index: 5;
 }
 
