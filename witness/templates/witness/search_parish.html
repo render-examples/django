@@ -34,36 +34,14 @@
 		<div class="searchfilter">		
 			<div class="filter">
 			<h2>Filter</h2>
-			<form id="form" action="/search/actors" method="post">
+			<form id="form" action="/search/parish" method="post">
 		    	{% csrf_token %}
 				{{ form.non_field_errors }}
-				<div style="display: none" class="fieldWrapper">
-					{{ form.pagination.errors }}
-					<label for="{{ form.pagination.id_for_label }}">pagination</label>
-					{{ form.pagination}}
-				</div>
 				<div class="fieldWrapper">		
-					{{ form.name.errors }}
-					<label for="{{ form.name.id_for_label }}">Name <a class="help" href="{% url 'entity' digisig_entity_number=10001587 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
-					{{ form.name }}
-				</div>
-				<div class="fieldWrapper" >		
-					{{ form.group.errors }}
-					<label for="{{ form.group.id_for_label }}">Actor Type</label>
-					{{ form.group }}
-				</div>
-				<div class="fieldWrapper">		
-					{{ form.personclass.errors }}
-					<label for="{{ form.personclass.id_for_label }}">Corporate Actor Class</label>
-					{{ form.personclass }}
-				</div>
-				<div class="fieldWrapper">		
-					{{ form.personorder.errors }}
-					<label for="{{ form.personorder.id_for_label }}">Corporate Actor Order</label>
-					{{ form.personorder }}
-				</div>
-
-
+					{{ form.londonparish.errors }}
+					<label for="{{ form.londonparish.id_for_label }}">londonparish <i class="fas fa-question-circle"></i></a></label>
+					{{ form.londonparish }}
+				</div>		
 				<div class="fieldWrapper">
 			    	<input class="submit" type="submit" value="Submit">
 		    	</div>
@@ -74,38 +52,11 @@
 			</div>
 		</div>
 	
-		<div class="searchresults">
-		{% for actor, value in individual_set.items %}
-			<div>
-				<a href="{% url 'entity' digisig_entity_number=value.id_individual %}">{{value.actor_name}}</a>
-			</div>
-			<div></div>
-		{% endfor %}
-
-		<div>
-		{% if totalrows > 9 %}
-			<div class= "pagination" style="float: right;">
-				{% if pagecountercurrent > 1 %}
-				<button id="page_button_previous" onclick="page_button(-1)">Previous</button>
-					{% endif %}
-				<button id="page_button_1" onclick="page_button(1)">{{pagecountercurrent}}</button>
-				<button id="page_button_2" onclick="page_button(2)">{{pagecounternext}}</button>
-				<button id="page_button_2" onclick="page_button(3)">{{pagecounternextnext}}</button>
-				<button id="page_button_next" onclick="page_button(1)">Next</button>
-			</div>
-		{% endif %}
-		</div>
 	</div>
 	</div>
 
 <script>
 
-
-// if the form data is changed then reset the page counter back to 1
-	document.getElementById("form").addEventListener("input", formupdate_event);
-	function formupdate_event() {
-		document.getElementById("id_pagination").value = 1;
-	}
 
 // clear all user inputs from the select boxes in the form 
 	function myFunction() {
@@ -119,59 +70,6 @@
 		document.getElementById("id_personclass").disabled = true;	    	
 		document.getElementById("id_personorder").disabled = true;
 	}
-
-// allow the user to progress to the subsequent page 
-	function page_button(numberofpages) {
-		var pagevalue = document.getElementById("id_pagination").value;
-		pagevalue = parseInt(pagevalue) + numberofpages;
-		document.getElementById("id_pagination").value = pagevalue;
-		document.getElementById("form").submit(); 
-	}
-
-// enable the coroprate options if corporate option is selected
-	document.getElementById("id_group").onchange = function() {
-		//check to see if form has a value
-		var statusgroup = document.getElementById('id_group').value;
-
-		if (statusgroup == "2") {
-	    	document.getElementById('id_personclass').style="opacity:1";
-	    	document.getElementById('id_personorder').style="opacity:1";	    	
-	   		document.getElementById("id_personclass").disabled = false;	    	
-	   		document.getElementById("id_personorder").disabled = false;	    	
-	    	console.log("hi", statusgroup);
-
-	    } else {
-	    	document.getElementById('id_personclass').style="opacity:0.6";
-	    	document.getElementById('id_personorder').style="opacity:0.6";
-	   		document.getElementById("id_personclass").disabled = true;	    	
-	   		document.getElementById("id_personorder").disabled = true;	    	
-		}
-	}
-
-// enable the coroprate options if corporate option is selected
-
-	function loadFunction() {
-		//check to see if form has a value
-		var statusgroup = document.getElementById('id_group').value;
-
-		console.log ("hi there", statusgroup);
-
-		if (statusgroup == "2") {
-	    	document.getElementById('id_personclass').style="opacity:1";
-	    	document.getElementById('id_personorder').style="opacity:1";	    	
-	   		document.getElementById("id_personclass").disabled = false;	    	
-	   		document.getElementById("id_personorder").disabled = false;	    	
-	    	console.log("hi", statusgroup);
-
-	    } else {
-	    	document.getElementById('id_personclass').style="opacity:0.6";
-	    	document.getElementById('id_personorder').style="opacity:0.6";
-	   		document.getElementById("id_personclass").disabled = true;	    	
-	   		document.getElementById("id_personorder").disabled = true;	    	
-		}
-	}
-
-
 </script>
 
 {% endblock %}

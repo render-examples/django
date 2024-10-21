@@ -191,7 +191,7 @@ background-color: #e5ebef;
 .sidepanel-left,
 .sidepanel-right {
 	grid-row: 5/14;
-	background-color:#b6c1c9;
+	background-color:#000;
 }
 
 .sidepanel-left {
