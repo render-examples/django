@@ -195,7 +195,10 @@ class MLpredictionForm(forms.Form):
 
 # For for parish selection
 
-for e in Location.objects.filter(fk_locationtype=1, fk_region=87).order_by('location')
+londonparishes_options = []
 
-class ParishForm(forms.Form):
+for e in Location.objects.filter(fk_locationtype=1, fk_region=87).order_by('location'):
+	londonparishes_options.append((e.id_location, e.location))
+
+class LondonparishForm(forms.Form):
 	londonparish = forms.ChoiceField(label='London Parish', choices=londonparishes_options, required=True)
