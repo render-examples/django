@@ -1,0 +1,190 @@
+{% extends "witness/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="search-people-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title"><h1>{{pagetitle}}</h1></div>
+
+	<div class="mainpage" id="maingpage"></div>
+
+	<div class="entity_detail" id="entity_detail">
+		<h3>Actor details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
+		<table>
+			{% if individual_object.fk_group.fk_group_class != null %}
+			<tr>
+				<th>Class</th>
+				<td>{{individual_object.fk_group.fk_group_class}}</td>
+			<tr>
+			{% endif %}
+	
+			{% if individual_object.fk_group.fk_group_order != null %}
+			<tr>
+				<th>Order</th>
+				<td>{{individual_object.fk_group.fk_group_order}}</td>
+			</tr>
+			{% endif %}				 
+		</table>
+	</div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{individual_object.id_individual}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+			
+	<div class="entity_seals" id="entity_seals">
+		<div class="div-caption">
+			Seal details ({{totaldisplay}} of {{totalrows}})<button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity1" style="display:none;">
+
+		{% for m in manifestation_set.values %}
+			<tr>
+				<th class="indent">Held by </th>
+				<td>{{m.repository_fulltitle}}</td>
+
+			{% if m.representation_thumbnail_hash != null %}
+				<td rowspan="6">
+
+			<figure>
+				<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{m.thumb}}{{m.representation_thumbnail_hash}}" alt="{{m.id_representation}}" onclick="image({{forloop.counter}})">
+			</figure>
+
+			<!-- The Modal -->
+			<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
+			  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
+			  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{m.medium}}{{m.representation_filename_hash}}" alt="{{m.id_representation}}">
+			  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' m.id_representation %}">Representation details</a></div>
+			</div>
+
+				</td>
+			{% endif %}	
+			</tr>
+
+			<tr>
+				<th class="indent">Part of item</th>
+				<td><a href="{% url 'item_page' digisig_entity_number=m.id_item %}">{{m.shelfmark}}</a>
+				{% if m.number != 'Undetermined'%}(seal {{m.number}}){% endif %}
+				</td>
+			</tr>
+
+			{% if m.label_manifestation_repository != null %}
+			<tr>
+				<th class="indent">Reference<a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+				<td>{{m.label_manifestation_repository}}
+				</td>
+			</tr>
+			{% endif %}
+
+			<tr>
+				{% if m.repository_location != null %}
+				<th class="indent">Place </th>
+				<td><a href="{% url 'place_page' digisig_entity_number=m.id_location %}">{{m.repository_location}}</a></td>
+				{% endif %}
+			</tr>
+
+			<tr>
+				{% if m.repository_startdate != null %}
+				<th class="indent">Date</th>
+				<td>{{m.repository_startdate}}
+				{% if m.repository_enddate != null %}- {{m.repository_enddate}}{% endif %}</td>
+				{% endif %}
+			</tr>
+
+			<tr>
+				<th class="indent">Example of </th>
+				<td><a href="{% url 'seal_page' digisig_entity_number=m.id_seal %}">Seal details</a></td>
+			</tr>
+
+			{% for key, value in m.sealdescriptions.items %}
+			<tr>
+				<th class="indent">
+					{% if forloop.first %} Described in {% endif %}
+				</th>
+				<td><a href="{% url 'sealdescription_page' digisig_entity_number=value.sealdescription_id %}">{{value.collection}} ({{value.identifier}})</a></td>
+			</tr>
+			{% endfor %}
+
+			{% endfor %}
+			</table>
+		</div>
+	</div>
+
+	{% if relationshipnumber > 0 %}
+	<div class="entity_relationship" id="entity_relationship">
+		<div class="div-caption">
+			Relationships <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity2" style="display:none;">
+			{% for relationship in relationship_object %}
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+					<td>{{relationship.relationship_role}} of 
+						<a href="{% url 'actor_page' digisig_entity_number=relationship.person2 %}">
+							{% if relationship.group_name != null %}{{relationship.group_name}}{% endif %}
+							{% if relationship.groupclass != null %} ({{relationship.groupclass}}){% endif %}
+							{% if relationship.grouporder != null %}: {{relationship.grouporder}}{% endif %}
+							{% if relationship.descriptor_title != null %}{{relationship.descriptor_title}}{% endif %}
+							{% if relationship.descriptor_name != null %}{{relationship.descriptor_name}}{% endif %}
+							{% if relationship.prefix1 != null %}{{relationship.prefix1}}{% endif %}
+							{% if relationship.descriptor1 != null %}{{relationship.descriptor1}}{% endif %}
+							{% if relationship.prefix2 != null %}{{relationship.prefix2}}{% endif %}
+							{% if relationship.descriptor2 != null %}{{relationship.descriptor2}}{% endif %}
+							{% if relationship.prefix3 != null %}{{relationship.prefix3}}{% endif %}
+							{% if relationship.descriptor3 != null %}{{relationship.descriptor3}}{% endif %}
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+	</div>
+	{% endif %}
+
+
+	<div class="entity_event" id="entity_event">
+		<div class="div-caption">
+			References <button id="entitybutton3" onclick="tbtoggle('entity3', 'entitybutton3')" class="entity">+</button>
+		</div>
+
+		<div >
+			<table id="entity3" style="display:none;">
+				<tr>
+					<th>Item</th>
+					<th>Date</th>
+					<th>Location</th>
+					<th>Role</th>
+				</tr>
+
+			{% for key, r in reference_set.items %}
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
+					<td><a href="{% url 'entity' digisig_entity_number=r.item_id %}">{{r.item_shelfmark}}</a></td>
+					<td>{{r.date}}</td>
+					<td><a href="{% url 'entity' digisig_entity_number=r.location_id %}">{{r.location}}]]</a> ({{r.region}})</td>
+					<td>{{r.role}}</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+	</div>
+
+
+<script>
+
+</script>
+
+
+{% endblock %}

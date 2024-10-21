@@ -191,3 +191,11 @@ for e in Collection.objects.filter(id_collection=30000047).order_by('id_collecti
 class MLpredictionForm(forms.Form):
 	classification = forms.ChoiceField(choices=classification_options, required=False)
 	collection2 = forms.ChoiceField(choices=collection2_options, required=False)
+
+
+# For for parish selection
+
+for e in Location.objects.filter(fk_locationtype=1, fk_region=87).order_by('location')
+
+class ParishForm(forms.Form):
+	londonparish = forms.ChoiceField(label='London Parish', choices=londonparishes_options, required=True)
