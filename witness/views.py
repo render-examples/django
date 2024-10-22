@@ -206,9 +206,6 @@ def parish_page(request, witness_entity_number):
                 person2 = targetset[y]
                 linkslist.append({'source': person1, 'target': person2})
 
-    # print (nodelist[0])
-    # print (linkslist[0])
-
     template = loader.get_template('witness/parish.html')
     context = {
         'nodelist': nodelist,

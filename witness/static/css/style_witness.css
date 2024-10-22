@@ -94,6 +94,14 @@ a {
 	text-decoration-thickness: 1px;
 	color: black;
 }
+
+a.centerpanel {
+	color: white;
+}
+
+
+
+
 a:hover, a.headingbtn:hover {
 	text-decoration: underline;
 	text-decoration-color: #c20a0a;
@@ -113,8 +121,9 @@ text-decoration: none;
 border-left: 5px solid #c20a0a;
 padding: 5px;
 background-color: #e5ebef;
-
 }
+
+
 
 .heading {
 	margin-top: 40px;
@@ -1266,7 +1275,6 @@ input[type=image] {
 }
 
 
-
 /* Tooltip container */
 .tooltip {
   position: relative;
@@ -1340,13 +1348,4 @@ input[type=image] {
 	grid-row: 5;
 	color:white;
 	background-color:black;
-}
-
-
-a.centerpanel {
-	text-decoration: underline;
-	text-decoration-style: dotted;
-	text-decoration-color: #c20a0a;
-	text-decoration-thickness: 1px;
-	color: white;
 }
