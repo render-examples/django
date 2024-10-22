@@ -1319,3 +1319,34 @@ input[type=image] {
 	/* this is important, it would cause firefox flickering! */
 	overflow: hidden;
 }
+
+/* rules from here are for witness Oct21 2024*/
+
+.main-title-witness {
+	grid-column:2/11;
+	grid-row: 4;
+	background-color:#eff3f6;
+	color: black;
+	padding: 10px;
+	text-align: center;
+	opacity: 90%;
+	height: 75px;	
+	white-space: nowrap;
+	overflow: hidden;	
+}
+
+.centerpanel {
+	grid-column: 3/7;
+	grid-row: 5;
+	color:white;
+	background-color:black;
+}
+
+
+a.centerpanel {
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	text-decoration-color: #c20a0a;
+	text-decoration-thickness: 1px;
+	color: white;
+}

@@ -4,11 +4,11 @@
 {% block content %}
 
 
-	<div class="search-people-banner"></div>
+	<div class="home-banner"></div>
 	<div class="sidepanel-left"></div>
 	<div class="sidepanel-right"></div>
 
-	<div class="main-title">
+	<div class="main-title-witness">
 		<h1>Search Parish</h1>
 	</div>
 
@@ -25,30 +25,28 @@
 	</div>
 
 	<div class="results-bar">
-		<div class="div-caption">
-			Results ({{totaldisplay}} of {{totalrows}})<button id="resultsbutton1" onclick="tbtoggle('results', 'resultsbutton1')" class="entity">-</button>
+		<div class="div-caption">Filter
 		</div>
 	</div>
 
 	<div class="results" id="results">
 		<div class="searchfilter">		
 			<div class="filter">
-			<h2>Filter</h2>
-			<form id="form" action="/search/parish" method="post">
-		    	{% csrf_token %}
-				{{ form.non_field_errors }}
-				<div class="fieldWrapper">		
-					{{ form.londonparish.errors }}
-					<label for="{{ form.londonparish.id_for_label }}">londonparish <i class="fas fa-question-circle"></i></a></label>
-					{{ form.londonparish }}
-				</div>		
-				<div class="fieldWrapper">
-			    	<input class="submit" type="submit" value="Submit">
-		    	</div>
-		    	<div class="fieldWrapper">
-		    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
-		    	</div>
-			</form>
+				<form id="form" action="/search/parish" method="post">
+			    	{% csrf_token %}
+					{{ form.non_field_errors }}
+					<div class="fieldWrapper">		
+						{{ form.londonparish.errors }}
+						<label for="{{ form.londonparish.id_for_label }}">londonparish <i class="fas fa-question-circle"></i></a></label>
+						{{ form.londonparish }}
+					</div>		
+					<div class="fieldWrapper">
+				    	<input class="submit" type="submit" value="Submit">
+			    	</div>
+			    	<div class="fieldWrapper">
+			    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
+			    	</div>
+				</form>
 			</div>
 		</div>
 	
