@@ -1362,9 +1362,10 @@ def entity(request, digisig_entity_number):
 
 	#create flag that this is a view operation....
 	operation = 1
+	application = 1
 
 	#item = 0, seal=1, manifestation=2, sealdescription=3, etc...
-	targetphrase = redirectgenerator(digisig_entity_number, operation)
+	targetphrase = redirectgenerator(digisig_entity_number, operation, application)
 
 	print ("targetphrase", targetphrase)
 

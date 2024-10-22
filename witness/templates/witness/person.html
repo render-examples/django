@@ -13,7 +13,7 @@
 	<div class="mainpage" id="maingpage"></div>
 
 	<div class="entity_detail" id="entity_detail">
-		<h3>Actor details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
+		<h3>Person details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
 		<table>
 			{% if individual_object.fk_group.fk_group_class != null %}
 			<tr>
@@ -133,7 +133,7 @@
 			{% for relationship in relationship_object %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
 					<td>{{relationship.relationship_role}} of 
-						<a href="{% url 'actor_page' digisig_entity_number=relationship.person2 %}">
+						<a href="{% url 'person_page' witness_entity_number=relationship.person2 %}">
 							{% if relationship.group_name != null %}{{relationship.group_name}}{% endif %}
 							{% if relationship.groupclass != null %} ({{relationship.groupclass}}){% endif %}
 							{% if relationship.grouporder != null %}: {{relationship.grouporder}}{% endif %}
@@ -171,9 +171,9 @@
 
 			{% for key, r in reference_set.items %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
-					<td><a href="{% url 'entity' digisig_entity_number=r.item_id %}">{{r.item_shelfmark}}</a></td>
+					<td><a href="{% url 'entity' witness_entity_number=r.item_id %}">{{r.item_shelfmark}}</a></td>
 					<td>{{r.date}}</td>
-					<td><a href="{% url 'entity' digisig_entity_number=r.location_id %}">{{r.location}}]]</a> ({{r.region}})</td>
+					<td><a href="{% url 'entity' witness_entity_number=r.location_id %}">{{r.location}}]]</a> ({{r.region}})</td>
 					<td>{{r.role}}</td>
 				</tr>
 			{% endfor %}

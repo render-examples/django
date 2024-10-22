@@ -19,7 +19,7 @@ urlpatterns = [
     path('exhibit', views.exhibit, name='exhibit'),
 
     re_path(r'page/parish/(?P<witness_entity_number>[0-9]{8})', views.parish_page, name='parish_page'),
-    re_path(r'page/person/(?P<digisig_entity_number>[0-9]{8})', views.person_page, name='person_page'),
+    re_path(r'page/person/(?P<witness_entity_number>[0-9]{8})', views.person_page, name='person_page'),
     re_path(r'entity/(?P<witness_entity_number>[0-9]{8})', views.entity, name='entity'),
 
 ] + debug_toolbar_urls()

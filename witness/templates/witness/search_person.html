@@ -34,7 +34,7 @@
 		<div class="searchfilter">		
 			<div class="filter">
 			<h2>Filter</h2>
-			<form id="form" action="/search/actors" method="post">
+			<form id="form" action="/search/person" method="post">
 		    	{% csrf_token %}
 				{{ form.non_field_errors }}
 				<div style="display: none" class="fieldWrapper">
@@ -44,25 +44,9 @@
 				</div>
 				<div class="fieldWrapper">		
 					{{ form.name.errors }}
-					<label for="{{ form.name.id_for_label }}">Name <a class="help" href="{% url 'entity' digisig_entity_number=10001587 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+					<label for="{{ form.name.id_for_label }}">Name</label>
 					{{ form.name }}
 				</div>
-				<div class="fieldWrapper" >		
-					{{ form.group.errors }}
-					<label for="{{ form.group.id_for_label }}">Actor Type</label>
-					{{ form.group }}
-				</div>
-				<div class="fieldWrapper">		
-					{{ form.personclass.errors }}
-					<label for="{{ form.personclass.id_for_label }}">Corporate Actor Class</label>
-					{{ form.personclass }}
-				</div>
-				<div class="fieldWrapper">		
-					{{ form.personorder.errors }}
-					<label for="{{ form.personorder.id_for_label }}">Corporate Actor Order</label>
-					{{ form.personorder }}
-				</div>
-
 
 				<div class="fieldWrapper">
 			    	<input class="submit" type="submit" value="Submit">
@@ -77,7 +61,7 @@
 		<div class="searchresults">
 		{% for actor, value in individual_set.items %}
 			<div>
-				<a href="{% url 'entity' digisig_entity_number=value.id_individual %}">{{value.actor_name}}</a>
+				<a href="{% url 'entity' witness_entity_number=value.id_individual %}">{{value.actor_name}}</a>
 			</div>
 			<div></div>
 		{% endfor %}

@@ -50,8 +50,6 @@ def explore(request, exploretype):
     return redirect(targetphrase, 50013947)
 
 
-
-
 def information(request, informationtype):
 
     print (request)
@@ -91,7 +89,6 @@ def exhibit(request):
 def search(request, searchtype):
 
     if searchtype == "parish":
-        print ("hello")
 
         #default
         qlondonparish= 50013947
@@ -120,30 +117,126 @@ def search(request, searchtype):
 
         return HttpResponse(template.render(context, request))
 
+### Actor (Person)
 
     if searchtype == "person":
-        print ("hello")
 
-    print (request)
-    targetphrase = "parish_page"
+        pagetitle = 'title'
 
-    return redirect(targetphrase, 50013947)
+        londonevents = Location.objects.filter(fk_region=87).values('locationname__locationreference__fk_event')
 
+        individual_object = individualsearch()
 
-def person_page(request):
+        individual_object = individual_object.exclude(
+            id_individual=10000019).filter(
+            fk_individual_event__in=londonevents).distinct('id_individual')
 
-    print (request)
-    targetphrase = "parish_page"
+        if request.method == "POST":
+            form = PeopleForm(request.POST)
+            if form.is_valid():
+                qname = form.cleaned_data['name']   
+                qpagination = form.cleaned_data['pagination']
 
-    return redirect(targetphrase, 50013947)
+                if len(qname) > 0:
+                    individual_object = individual_object.filter(
+                        Q(fullname_modern__icontains=qname) | Q(fullname_original__icontains=qname)) 
 
-def entity(request):
+                form = PeopleForm(request.POST)
 
-    print (request)
-    targetphrase = "parish_page"
+        else:
+            form = PeopleForm()
+            qpagination = 1
 
-    return redirect(targetphrase, 50013947)
+        individual_object, totalrows, totaldisplay, qpagination = defaultpagination(individual_object, qpagination) 
 
+        pagecountercurrent = qpagination
+        pagecounternext = qpagination + 1
+        pagecounternextnext = qpagination +2        
+
+        individual_set = {}
+
+        for i in individual_object:
+            individual_info = {}
+            individual_info['actor_name'] = namecompiler(i)
+            individual_info['id_individual'] = i.id_individual
+
+            individual_set[i.id_individual] = individual_info
+
+        context = {
+            'pagetitle': pagetitle,
+            'individual_set': individual_set,
+            'totalrows': totalrows,
+            'totaldisplay': totaldisplay,
+            'form': form,
+            'pagecountercurrent': pagecountercurrent,
+            'pagecounternext': pagecounternext,
+            'pagecounternextnext': pagecounternextnext,
+            }
+
+        template = loader.get_template('witness/search_person.html')
+        return HttpResponse(template.render(context, request))
+
+def person_page(request, witness_entity_number):
+
+    individual_object = individualsearch()
+    individual_object = individual_object.get(id_individual=witness_entity_number)
+
+    pagetitle= namecompiler(individual_object)
+
+    template = loader.get_template('witness/person.html')
+
+    manifestation_object = sealsearch().filter(
+        Q(fk_face__fk_seal__fk_individual_realizer=witness_entity_number) | Q(fk_face__fk_seal__fk_actor_group=witness_entity_number)
+    ). order_by('fk_face__fk_seal__fk_individual_realizer')
+
+    #hack to deal with cases where there are too many seals for the form to handle
+    qpagination = 1
+    manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
+
+    manifestation_set={}
+
+    for e in manifestation_object:
+        manifestation_dic = {}
+        manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+        manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+        manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
+        manifestation_set[e.id_manifestation] = manifestation_dic
+
+    # list of relationships for each actor
+    relationship_object = []            
+    relationship_object = Digisigrelationshipview.objects.filter(fk_individual = witness_entity_number)
+    relationshipnumber = len(relationship_object)
+
+    # list of references to the actor
+    reference_set = {}
+    reference_set = referenceset_references(individual_object, reference_set)
+
+    context = {
+        'pagetitle': pagetitle,
+        'individual_object': individual_object,
+        'relationship_object': relationship_object,
+        'relationshipnumber' : relationshipnumber,
+        'manifestation_set': manifestation_set,
+        'totalrows': totalrows,
+        'totaldisplay': totaldisplay,
+        'reference_set': reference_set,
+        }
+
+    template = loader.get_template('witness/person.html')
+    return HttpResponse(template.render(context, request))
+
+def entity(request, witness_entity_number):
+
+    print(witness_entity_number)
+
+    #create flag that this is a view operation....
+    operation = 1
+    application = 2
+
+    #item = 0, seal=1, manifestation=2, sealdescription=3, etc...
+    targetphrase = redirectgenerator(witness_entity_number, operation, application)
+
+    return redirect(targetphrase)
 
 def parish_page(request, witness_entity_number):
 
@@ -163,8 +256,7 @@ def parish_page(request, witness_entity_number):
 
     reference_dic = {}
     person_dic = {}
-    personlist = []
-    
+    personlist = []  
 
     for r in reference_set:
 
@@ -176,9 +268,6 @@ def parish_page(request, witness_entity_number):
             reference_dic[eventid] = [r['fk_individual']]
 
         person = r['fk_individual']
-
-        if person == 10000459:
-            print ("found him")
 
         nameoriginal = r['fk_individual__fullname_original']
         valuetarget = 1

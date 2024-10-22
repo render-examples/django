@@ -14,6 +14,54 @@ from django.conf import settings
 from time import time
 
 
+#### creates redirect links from generic URLs 
+def redirectgenerator(digisig_entity_number, operation, application):
+
+	entitynumber = int(digisig_entity_number)
+
+	if (operation == 1): root = "/page/"
+	if (operation == 2): root = "/edit/"
+	if (operation == 3): 
+		root = "/discover/exhibit/"
+		targetphrase = root + str(digisig_entity_number)
+		return (targetphrase)		
+
+	finalcharacter = (str(digisig_entity_number))[7:] 
+
+	if finalcharacter == '0': stem = "item/"
+	if finalcharacter == '1': stem = "seal/"
+	if finalcharacter == '2': stem = "manifestation/"
+	if finalcharacter == '3': stem = "sealdescription/"
+	if finalcharacter == '4': stem = "representation/"
+	if finalcharacter == '5': stem = "support/"
+	if finalcharacter == '6': stem = "face/"
+
+	#term=7 (10000007-29999997) collection=7(30000007-49999997) and place=7(higher than 49999997...)	
+	if finalcharacter == '7':
+		if (entitynumber < 29999997): stem = "term/"
+		elif (entitynumber < 49999997): stem = "collection/"
+		else: 
+			stem = "place/" 
+			if application == 2:
+				stem = "parish/" 
+
+	#temp workaround -- parts to redirect to item page
+	if finalcharacter == '8': 
+		stem = "part/"
+		part_object = get_object_or_404(Part, id_part=digisig_entity_number)
+		digisig_entity_number = part_object.fk_item.id_item
+
+	if finalcharacter == '9':
+		stem = "actor/" 
+		if application == 2:
+			stem = "person/"
+
+
+	targetphrase = root + stem + str(digisig_entity_number)
+	
+	return (targetphrase)
+
+
 def temporaldistribution(timegroupcases):
 	#prepare the temporal groups of seals for graph
 	timegroupset = TimegroupC.objects.filter(pk_timegroup_c__lt=15).order_by('pk_timegroup_c')
