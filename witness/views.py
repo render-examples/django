@@ -110,7 +110,7 @@ def search(request, searchtype):
         else:
             form = LondonparishForm()
 
-        template = loader.get_template('witness/SEARCH_parish.html')
+        template = loader.get_template('witness/search_parish.html')
         context = {
             'form': form,
             }
