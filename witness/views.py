@@ -90,6 +90,7 @@ def search(request, searchtype):
 
     if searchtype == "parish":
 
+        print ("Hello")
         #default
         qlondonparish= 50013947
 
