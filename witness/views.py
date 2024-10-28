@@ -103,8 +103,6 @@ def search(request, searchtype):
                 #make sure values are not empty then try and convert to ints
                 if len(londonparish) > 0:
                     qlondonparish = int(londonparish)
-
-                    print (request)
                     targetphrase = "parish_page"
                     return redirect(targetphrase, qlondonparish)
 
@@ -228,14 +226,32 @@ def person_page(request, witness_entity_number):
     parishstats = {}
 
     for r in reference_set.values():
-        print (r['location_id'])
-        parishvalue = r['location']
+        # r['location'] = r['location_id']        
+
+        parishvalue = r['location_id']
         if parishvalue in parishstats:
             parishstats[parishvalue] += 1
         else:
             parishstats[parishvalue] = 1
 
     print (parishstats)
+
+
+    # #adjust values if form submitted
+    # if request.method == 'POST':
+    #     form = LondonparishForm(request.POST)
+        
+    #     if form.is_valid():
+    #         londonparish = form.cleaned_data['londonparish']
+    #         #make sure values are not empty then try and convert to ints
+    #         if len(londonparish) > 0:
+    #             qlondonparish = int(londonparish)
+    #             targetphrase = "parish_page"
+    #             return redirect(targetphrase, qlondonparish)
+
+    # else:
+    #     form = LondonparishForm(initial=parishstats, instance=reference_set)
+
 
     context = {
         'pagetitle': pagetitle,
@@ -246,6 +262,7 @@ def person_page(request, witness_entity_number):
         'totalrows': totalrows,
         'totaldisplay': totaldisplay,
         'reference_set': reference_set,
+        # 'form': form,
         }
 
     template = loader.get_template('witness/person.html')
@@ -271,55 +288,55 @@ def parish_page(request, witness_entity_number):
 
     qlondonparish = witness_entity_number
  
-    linkslist = []
-    nodelist = []
-
     parishevents = Location.objects.filter(id_location=qlondonparish).values('locationname__locationreference__fk_event')
 
     reference_set = Referenceindividual.objects.filter(
         fk_referencerole=1).exclude(fk_individual=10000019).filter(
         fk_event__in=parishevents).values('fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
 
-    reference_dic = {}
-    person_dic = {}
-    personlist = []  
+    linkslist, nodelist = networkgenerator(reference_set)
 
-    for r in reference_set:
+    template = loader.get_template('witness/parish.html')
+    context = {
+        'nodelist': nodelist,
+        'linkslist': linkslist,
+        }
 
-        if r['fk_event'] in reference_dic:
-            eventid = r['fk_event']
-            reference_dic[eventid].append(r['fk_individual'])
-        else:
-            eventid = r['fk_event']
-            reference_dic[eventid] = [r['fk_individual']]
+    return HttpResponse(template.render(context, request))
 
-        person = r['fk_individual']
+def item_page(request, witness_entity_number):
 
-        nameoriginal = r['fk_individual__fullname_original']
-        valuetarget = 1
+    print (request)
+    targetphrase = "parish_page"
 
-        if person in personlist:
-            x=personlist.index(person)
-            case = nodelist[x]
-            currentvalue = case['val']
-            nodelist.pop(x)
-            nodelist.insert(x, {'id':person, 'name': nameoriginal, 'val': currentvalue+1})
-            # nodelist.insert(x, {'id':person})
+    return redirect(targetphrase, 50013947)
 
-        else:
-            personlist.append(person)
-            nodelist.append({'id':person, 'name': nameoriginal, 'val': valuetarget})
-            # nodelist.append({'id':person})
+def seal_page(request, witness_entity_number):
 
-    for r in reference_dic:
-        targetset = reference_dic[r]
-        numberofpeople = len(reference_dic[r])
+    print (request)
+    targetphrase = "parish_page"
 
-        for x in range(numberofpeople):
-            for y in range(x+1, numberofpeople):
-                person1 = targetset[x]
-                person2 = targetset[y]
-                linkslist.append({'source': person1, 'target': person2})
+    return redirect(targetphrase, 50013947)
+
+
+def personnetwork_page(request, witness_entity_number):
+
+    #default
+    qpersonnetwork= 10000039
+
+    #qpersonnetwork = witness_entity_number
+ 
+    reference_set1 = Referenceindividual.objects.filter(fk_individual=qpersonnectwork).distinct('fk_event')
+
+    parishevents = Referenceindividual.objects.filter(
+        fk_referencerole=1).filter(
+        fk_individual=qpersonnectwork).values('fk_event')
+
+    reference_set = Referenceindividual.objects.filter(
+        fk_referencerole=1).exclude(fk_individual=10000019).filter(
+        fk_event__in=parishevents).values('fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
+
+    linkslist, nodelist = networkgenerator(reference_set)
 
     template = loader.get_template('witness/parish.html')
     context = {

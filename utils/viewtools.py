@@ -14,6 +14,56 @@ from django.conf import settings
 from time import time
 
 
+### network diagrams
+def networkgenerator(reference_set):
+
+	linkslist = []
+	nodelist = []
+
+	reference_dic = {}
+	person_dic = {}
+	personlist = []  
+
+	for r in reference_set:
+
+		if r['fk_event'] in reference_dic:
+			eventid = r['fk_event']
+			reference_dic[eventid].append(r['fk_individual'])
+		else:
+			eventid = r['fk_event']
+			reference_dic[eventid] = [r['fk_individual']]
+
+		person = r['fk_individual']
+
+		nameoriginal = r['fk_individual__fullname_original']
+		valuetarget = 1
+
+		if person in personlist:
+			x=personlist.index(person)
+			case = nodelist[x]
+			currentvalue = case['val']
+			nodelist.pop(x)
+			nodelist.insert(x, {'id':person, 'name': nameoriginal, 'val': currentvalue+1})
+			# nodelist.insert(x, {'id':person})
+
+		else:
+			personlist.append(person)
+			nodelist.append({'id':person, 'name': nameoriginal, 'val': valuetarget})
+			# nodelist.append({'id':person})
+
+	for r in reference_dic:
+		targetset = reference_dic[r]
+		numberofpeople = len(reference_dic[r])
+
+		for x in range(numberofpeople):
+			for y in range(x+1, numberofpeople):
+				person1 = targetset[x]
+				person2 = targetset[y]
+				linkslist.append({'source': person1, 'target': person2})
+
+	return (linkslist, nodelist)
+
+
 #### creates redirect links from generic URLs 
 def redirectgenerator(digisig_entity_number, operation, application):
 
@@ -274,7 +324,7 @@ def mlshowpath (mlmodel, df):
 	sample_id = 0
 	# obtain ids of the nodes `sample_id` goes through, i.e., row `sample_id`
 	node_index = node_indicator.indices[
-	    node_indicator.indptr[sample_id] : node_indicator.indptr[sample_id + 1]
+		node_indicator.indptr[sample_id] : node_indicator.indptr[sample_id + 1]
 	]
 
 	#print ("node_index", node_index)
@@ -283,51 +333,51 @@ def mlshowpath (mlmodel, df):
 	i = -1
 	featurenames = []
 	for col in df.columns:
-	    i = i + 1
-	    #print (i, col)
+		i = i + 1
+		#print (i, col)
 
-	    if col == "size_area":
-	    	col = "size"
-	    featurenames.append(col)
+		if col == "size_area":
+			col = "size"
+		featurenames.append(col)
 
 	decisiontreetext= []
 	decisiontreedic= {}
 	for node_id in node_index:
-	    
-	    # continue to the next node if it is a leaf node
-	    if leaf_id[sample_id] == node_id:
-	        continue 
+		
+		# continue to the next node if it is a leaf node
+		if leaf_id[sample_id] == node_id:
+			continue 
 
-	    value = df.iat[0,feature[node_id]]
-	    
-	    if value <= threshold[node_id]:
-	        threshold_sign = "<="
-	    else:
-	        threshold_sign = ">"
+		value = df.iat[0,feature[node_id]]
+		
+		if value <= threshold[node_id]:
+			threshold_sign = "<="
+		else:
+			threshold_sign = ">"
 
-	    decisiontreetext.append(
-	        "decision node {node} : {featurename}({value}) "
-	        "{inequality} {threshold}".format(
-	            node=node_id,
-	            sample=sample_id,
-	            feature=feature[node_id],
-	            featurename=featurenames[feature[node_id]],
-	            value = df.iat[0,feature[node_id]],
-	            #value=X2[sample_id, feature[node_id]],
-	            inequality=threshold_sign,
-	            threshold=threshold[node_id],
-	        )
-	    )
+		decisiontreetext.append(
+			"decision node {node} : {featurename}({value}) "
+			"{inequality} {threshold}".format(
+				node=node_id,
+				sample=sample_id,
+				feature=feature[node_id],
+				featurename=featurenames[feature[node_id]],
+				value = df.iat[0,feature[node_id]],
+				#value=X2[sample_id, feature[node_id]],
+				inequality=threshold_sign,
+				threshold=threshold[node_id],
+			)
+		)
 
-	    decisiontreedic[node_id] = {
-	    	"node": node_id,
-	    	"inequality": threshold_sign,
-	    	"feature": feature[node_id],
-	    	"featurename": featurenames[feature[node_id]],
-	    	"value": df.iat[0,feature[node_id]],
-	    	"inequality":threshold_sign,
-	    	"threshold": round(threshold[node_id], 2)
-	    }
+		decisiontreedic[node_id] = {
+			"node": node_id,
+			"inequality": threshold_sign,
+			"feature": feature[node_id],
+			"featurename": featurenames[feature[node_id]],
+			"value": df.iat[0,feature[node_id]],
+			"inequality":threshold_sign,
+			"threshold": round(threshold[node_id], 2)
+		}
 
 	return (node_index, decisiontreedic)
 
