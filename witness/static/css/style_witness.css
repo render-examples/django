@@ -209,6 +209,7 @@ background-color: #e5ebef;
 
 .sidepanel-right {
 	grid-column: 11;
+  background-position: center top; 
 }
 
 /* header for top of all pages */
