@@ -38,7 +38,6 @@
 
  </script>
 
-
   <script type="module">
     import { CSS2DRenderer, CSS2DObject } from '//unpkg.com/three/examples/jsm/renderers/CSS2DRenderer.js';
 
@@ -47,7 +46,14 @@
     })
     (document.getElementById('3d-graph'))
       .graphData(obj)
-      .nodeAutoColorBy('group')
+      .nodeRelSize(4)
+      .onNodeRightClick(node => {
+        window.open('https://www.witnessinglondon.org/page/person/' + node.id, '_blank')})
+      .onNodeDragEnd(node => {
+          node.fx = node.x;
+          node.fy = node.y;
+          node.fz = node.z;
+        })
       .nodeThreeObject(node => {
         const nodeEl = document.createElement('div');
         nodeEl.textContent = node.name;
@@ -65,3 +71,5 @@
   </script>
 
 </body>
+
+

@@ -333,17 +333,17 @@ def personnetwork_page(request, witness_entity_number):
  
     reference_set1 = Referenceindividual.objects.filter(fk_individual=qpersonnetwork).distinct('fk_event')
 
-    parishevents = Referenceindividual.objects.filter(
+    witnessevents = Referenceindividual.objects.filter(
         fk_referencerole=1).filter(
         fk_individual=qpersonnetwork).values('fk_event')
 
     reference_set = Referenceindividual.objects.filter(
         fk_referencerole=1).exclude(fk_individual=10000019).filter(
-        fk_event__in=parishevents).values('fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
+        fk_event__in=witnessevents).values('fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
 
     linkslist, nodelist = networkgenerator(reference_set)
 
-    template = loader.get_template('witness/parish.html')
+    template = loader.get_template('witness/person_graph.html')
     context = {
         'nodelist': nodelist,
         'linkslist': linkslist,

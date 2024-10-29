@@ -1,0 +1,48 @@
+<head>
+  <style> body { margin: 0; } </style>
+
+  <script src="//unpkg.com/3d-force-graph"></script>
+  <!--<script src="../../dist/3d-force-graph.js"></script>-->
+</head>
+
+
+<body>
+  <div id="3d-graph"></div>
+
+  {{ graphdata|json_script:"graphdata" }}
+  {{ linkslist|json_script:"linklist" }}
+  {{ nodelist|json_script:"nodelist" }}
+
+</body>
+
+
+  <script>
+
+  var graphdata2 = JSON.parse(document.getElementById('graphdata').textContent);
+  var nodes = JSON.parse(document.getElementById('nodelist').textContent);
+  var links = JSON.parse(document.getElementById('linklist').textContent);
+
+   var obj = new Object();
+   obj.nodes = nodes;
+   obj.links = links;
+
+    const Graph = ForceGraph3D()
+      (document.getElementById('3d-graph'))
+        .graphData(obj)
+        .onNodeClick(node => {
+          // Aim at node from outside it
+          const distance = 40;
+          const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+
+          const newPos = node.x || node.y || node.z
+            ? { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }
+            : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
+
+          Graph.cameraPosition(
+            newPos, // new position
+            node, // lookAt ({ x, y, z })
+            3000  // ms transition duration
+          );
+        });
+
+    </script>

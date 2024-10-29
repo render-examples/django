@@ -41,14 +41,20 @@ def networkgenerator(reference_set):
 		if person in personlist:
 			x=personlist.index(person)
 			case = nodelist[x]
-			currentvalue = case['val']
+			currentvalue = case['val'] + 1
+			if currentvalue > 1: colour = '#4d4db3'
+			if currentvalue > 3: colour = '#409fbf'
+			if currentvalue > 5: colour = '#c6a339'
+			if currentvalue > 7: colour = '#c68039'
+			if currentvalue > 10: colour = '#d95326'
+			if currentvalue > 15: colour = '#ff0000'
 			nodelist.pop(x)
-			nodelist.insert(x, {'id':person, 'name': nameoriginal, 'val': currentvalue+1})
+			nodelist.insert(x, {'id':person, 'name': nameoriginal, 'val': currentvalue, 'color': colour})
 			# nodelist.insert(x, {'id':person})
 
 		else:
 			personlist.append(person)
-			nodelist.append({'id':person, 'name': nameoriginal, 'val': valuetarget})
+			nodelist.append({'id':person, 'name': nameoriginal, 'val': 1, 'color':'#806c93'})
 			# nodelist.append({'id':person})
 
 	for r in reference_dic:
