@@ -18,6 +18,9 @@ urlpatterns = [
     path('about', views.about, name='about'),
     path('exhibit', views.exhibit, name='exhibit'),
 
+
+    re_path(r'page/person/(?P<witness_entity_number>[0-9]{8})', views.personnetwork_page, name='personnetwork_page'),
+
     re_path(r'page/parish/(?P<witness_entity_number>[0-9]{8})', views.parish_page, name='parish_page'),
     re_path(r'page/person/(?P<witness_entity_number>[0-9]{8})', views.person_page, name='person_page'),
     re_path(r'page/item/(?P<witness_entity_number>[0-9]{8})', views.item_page, name='item_page'),

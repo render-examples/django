@@ -13,6 +13,9 @@
   {{ linkslist|json_script:"linklist" }}
   {{ nodelist|json_script:"nodelist" }}
 
+</body>
+
+
   <script>
 
   var graphdata2 = JSON.parse(document.getElementById('graphdata').textContent);
@@ -43,5 +46,3 @@
         });
 
     </script>
-
-</body>

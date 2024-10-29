@@ -189,6 +189,13 @@ def search(request, searchtype):
 
 def person_page(request, witness_entity_number):
 
+    print (request)
+    targetphrase = "personnetwork_page"
+
+    return redirect(targetphrase, witness_entity_number)
+
+
+
     individual_object = individualsearch()
     individual_object = individual_object.get(id_individual=witness_entity_number)
 
@@ -322,15 +329,13 @@ def seal_page(request, witness_entity_number):
 def personnetwork_page(request, witness_entity_number):
 
     #default
-    qpersonnetwork= 10000039
-
-    #qpersonnetwork = witness_entity_number
+    qpersonnetwork = witness_entity_number
  
-    reference_set1 = Referenceindividual.objects.filter(fk_individual=qpersonnectwork).distinct('fk_event')
+    reference_set1 = Referenceindividual.objects.filter(fk_individual=qpersonnetwork).distinct('fk_event')
 
     parishevents = Referenceindividual.objects.filter(
         fk_referencerole=1).filter(
-        fk_individual=qpersonnectwork).values('fk_event')
+        fk_individual=qpersonnetwork).values('fk_event')
 
     reference_set = Referenceindividual.objects.filter(
         fk_referencerole=1).exclude(fk_individual=10000019).filter(
