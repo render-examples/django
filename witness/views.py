@@ -109,7 +109,7 @@ def search(request, searchtype):
         else:
             form = LondonparishForm()
 
-        template = loader.get_template('witness/search_parish.html')
+        template = loader.get_template('witness/search_parish_graph.html')
         context = {
             'form': form,
             }
@@ -189,13 +189,6 @@ def search(request, searchtype):
 
 def person_page(request, witness_entity_number):
 
-    print (request)
-    targetphrase = "personnetwork_page"
-
-    return redirect(targetphrase, witness_entity_number)
-
-
-
     individual_object = individualsearch()
     individual_object = individual_object.get(id_individual=witness_entity_number)
 
@@ -203,22 +196,22 @@ def person_page(request, witness_entity_number):
 
     template = loader.get_template('witness/person.html')
 
-    manifestation_object = sealsearch().filter(
-        Q(fk_face__fk_seal__fk_individual_realizer=witness_entity_number) | Q(fk_face__fk_seal__fk_actor_group=witness_entity_number)
-    ). order_by('fk_face__fk_seal__fk_individual_realizer')
+    # manifestation_object = sealsearch().filter(
+    #     Q(fk_face__fk_seal__fk_individual_realizer=witness_entity_number) | Q(fk_face__fk_seal__fk_actor_group=witness_entity_number)
+    # ). order_by('fk_face__fk_seal__fk_individual_realizer')
 
-    #hack to deal with cases where there are too many seals for the form to handle
-    qpagination = 1
-    manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
+    # #hack to deal with cases where there are too many seals for the form to handle
+    # qpagination = 1
+    # manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
 
-    manifestation_set={}
+    # manifestation_set={}
 
-    for e in manifestation_object:
-        manifestation_dic = {}
-        manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-        manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-        manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
-        manifestation_set[e.id_manifestation] = manifestation_dic
+    # for e in manifestation_object:
+    #     manifestation_dic = {}
+    #     manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+    #     manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+    #     manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
+    #     manifestation_set[e.id_manifestation] = manifestation_dic
 
     # list of relationships for each actor
     relationship_object = []            
@@ -243,6 +236,36 @@ def person_page(request, witness_entity_number):
 
     print (parishstats)
 
+    mapparishes = []
+
+        # #map counties
+        #     #if collection is set then limit the scope of the dataset
+        #     if (qcollection == 30000287):
+        #         #data for map counties
+        #         placeset = Region.objects.filter(fk_locationtype=4, 
+        #             location__locationname__locationreference__fk_locationstatus=1
+        #             ).annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+
+        #     else:
+        #         #data for map counties
+        #         placeset = Region.objects.filter(fk_locationtype=4, 
+        #             location__locationname__locationreference__fk_locationstatus=1, 
+        #             location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+        #             ).annotate(numplaces=Count('location__locationname__locationreference'))
+
+        #     ## data for colorpeth map
+        #     mapcounties1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
+        #     mapcounties = json.loads(mapcounties1.jsonfiletxt)
+
+        #     for i in mapcounties:
+        #         if i == "features":
+        #             for b in mapcounties[i]:
+        #                 j = b["properties"]
+        #                 countyvalue = j["HCS_NUMBER"]
+        #                 countyname = j["NAME"]
+        #                 numberofcases = placeset.filter(fk_his_countylist=countyvalue)
+        #                 for i in numberofcases:
+        #                     j["cases"] = i.numplaces
 
     # #adjust values if form submitted
     # if request.method == 'POST':
@@ -265,9 +288,10 @@ def person_page(request, witness_entity_number):
         'individual_object': individual_object,
         'relationship_object': relationship_object,
         'relationshipnumber' : relationshipnumber,
-        'manifestation_set': manifestation_set,
-        'totalrows': totalrows,
-        'totaldisplay': totaldisplay,
+        # 'manifestation_set': manifestation_set,
+        # 'totalrows': totalrows,
+        # 'totaldisplay': totaldisplay,
+        'parishes_dict': mapparishes,
         'reference_set': reference_set,
         # 'form': form,
         }
@@ -286,6 +310,8 @@ def entity(request, witness_entity_number):
     #item = 0, seal=1, manifestation=2, sealdescription=3, etc...
     targetphrase = redirectgenerator(witness_entity_number, operation, application)
 
+    print ("targetphrase", targetphrase)
+
     return redirect(targetphrase)
 
 def parish_page(request, witness_entity_number):
@@ -303,13 +329,37 @@ def parish_page(request, witness_entity_number):
 
     linkslist, nodelist = networkgenerator(reference_set)
 
-    template = loader.get_template('witness/parish.html')
+    template = loader.get_template('witness/parish_graph.html')
     context = {
         'nodelist': nodelist,
         'linkslist': linkslist,
         }
 
     return HttpResponse(template.render(context, request))
+
+def parish_graph(request, witness_entity_number):
+
+    #default
+    qlondonparish= 50013947
+
+    qlondonparish = witness_entity_number
+ 
+    parishevents = Location.objects.filter(id_location=qlondonparish).values('locationname__locationreference__fk_event')
+
+    reference_set = Referenceindividual.objects.filter(
+        fk_referencerole=1).exclude(fk_individual=10000019).filter(
+        fk_event__in=parishevents).values('fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
+
+    linkslist, nodelist = networkgenerator(reference_set)
+
+    template = loader.get_template('witness/parish_graph.html')
+    context = {
+        'nodelist': nodelist,
+        'linkslist': linkslist,
+        }
+
+    return HttpResponse(template.render(context, request))
+
 
 def item_page(request, witness_entity_number):
 

@@ -112,7 +112,6 @@ def redirectgenerator(digisig_entity_number, operation, application):
 		if application == 2:
 			stem = "person/"
 
-
 	targetphrase = root + stem + str(digisig_entity_number)
 	
 	return (targetphrase)
@@ -1331,44 +1330,99 @@ def eventset_references(event_object, event_dic):
 
 	return(event_dic)
 
+# def referenceset_references(individual_object, reference_set):
+
+# 	reference_dic = Referenceindividual.objects.filter(
+# 		fk_individual=individual_object).select_related(
+# 		'fk_event').select_related(
+# 		'fk_referencerole').order_by(
+# 		"fk_event__startdate", "fk_event__enddate")
+
+# 	for r in reference_dic:
+
+# 		reference_row = {}
+
+# 		#date
+# 		if r.fk_event.startdate != None:
+# 			reference_row['date'] = str(r.fk_event.startdate) + "-" + str(r.fk_event.enddate)
+# 		else:
+# 			if r.fk_event.repository_startdate != None:
+# 				reference_row['date'] = str(r.fk_event.repository_startdate) + " - " + str(r.fk_event.repository_enddate)
+# 		#role
+# 		reference_row["role"] = r.fk_referencerole.referencerole
+
+# 		#item
+# 		part_object = Part.objects.select_related('fk_item').get(fk_event=r.fk_event)
+# 		reference_row["item_shelfmark"] = part_object.fk_item.shelfmark
+# 		reference_row["item_id"] = part_object.fk_item.id_item
+
+# 		#location
+# 		locationreference_object = Locationreference.objects.filter(
+# 			location_reference_primary=0).select_related(
+# 			'fk_locationname__fk_location__fk_region').get(
+# 			fk_event=r.fk_event)
+# 		reference_row["region"] = locationreference_object.fk_locationname.fk_location.fk_region
+# 		reference_row["location_id"] = locationreference_object.fk_locationname.fk_location.id_location
+# 		reference_row["location"] = locationreference_object.fk_locationname.fk_location.location
+
+# 		reference_set[r.pk_referenceindividual] = reference_row
+
+# 	return(reference_set)
+
 def referenceset_references(individual_object, reference_set):
 
 	reference_dic = Referenceindividual.objects.filter(
 		fk_individual=individual_object).select_related(
 		'fk_event').select_related(
 		'fk_referencerole').order_by(
-		"fk_event__startdate", "fk_event__enddate")
+		"fk_event__startdate", "fk_event__enddate").values(
+		'pk_referenceindividual',
+		'fk_event__startdate',
+		'fk_event__enddate',
+		'fk_event__repository_startdate',
+		'fk_event__repository_enddate',
+		'fk_referencerole__referencerole',
+		'fk_event__part__fk_item__shelfmark',
+		'fk_event__part__fk_item__id_item',
+		'fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region',
+		'fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location',
+		'fk_event__fk_event_locationreference__fk_locationname__fk_location__location')
 
 	for r in reference_dic:
 
 		reference_row = {}
 
 		#date
-		if r.fk_event.startdate != None:
-			reference_row['date'] = str(r.fk_event.startdate) + "-" + str(r.fk_event.enddate)
+		if r['fk_event__startdate'] != None:
+			reference_row['date'] = str(r['fk_event__startdate']) + "-" + str(r['fk_event__enddate'])
 		else:
-			if r.fk_event.repository_startdate != None:
-				reference_row['date'] = str(r.fk_event.repository_startdate) + " - " + str(r.fk_event.repository_enddate)
+			if r['fk_event__repository_startdate'] != None:
+				reference_row['date'] = str['fk_event__repository_startdate'] + " - " + str(['fk_event__repository_enddate'])
 		#role
-		reference_row["role"] = r.fk_referencerole.referencerole
+		reference_row["role"] = r['fk_referencerole__referencerole']
 
 		#item
-		part_object = Part.objects.select_related('fk_item').get(fk_event=r.fk_event)
-		reference_row["item_shelfmark"] = part_object.fk_item.shelfmark
-		reference_row["item_id"] = part_object.fk_item.id_item
+		# part_object = Part.objects.select_related('fk_item').get(fk_event=r.fk_event)
+		reference_row["item_shelfmark"] = r['fk_event__part__fk_item__shelfmark']
+		reference_row["item_id"] = r['fk_event__part__fk_item__id_item']
 
 		#location
-		locationreference_object = Locationreference.objects.filter(
-			location_reference_primary=0).select_related(
-			'fk_locationname__fk_location__fk_region').get(
-			fk_event=r.fk_event)
-		reference_row["region"] = locationreference_object.fk_locationname.fk_location.fk_region
-		reference_row["location_id"] = locationreference_object.fk_locationname.fk_location.id_location
-		reference_row["location"] = locationreference_object.fk_locationname.fk_location.location
+		# locationreference_object = Locationreference.objects.filter(
+		# 	location_reference_primary=0).select_related(
+		# 	'fk_locationname__fk_location__fk_region').get(
+		# 	fk_event=r.fk_event)
+		reference_row["region"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region']
+		reference_row["location_id"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location']
+		reference_row["location"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
 
-		reference_set[r.pk_referenceindividual] = reference_row
+		reference_set[r['pk_referenceindividual']] = reference_row
 
 	return(reference_set)
+
+
+
+
+
 
 
 #externallinks for object
