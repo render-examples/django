@@ -154,7 +154,7 @@
 
 	if (countieslen > 1) { 
 
-	var map1 = L.map('mapid1', {scrollWheelZoom:false}).setView([52.5,-2], 7);
+	var map1 = L.map('mapid1', {scrollWheelZoom:false}).setView([51.515556,-0.093056], 13);
 var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
 	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
 	subdomains: 'abcd',
@@ -175,8 +175,8 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 	};
 
 	info2.update = function (props) {
-		this._div.innerHTML = '<h4>Cases per County</h4>' +  (props ?
-			'<b>' + props.NAME + '</b><br />' + props.cases + ' cases' : 'Hover over a County');
+		this._div.innerHTML = '<h4>Cases per Parish</h4>' +  (props ?
+			'<b>' + props.NAME + '</b><br />' + props.cases + ' cases' : 'Hover over a Parish');
 	};
 
 	info2.addTo(map1);
@@ -184,13 +184,13 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 	// get color depending on population density value
 	function getColor(d) {
 		return d > 5000 ? '#49006a' :
-			d > 1000  ? '#7a0177' :
-			d > 500  ? '#ae017e' :
-			d > 200  ? '#dd3497' :
-			d > 100   ? '#f768a1' :
-			d > 50   ? '#fa9fb5' :
-			d > 20   ? '#fcc5c0' :  
-			d > 10   ? '#fde0dd' : '#fff7f3';
+			d > 100  ? '#7a0177' :
+			d > 50  ? '#ae017e' :
+			d > 20  ? '#dd3497' :
+			d > 10  ? '#f768a1' :
+			d > 5   ? '#fa9fb5' :
+			d > 2   ? '#fcc5c0' :  
+			d > 1   ? '#fde0dd' : '#fff7f3';
 	}
 
 	function style(feature) {

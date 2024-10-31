@@ -90,7 +90,6 @@ def search(request, searchtype):
 
     if searchtype == "parish":
 
-        print ("Hello")
         #default
         qlondonparish= 50013947
 
@@ -109,7 +108,7 @@ def search(request, searchtype):
         else:
             form = LondonparishForm()
 
-        template = loader.get_template('witness/search_parish_graph.html')
+        template = loader.get_template('witness/search_parish.html')
         context = {
             'form': form,
             }
@@ -226,47 +225,34 @@ def person_page(request, witness_entity_number):
     parishstats = {}
 
     for r in reference_set.values():
-        # r['location'] = r['location_id']        
-
         parishvalue = r['location_id']
-        if parishvalue in parishstats:
-            parishstats[parishvalue] += 1
+        parisholdid = r['location_pk']
+        if parisholdid in parishstats:
+            print ("hi")
+            parishstats[parisholdid] += 1
         else:
-            parishstats[parishvalue] = 1
+            parishstats[parisholdid] = 1
 
     print (parishstats)
 
     mapparishes = []
 
-        # #map counties
-        #     #if collection is set then limit the scope of the dataset
-        #     if (qcollection == 30000287):
-        #         #data for map counties
-        #         placeset = Region.objects.filter(fk_locationtype=4, 
-        #             location__locationname__locationreference__fk_locationstatus=1
-        #             ).annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+    ## data for colorpeth map
+    mapparishes1 = get_object_or_404(Jsonstorage, id_jsonfile=2)
+    mapparishes = json.loads(mapparishes1.jsonfiletxt)
 
-        #     else:
-        #         #data for map counties
-        #         placeset = Region.objects.filter(fk_locationtype=4, 
-        #             location__locationname__locationreference__fk_locationstatus=1, 
-        #             location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
-        #             ).annotate(numplaces=Count('location__locationname__locationreference'))
-
-        #     ## data for colorpeth map
-        #     mapcounties1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
-        #     mapcounties = json.loads(mapcounties1.jsonfiletxt)
-
-        #     for i in mapcounties:
-        #         if i == "features":
-        #             for b in mapcounties[i]:
-        #                 j = b["properties"]
-        #                 countyvalue = j["HCS_NUMBER"]
-        #                 countyname = j["NAME"]
-        #                 numberofcases = placeset.filter(fk_his_countylist=countyvalue)
-        #                 for i in numberofcases:
-        #                     j["cases"] = i.numplaces
-
+    for i in mapparishes:
+        if i == "features":
+            for b in mapparishes[i]:
+                j = b["properties"]
+                parishvalue = j["fk_locatio"]
+                try:
+                    j["cases"] = parishstats[parishvalue]
+                    #print ("found", parishvalue)
+                except:
+                    pass
+                    #print ("can't find", parishvalue)
+    
     # #adjust values if form submitted
     # if request.method == 'POST':
     #     form = LondonparishForm(request.POST)

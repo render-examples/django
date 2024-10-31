@@ -1386,6 +1386,7 @@ def referenceset_references(individual_object, reference_set):
 		'fk_event__part__fk_item__id_item',
 		'fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region',
 		'fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location',
+		'fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location',
 		'fk_event__fk_event_locationreference__fk_locationname__fk_location__location')
 
 	for r in reference_dic:
@@ -1414,15 +1415,10 @@ def referenceset_references(individual_object, reference_set):
 		reference_row["region"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region']
 		reference_row["location_id"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location']
 		reference_row["location"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
-
+		reference_row["location_pk"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
 		reference_set[r['pk_referenceindividual']] = reference_row
 
 	return(reference_set)
-
-
-
-
-
 
 
 #externallinks for object
