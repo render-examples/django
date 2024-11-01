@@ -1350,3 +1350,13 @@ input[type=image] {
 	color:white;
 	background-color:black;
 }
+
+/* rules introduced for witness */
+
+.entity_chart_3 {
+	margin-top: 30px;
+	background-color:#eff3f6;
+	padding: 20px;
+	grid-row: 6;
+	grid-column:3/10;
+}
