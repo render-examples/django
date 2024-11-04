@@ -332,9 +332,16 @@ def parish_graph(request, witness_entity_number):
  
     parishevents = Location.objects.filter(id_location=qlondonparish).values('locationname__locationreference__fk_event')
 
+    exclusionset = Digisigrelationshipview.Q(person2=10140149)|Q(person2=10140449)|Q(person2=10139569).values('fk_individual')
+
+    print (exclusionset)
+
     reference_set = Referenceindividual.objects.filter(
-        fk_referencerole=1).exclude(fk_individual=10000019).filter(
-        fk_event__in=parishevents).values('fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
+        fk_referencerole=1).exclude(
+        fk_individual=10000019).exclude(
+        fk_individual__in=exclusionset).filter(
+        fk_event__in=parishevents).values(
+        'fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
 
     linkslist, nodelist = networkgenerator(reference_set)
 
