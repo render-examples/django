@@ -1,74 +1,221 @@
-<head>
-  <style> body { margin: 0; } </style>
+{% extends "witness/base.html" %}
 
-  <script src="//unpkg.com/3d-force-graph"></script>
-<!--  <script src="../../dist/3d-force-graph.js"></script>-->
+{% load static %}
 
-  <style>
-    .node-label {
-      font-size: 16px;
-      padding: 1px 4px;
-      border-radius: 4px;
-      background-color: rgba(0,0,0,0.5);
-      user-select: none;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="3d-graph"></div>
-
-  {{ graphdata|json_script:"graphdata" }}
-  {{ linkslist|json_script:"linklist" }}
-  {{ nodelist|json_script:"nodelist" }}
+{% block content %}
 
 
-  <script type="importmap">{ "imports": { "three": "https://unpkg.com/three/build/three.module.js" }}
-  </script>
+<!--leaflet -->   
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!--Mapping --> 
+<script type="text/javascript" src="https://stamen-maps.a.ssl.fastly.net/js/tile.stamen.js?v1.3.0"></script>
+
+  <div class="search-people-banner"></div>
+  <div class="sidepanel-left"></div>
+  <div class="sidepanel-right"></div>
+
+  <div class="main-title"><h1>{{pagetitle}}</h1></div>
+
+  <div class="mainpage" id="maingpage"></div>
+
+  <div class="entity_detail" id="entity_detail">
+    <div>
+      <h3>Parish details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
+      <table>
+        <tr>
+          <th>Parish Witness Graph</th>
+          <td><a class="help" href="{% url 'parishnetwork_page' witness_entity_number=qlondonparish %}" target="_blank">Link</a></td>
+        <tr>       
+      <tr>
+        <th>Place</th>
+        <td>{{parish.location}}</td>
+      </tr>
+      <tr>
+        <th>Coordinates </th>
+        <td>{{parish.longitude}}, {{parish.latitude}}</td>
+      </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="entity-permalink" id="entity-permalink">
+    <div class="permalinkinfo" id="permalinkinfo">
+      Permalink
+      <button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+      <form action="#">
+        <label>Copy this URL to link to this page:</label>
+        <input id="input" class="text" name="" value="http://www.witness.org/entity/{{qlondonparish}}" type="text" readonly>
+      </form>
+    </div>
+  </div>
   
 
+  <div class="entity_chart_3" id="entity_chart_3">
+    <div id="mapid1"></div>
+  </div>
+
+  {{ parishes_dict|json_script:"mapdata2" }}
+
+
+  <div class="entity_relationship" id="entity_relationship">
+    <div class="div-caption">
+      People <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
+    </div>
+
+    <div>
+      <table id="entity2" style="display:none;">
+        <tr> 
+          <th>Name</th>
+          <th>Occurrences</th>
+        </tr>
+      {% for person in individual_set %}
+        {% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+          <td> 
+            <a href="{% url 'person_page' witness_entity_number=person.id_individual %}">{{person}}</a>
+          </td>
+          <td>
+            {{person.occurences}}
+          </td>
+        </tr>
+      {% endfor %}
+      </table>
+    </div>
+  </div>
+
+
 <script>
-  var graphdata2 = JSON.parse(document.getElementById('graphdata').textContent);
-  var nodes = JSON.parse(document.getElementById('nodelist').textContent);
-  var links = JSON.parse(document.getElementById('linklist').textContent);
 
-   var obj = new Object();
-   obj.nodes = nodes;
-   obj.links = links;
+  //map 2
 
- </script>
+  var geojsonFeature2 = JSON.parse(document.getElementById('mapdata2').textContent);
+  var countieslen = Object.keys(geojsonFeature2).length;
+
+  if (countieslen > 1) { 
+
+  var map1 = L.map('mapid1', {scrollWheelZoom:false}).setView([51.515556,-0.093056], 14);
+var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 20
+});
+  
+  map1.addLayer(layer2);
+
+  L.geoJSON(geojsonFeature2, {style: style}).addTo(map1);
+
+  // control that shows state info on hover
+  var info2 = L.control();
+
+  info2.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info');
+    this.update();
+    return this._div;
+  };
+
+  info2.update = function (props) {
+    this._div.innerHTML = '<h4>Cases per Parish</h4>' +  (props ?
+      '<b>' + props.NAME + '</b><br />' + props.cases + ' cases' : 'Hover over a Parish');
+  };
+
+  info2.addTo(map1);
+
+  // get color depending on population density value
+  function getColor(d) {
+    return d > 1280 ? '#49006a' :
+      d > 640  ? '#7a0177' :
+      d > 320  ? '#ae017e' :
+      d > 160  ? '#dd3497' :
+      d > 80  ? '#f768a1' :
+      d > 40   ? '#fa9fb5' :
+      d > 20   ? '#fcc5c0' :  
+      d > 10   ? '#fde0dd' : '#fff7f3';
+  }
+
+  function style(feature) {
+    return {
+      weight: 2,
+      opacity: 1,
+      color: 'white',
+      dashArray: '3',
+      fillOpacity: 0.7,
+      fillColor: getColor(feature.properties.cases)
+    };
+  }
+
+  function highlightFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+      weight: 5,
+      color: '#666',
+      dashArray: '',
+      fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+      layer.bringToFront();
+    }
+
+    info2.update(layer.feature.properties);
+  }
+
+  var geojson2;
+
+  function resetHighlight(e) {
+    geojson2.resetStyle(e.target);
+    info2.update();
+  }
+
+  function zoomToFeature(e) {
+    map.fitBounds(e.target.getBounds());
+  }
+
+  function onEachFeature(feature, layer) {
+    layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetHighlight,
+      click: zoomToFeature
+    });
+  }
+
+  /* global statesData */
+  geojson2 = L.geoJson(geojsonFeature2, {
+    style: style,
+    onEachFeature: onEachFeature
+  }).addTo(map1);
+
+  map1.attributionControl.addAttribution('');
+
+  var legend2 = L.control({position: 'bottomright'});
+
+  legend2.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend');
+    var grades = [0, 10, 20, 40, 80, 160, 320, 640, 1280];
+    var labels = [];
+    var from, to;
+
+    for (var i = 0; i < grades.length; i++) {
+      from = grades[i];
+      to = grades[i + 1];
+
+      labels.push(
+        '<i style="background:' + getColor(from + 1) + '"></i> ' +
+        from + (to ? '&ndash;' + to : '+'));
+    }
+
+    div.innerHTML = labels.join('<br>');
+    return div;
+  };
+
+  legend2.addTo(map1);
+
+}
+
+</script>
 
 
-  <script type="module">
-    import { CSS2DRenderer, CSS2DObject } from '//unpkg.com/three/examples/jsm/renderers/CSS2DRenderer.js';
-
-    const Graph = ForceGraph3D({
-      extraRenderers: [new CSS2DRenderer()]
-    })
-    (document.getElementById('3d-graph'))
-      .graphData(obj)
-      .nodeRelSize(4)
-      .onNodeRightClick(node => {
-        window.open('https://www.witnessinglondon.org/page/person/' + node.id, '_blank')})
-      .onNodeDragEnd(node => {
-          node.fx = node.x;
-          node.fy = node.y;
-          node.fz = node.z;
-        })
-      .nodeThreeObject(node => {
-        const nodeEl = document.createElement('div');
-        nodeEl.textContent = node.name;
-        nodeEl.style.color = node.color;
-        nodeEl.className = 'node-label';
-        return new CSS2DObject(nodeEl);
-      })
-      .nodeThreeObjectExtend(true)
-    ;
-
-      // Spread nodes a little wider
-    Graph.d3Force('charge').strength(-1000);
-
-  </script>
-
-
-</body>
+{% endblock %}

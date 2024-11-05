@@ -88,6 +88,8 @@ def exhibit(request):
 
 def search(request, searchtype):
 
+### Parish
+
     if searchtype == "parish":
 
         #default
@@ -195,31 +197,13 @@ def person_page(request, witness_entity_number):
 
     template = loader.get_template('witness/person.html')
 
-    # manifestation_object = sealsearch().filter(
-    #     Q(fk_face__fk_seal__fk_individual_realizer=witness_entity_number) | Q(fk_face__fk_seal__fk_actor_group=witness_entity_number)
-    # ). order_by('fk_face__fk_seal__fk_individual_realizer')
-
-    # #hack to deal with cases where there are too many seals for the form to handle
-    # qpagination = 1
-    # manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
-
-    # manifestation_set={}
-
-    # for e in manifestation_object:
-    #     manifestation_dic = {}
-    #     manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-    #     manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-    #     manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
-    #     manifestation_set[e.id_manifestation] = manifestation_dic
-
     # list of relationships for each actor
     relationship_object = []            
     relationship_object = Digisigrelationshipview.objects.filter(fk_individual = witness_entity_number)
     relationshipnumber = len(relationship_object)
 
     # list of references to the actor
-    reference_set = {}
-    reference_set = referenceset_references(individual_object, reference_set)
+    reference_set = referenceset_references(individual_object)
 
     # parish where active
     parishstats = {}
@@ -228,12 +212,9 @@ def person_page(request, witness_entity_number):
         parishvalue = r['location_id']
         parisholdid = r['location_pk']
         if parisholdid in parishstats:
-            print ("hi")
             parishstats[parisholdid] += 1
         else:
             parishstats[parisholdid] = 1
-
-    print (parishstats)
 
     mapparishes = []
 
@@ -302,28 +283,52 @@ def entity(request, witness_entity_number):
 
 def parish_page(request, witness_entity_number):
 
-    #default
-    qlondonparish= 50013947
-
     qlondonparish = witness_entity_number
  
-    parishevents = Location.objects.filter(id_location=qlondonparish).values('locationname__locationreference__fk_event')
+    parish = Location.objects.get(id_location=qlondonparish)
 
-    reference_set = Referenceindividual.objects.filter(
-        fk_referencerole=1).exclude(fk_individual=10000019).filter(
-        fk_event__in=parishevents).values('fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
+    # # list of references to actors in parish
+    # reference_set = Referenceindividual.objects.filter(
+    #     fk_referencerole=1).filter(
+    #     fk_event__fk_event_locationreference__fk_locationname__fk_location=qlondonparish).exclude(
+    #     fk_individual=10000019)
 
-    linkslist, nodelist = networkgenerator(reference_set)
 
-    template = loader.get_template('witness/parish_graph.html')
+    individual_set = Individual.objects.filter(
+        fk_individual_event__fk_event__fk_event_locationreference__fk_locationname__fk_location=qlondonparish).annotate(occurences=
+        Count('fk_individual_event'))
+
+
+    case_value = individual_set.aggregate(Sum('occurences'))
+    totalcases = case_value['occurences__sum']
+
+    mapparishes = []
+
+    ## data for colorpeth map
+    mapparishes1 = get_object_or_404(Jsonstorage, id_jsonfile=2)
+    mapparishes = json.loads(mapparishes1.jsonfiletxt)
+
+    for i in mapparishes:
+        if i == "features":
+            for b in mapparishes[i]:
+                t = b["properties"]
+                if t["fk_locatio"] == parish.pk_location:
+                    print ("hellllllo")
+                    t["cases"] = totalcases
+                    print (t["cases"])
+
+    template = loader.get_template('witness/parish.html')
     context = {
-        'nodelist': nodelist,
-        'linkslist': linkslist,
+        'parish': parish,
+        'totalcases': totalcases,
+        'individual_set': individual_set,
+        'qlondonparish': qlondonparish,
+        'parishes_dict': mapparishes,
         }
 
     return HttpResponse(template.render(context, request))
 
-def parish_graph(request, witness_entity_number):
+def parishnetwork_page(request, witness_entity_number):
 
     #default
     qlondonparish= 50013947
@@ -332,9 +337,7 @@ def parish_graph(request, witness_entity_number):
  
     parishevents = Location.objects.filter(id_location=qlondonparish).values('locationname__locationreference__fk_event')
 
-    exclusionset = Digisigrelationshipview.Q(person2=10140149)|Q(person2=10140449)|Q(person2=10139569).values('fk_individual')
-
-    print (exclusionset)
+    exclusionset = Digisigrelationshipview.objects.filter(Q(person2=10140149)|Q(person2=10140449)|Q(person2=10139569)).values('fk_individual')
 
     reference_set = Referenceindividual.objects.filter(
         fk_referencerole=1).exclude(

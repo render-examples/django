@@ -1369,7 +1369,9 @@ def eventset_references(event_object, event_dic):
 
 # 	return(reference_set)
 
-def referenceset_references(individual_object, reference_set):
+def referenceset_references(individual_object):
+
+	reference_set = {}
 
 	reference_dic = Referenceindividual.objects.filter(
 		fk_individual=individual_object).select_related(
