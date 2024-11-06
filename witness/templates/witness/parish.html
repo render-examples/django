@@ -117,7 +117,7 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 
   info2.update = function (props) {
     this._div.innerHTML = '<h4>Cases per Parish</h4>' +  (props ?
-      '<b>' + props.NAME + '</b><br />' + props.cases + ' cases' : 'Hover over a Parish');
+      '<b>' + props.parishname + '</b><br />' + props.cases + ' cases' : 'Hover over a Parish');
   };
 
   info2.addTo(map1);

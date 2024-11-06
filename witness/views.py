@@ -207,14 +207,19 @@ def person_page(request, witness_entity_number):
 
     # parish where active
     parishstats = {}
+    parishnamevalues = {}
 
     for r in reference_set.values():
-        parishvalue = r['location_id']
+        #parishvalue = r['location_id']
         parisholdid = r['location_pk']
+        parishname = r['location']
         if parisholdid in parishstats:
             parishstats[parisholdid] += 1
         else:
             parishstats[parisholdid] = 1
+            parishnamevalues[parisholdid] = parishname
+
+    print (parishstats)
 
     mapparishes = []
 
@@ -229,6 +234,7 @@ def person_page(request, witness_entity_number):
                 parishvalue = j["fk_locatio"]
                 try:
                     j["cases"] = parishstats[parishvalue]
+                    j["parishname"] = parishnamevalues[parishvalue]
                     #print ("found", parishvalue)
                 except:
                     pass
@@ -298,7 +304,6 @@ def parish_page(request, witness_entity_number):
         fk_individual_event__fk_event__fk_event_locationreference__fk_locationname__fk_location=qlondonparish).annotate(occurences=
         Count('fk_individual_event'))
 
-
     case_value = individual_set.aggregate(Sum('occurences'))
     totalcases = case_value['occurences__sum']
 
@@ -313,9 +318,8 @@ def parish_page(request, witness_entity_number):
             for b in mapparishes[i]:
                 t = b["properties"]
                 if t["fk_locatio"] == parish.pk_location:
-                    print ("hellllllo")
                     t["cases"] = totalcases
-                    print (t["cases"])
+                    t["parishname"] = parish.location
 
     template = loader.get_template('witness/parish.html')
     context = {
