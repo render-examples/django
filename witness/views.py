@@ -219,8 +219,6 @@ def person_page(request, witness_entity_number):
             parishstats[parisholdid] = 1
             parishnamevalues[parisholdid] = parishname
 
-    print (parishstats)
-
     mapparishes = []
 
     ## data for colorpeth map
@@ -295,19 +293,23 @@ def parish_page(request, witness_entity_number):
  
     parish = Location.objects.get(id_location=qlondonparish)
 
-    # # list of references to actors in parish
-    # reference_set = Referenceindividual.objects.filter(
-    #     fk_referencerole=1).filter(
-    #     fk_event__fk_event_locationreference__fk_locationname__fk_location=qlondonparish).exclude(
-    #     fk_individual=10000019)
+    individual_object = individualsearch()
 
-
-    individual_set = Individual.objects.filter(
+    individual_object = individual_object.filter(
         fk_individual_event__fk_event__fk_event_locationreference__fk_locationname__fk_location=qlondonparish).annotate(occurences=
         Count('fk_individual_event'))
 
-    case_value = individual_set.aggregate(Sum('occurences'))
+    case_value = individual_object.aggregate(Sum('occurences'))
     totalcases = case_value['occurences__sum']
+
+    individual_set = {}
+
+    for i in individual_object:
+        individual_info = {}
+        individual_info['actor_name'] = namecompiler(i)
+        individual_info['id_individual'] = i.id_individual
+        individual_info['occurences'] = i.occurences
+        individual_set[i.id_individual] = individual_info
 
     mapparishes = []
 
@@ -365,10 +367,101 @@ def parishnetwork_page(request, witness_entity_number):
 
 def item_page(request, witness_entity_number):
 
-    print (request)
-    targetphrase = "parish_page"
+    starttime = time()
 
-    return redirect(targetphrase, 50013947)
+    try:
+        manifestation_object = sealsearch()
+        manifestation_object = manifestation_object.filter(
+            fk_support__fk_part__fk_item=witness_entity_number).order_by(
+            "fk_support__fk_number_currentposition")
+
+        firstmanifestation = manifestation_object.first()
+        item_object = firstmanifestation.fk_support.fk_part.fk_item
+        part_object = firstmanifestation.fk_support.fk_part
+        event_object = firstmanifestation.fk_support.fk_part.fk_event
+
+    except:
+        part_object = Part.objects.get(fk_item=witness_entity_number)
+        event_object = part_object.fk_event
+        item_object = part_object.fk_item
+
+    pagetitle = item_object.fk_repository.repository_fulltitle + " " + item_object.shelfmark
+
+    event_dic = {}
+    event_dic["part_object"] = part_object
+    event_dic = eventset_datedata(event_object, event_dic)
+    event_dic = eventset_locationdata(event_object, event_dic)
+    event_dic = eventset_references(event_object, event_dic)
+
+    place_object = event_dic["location"]
+    mapdic = mapgenerator(place_object, 0)
+    externallinkset = externallinkgenerator(witness_entity_number)
+
+    #for part images (code to show images not implemented yet)
+    representationset = {}
+
+    try: 
+        representation_part = Representation.objects.filter(fk_digisig=part_object.id_part).select_related('fk_connection')
+
+        for t in representation_part:
+            #Holder for representation info
+            representation_dic = {}
+
+            #for all images
+            connection = t.fk_connection
+            representation_dic["connection"] = t.fk_connection
+            representation_dic["connection_thumb"] = t.fk_connection.thumb
+            representation_dic["connection_medium"] = t.fk_connection.medium
+            representation_dic["representation_filename"] = t.representation_filename_hash
+            representation_dic["representation_thumbnail"] = t.representation_thumbnail_hash
+            representation_dic["id_representation"] = t.id_representation 
+            representation_dic["fk_digisig"] = t.fk_digisig
+            representation_dic["repository_fulltitle"] = item_object.fk_repository.repository_fulltitle
+            representation_dic["shelfmark"] = item_object.shelfmark
+            representation_dic["fk_item"] = item_object.id_item
+            representationset[t.id_representation] = representation_dic
+
+    except:
+        print ('no image of document available')
+
+    ## prepare the data for each displayed seal manifestation
+
+    manifestation_set = {}
+
+    try:
+        for e in manifestation_object:
+            manifestation_dic = {}
+            manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+            manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+            manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
+            manifestation_set[e.id_manifestation] = manifestation_dic
+
+        totalrows = manifestation_object.count
+        totaldisplay = len(manifestation_set)
+
+    except:
+        totalrows = 0
+        totaldisplay = 0
+
+    print("Compute Time:", time()-starttime)
+
+    template = loader.get_template('witness/item.html')
+    context = {
+        'pagetitle': pagetitle,
+        'item_object': item_object,
+        'event_dic': event_dic,
+        'mapdic': mapdic,
+        'representationset': representationset,
+        'manifestationset': manifestation_set,
+        'totalrows': totalrows,
+        'totaldisplay': totaldisplay,
+        'externallink_object': externallinkset,
+        #'location': location,
+        #'location_dict': location_dict,
+        }
+
+    return HttpResponse(template.render(context, request))
+
 
 def seal_page(request, witness_entity_number):
 

@@ -136,7 +136,7 @@
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
 					<td><a href="{% url 'entity' witness_entity_number=r.item_id %}">{{r.item_shelfmark}}</a></td>
 					<td>{{r.date}}</td>
-					<td><a href="{% url 'entity' witness_entity_number=r.location_id %}">{{r.location}}]]</a> ({{r.region}})</td>
+					<td><a href="{% url 'entity' witness_entity_number=r.location_id %}">{{r.location}}</a></td>
 					<td>{{r.role}}</td>
 				</tr>
 			{% endfor %}

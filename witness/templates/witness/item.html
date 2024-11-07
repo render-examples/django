@@ -23,7 +23,7 @@
 		<h3>
 			Item details 
 			{% if authenticationstatus == "authenticated" %}
-			<button class="permalink"><a href="{% url 'edit_item' digisig_entity_number=item_object.id_item %}">Edit</a></button>
+			<button class="permalink"><a href="{% url 'edit_item' witness_entity_number=item_object.id_item %}">Edit</a></button>
 			{% endif %} 
 			<button onclick="toggle('entity-permalink')" class="permalink entity">Permalink</button>
 		</h3>
@@ -58,7 +58,7 @@
 				</td>
 			</tr>
 			<tr>
-				<th>Reference <a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+				<th>Reference <a class="help" href="{% url 'entity' witness_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
 				<td>{{item_object.shelfmark}}
 			{% for linktext2 in externallink_object %}
 				 <a href="{{linktext2.external_link}}" target="_blank">External Link</a>
@@ -118,92 +118,6 @@
 		</div>
 	</div>
 
-
-	<div class="entity_seals" id="entity_seals">
-		<div class="div-caption">
-			Impressions, matrices, casts <button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
-		</div>
-
-		<div>
-		<table id="entity1" style="display:none;">
-		{% for m in manifestationset.values %}
-			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-				<th colspan="2"><h4><a class="headingbtn"  href="{% url 'entity' m.id_manifestation %}">{{m.imagestate_term}} details</a></h4></th>
- 			</tr>
-
-
-			{% if authenticationstatus == "authenticated" %}
-			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-				<th class="indent">Part</th>
-				<td> {{m.partvalue}}</td>
-			</tr>
-			{% endif %} 
-
-			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-
-				<th class="indent">Support Status</th>
-				<td>{{m.fk_supportstatus}}</td>
-
-				<td rowspan="5">
-					<div class="figure">
-						{% if m.representation_thumbnail_hash != null %}
-						<figure>
-							<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{m.thumb}}{{m.representation_thumbnail_hash}}" alt="{{m.id_representation}}" onclick="image({{forloop.counter}})">
-						</figure>
-
-						<!-- The Modal -->
-						<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
-						  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
-						  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{m.medium}}{{m.representation_filename_hash}}" alt="{{m.id_representation}}">
-						  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' m.id_representation %}">Representation details</a></div>
-						</div>
-						{% endif %}
-					</div>
-				</td>
-			</tr>
-
-			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-				<th class="indent">Attachment</th>
-				<td>{{m.fk_attachment}}</td>
-			</tr>
-
-			{% if m.label_manifestation_repository != null %}
-			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-				<th class="indent">Reference<a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
-				<td>{{m.label_manifestation_repository}}</td>
-				</tr>
-			{% endif %}
-
-			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-				<th class="indent">Position <a class="help" href="{% url 'entity' digisig_entity_number=10001447 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
-				{% if m.number %}
-					<td>support {{m.number}}, {{m.fk_position}}</td>
-				{% else %}<td></td>
-				{% endif %}
-			</tr>
-
-			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-				<th class="indent">Example of </th>
-				<td><a href="{% url 'entity' digisig_entity_number=m.id_seal %}">Seal details</a></td>
-			</tr>
-
-			{% for key, value in m.sealdescriptions.items %}
-			{% if forloop.parentloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-			<tr>
-				<th class="indent">
-					{% if forloop.first %} Described in {% endif %}
-				</th>
-				<td><a href="{% url 'sealdescription_page' digisig_entity_number=value.sealdescription_id %}">{{value.collection}} ({{value.identifier}})</a></td>
-			</tr>
-			{% endfor %}
-
- 		{% endfor %}
-		</table>
-		</div>
-	</div>
-
-
-
 	<div class="entity_event" id="entity_event">
 		<div class="div-caption">
 			Event and Participants <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
@@ -229,34 +143,15 @@
 			</tr>
 
 			{% for reference in event_dic.referenceset %}
-
 			<tr> 
-				{% if authenticationstatus == "authenticated" %}
-					<th class="indent">Ref. {{reference.pk_referenceindividual}}</th>
-					<td> 
-						{% if reference.fk_individual.id_individual != 10000019 %}
-						<a href="{% url 'entity' digisig_entity_number=reference.fk_individual.id_individual %}">{{reference.fk_individual}}</a> 
+				{% if reference.fk_individual.id_individual != 10000019 %}
+				<th class="indent"></th>
+				<td> 
+					<a href="{% url 'entity' witness_entity_number=reference.fk_individual.id_individual %}">{{reference.fk_individual}}</a> 
+				</td>
 
-						{% else %}
-						({{reference.referenceindividual}})
-
-						{% endif %}
-					</td>
-					<td> {{reference.fk_referencerole}}</td>
-					<td> {{reference.fk_referenceoffice}}</td>
-					
-
-					{% else %}
-					{% if reference.fk_individual.id_individual != 10000019 %}
-					<th class="indent"></th>
-					<td> 
-						<a href="{% url 'entity' digisig_entity_number=reference.fk_individual.id_individual %}">{{reference.fk_individual}}</a> 
-					</td>
-
-					<td> {{reference.fk_referencerole}}</td>
-					<td> {{reference.fk_referenceoffice}}</td>
-					{% endif %}
-
+				<td> {{reference.fk_referencerole}}</td>
+				<td> {{reference.fk_referenceoffice}}</td>
 				{% endif %}
 			</tr>
 		 	{% endfor %}

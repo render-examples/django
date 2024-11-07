@@ -71,10 +71,10 @@
           <th>Name</th>
           <th>Occurrences</th>
         </tr>
-      {% for person in individual_set %}
+      {% for key, person in individual_set.items %}
         {% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
           <td> 
-            <a href="{% url 'person_page' witness_entity_number=person.id_individual %}">{{person}}</a>
+            <a href="{% url 'person_page' witness_entity_number=person.id_individual %}">{{person.actor_name}}</a>
           </td>
           <td>
             {{person.occurences}}

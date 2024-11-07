@@ -1400,7 +1400,10 @@ def referenceset_references(individual_object):
 			reference_row['date'] = str(r['fk_event__startdate']) + "-" + str(r['fk_event__enddate'])
 		else:
 			if r['fk_event__repository_startdate'] != None:
-				reference_row['date'] = str['fk_event__repository_startdate'] + " - " + str(['fk_event__repository_enddate'])
+				try:
+					reference_row['date'] = str['fk_event__repository_startdate'] + " - " + str(['fk_event__repository_enddate'])
+				except:
+					reference_row['date'] = ""
 		#role
 		reference_row["role"] = r['fk_referencerole__referencerole']
 
