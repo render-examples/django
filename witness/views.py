@@ -231,6 +231,8 @@ def person_page(request, witness_entity_number):
         if i == "features":
             for b in mapparishes[i]:
                 j = b["properties"]
+
+                print (j)
                 parishvalue = j["fk_locatio"]
                 try:
                     j["cases"] = parishstats[parishvalue]
