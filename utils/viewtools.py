@@ -35,7 +35,8 @@ def networkgenerator(reference_set):
 
 		person = r['fk_individual']
 
-		nameoriginal = r['fk_individual__fullname_original']
+		nameoriginal = r['fk_individual']
+
 		valuetarget = 1
 
 		if person in personlist:
@@ -165,7 +166,6 @@ def getquantiles(timegroupcases):
 	resultrange = "c." + str(int(quantileset[0])) + "-" + str(int(quantileset[4]))
 
 	return (resultrange, timelist)
-
 
 
 def mlpredictcase (class_object, shape_object, case_area, mlmodel):
@@ -731,6 +731,19 @@ def individualsearch():
 	'fk_group__fk_group_class')
 
 	return(individual_object)
+
+def referencecollectindividual(reference_set):
+	reference_set.select_related(
+		'fk_individual__fk_descriptor_title').select_related(
+		'fk_individual__fk_descriptor_name').select_related(
+		'fk_individual__fk_descriptor_prefix1').select_related(
+		'fk_individual__fk_descriptor_descriptor1').select_related(
+		'fk_individual__fk_descriptor_prefix2').select_related(
+		'fk_individual__fk_descriptor_descriptor2').select_related(
+		'fk_individual__fk_descriptor_prefix3').select_related(
+		'fk_individual__fk_descriptor_descriptor3')
+
+	return(reference_set)
 
 ## function to collect all the possible information you would need to present a representation
 def representationmetadata(representation_case, representation_dic):
