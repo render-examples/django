@@ -151,7 +151,17 @@ def search(request, searchtype):
 
                 if len(qname) > 0:
                     individual_object = individual_object.filter(
-                        Q(fullname_modern__icontains=qname) | Q(fullname_original__icontains=qname)) 
+                        Q(
+                            fullname_modern__icontains=qname) | Q(
+                            fullname_original__icontains=qname) | Q(
+                            fk_descriptor_title__descriptor_original__icontains=qname)| Q(
+                            fk_descriptor_name__descriptor_original__icontains=qname)| Q(
+                            fk_descriptor_prefix1__prefix__icontains=qname)| Q(
+                            fk_descriptor_descriptor1__descriptor_original__icontains=qname)| Q(
+                            fk_descriptor_prefix2__prefix__icontains=qname)| Q(
+                            fk_descriptor_descriptor2__descriptor_original__icontains=qname)| Q(
+                            fk_descriptor_prefix3__prefix__icontains=qname)| Q(
+                            fk_descriptor_descriptor3__descriptor_original__icontains=qname)) 
 
                 form = PeopleForm(request.POST)
 
