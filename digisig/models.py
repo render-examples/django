@@ -17,9 +17,9 @@ from .models import *
 ### specials
 class Digisigrelationshipview(models.Model):
     pk_branch = models.AutoField(primary_key=True)
-    fk_individual = models.IntegerField(blank=True, null=True)
+    fk_individual = models.ForeignKey('Individual', models.DO_NOTHING, related_name="fk_individual1_relationshipview", db_column='fk_individual', blank=True, null=True)
     fk_relationshiprole = models.IntegerField(blank=True, null=True)
-    person2 = models.IntegerField(blank=True, null=True)
+    person2 = models.ForeignKey('Individual', models.DO_NOTHING, related_name="fk_individual2_relationshipview", db_column='person2', blank=True, null=True)
     fk_relationshipnode = models.IntegerField(blank=True, null=True)
     date_start = models.DateField(blank=True, null=True)
     date_end = models.DateField(blank=True, null=True)

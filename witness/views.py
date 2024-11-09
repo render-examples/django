@@ -208,9 +208,7 @@ def person_page(request, witness_entity_number):
 	template = loader.get_template('witness/person.html')
 
 	# list of relationships for each actor
-	relationship_object = []            
-	relationship_object = Digisigrelationshipview.objects.filter(fk_individual = witness_entity_number)
-	relationshipnumber = len(relationship_object)
+	relationship_dic, relationshipnumber = relationship_dataset(witness_entity_number)
 
 	# list of references to the actor
 	reference_set = referenceset_references(individual_object)
@@ -268,7 +266,7 @@ def person_page(request, witness_entity_number):
 	context = {
 		'pagetitle': pagetitle,
 		'individual_object': individual_object,
-		'relationship_object': relationship_object,
+		'relationship_dic': relationship_dic,
 		'relationshipnumber' : relationshipnumber,
 		# 'manifestation_set': manifestation_set,
 		# 'totalrows': totalrows,
@@ -508,26 +506,6 @@ def personnetwork_page(request, witness_entity_number):
 		fk_event__in=witnessevents)
 
 	reference_set = referencecollectindividual(reference_set)
-
-	print (reference_set)
-
-	# reference
-
-	# reference_set = reference_set.values(
-	# 	'fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by(
-	# 	'pk_referenceindividual')
-
-	# reference_set = reference_set.values(
-	# 	'fk_individual', 
-	# 	'fk_event', 
-	# 	'fk_individual__fullname_original',
-	# 	'fk_individual__fk_descriptor_name__descriptor_modern',
-	# 	'fk_individual__fk_descriptor_prefix1__prefix_english',
-	# 	'fk_individual__fk_descriptor_descriptor1__descriptor_modern',
-	# 	'fk_individual__fk_descriptor_prefix2__prefix_english',
-	# 	'fk_individual__fk_descriptor_descriptor2__descriptor_modern',
-	# 	'fk_individual__fk_descriptor_prefix3__prefix_english').order_by('pk_referenceindividual')
-
 
 	linkslist, nodelist = networkgenerator(reference_set)
 

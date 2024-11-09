@@ -13,6 +13,56 @@ from django.conf import settings
 
 from time import time
 
+def relationship_dataset(witness_entity_number):
+         
+	relationship_object = Digisigrelationshipview.objects.filter(
+		fk_individual = witness_entity_number).select_related(
+		'person2__fk_descriptor_title').select_related(
+		'person2__fk_descriptor_name').select_related(
+		'person2__fk_descriptor_prefix1').select_related(
+		'person2__fk_descriptor_descriptor1').select_related(
+		'person2__fk_descriptor_prefix2').select_related(
+		'person2__fk_descriptor_descriptor2').select_related(
+		'person2__fk_descriptor_prefix3').select_related(
+		'person2__fk_descriptor_descriptor3').values(
+		'relationship_role',
+		'person2__id_individual',
+		'person2__fk_descriptor_name__descriptor_modern',
+		'person2__fk_descriptor_prefix1__prefix_english',
+		'person2__fk_descriptor_descriptor1__descriptor_modern',
+		'person2__fk_descriptor_prefix2__prefix_english',
+		'person2__fk_descriptor_descriptor2__descriptor_modern',
+		'person2__fk_descriptor_prefix3__prefix_english').order_by('person2')
+
+	relationshipnumber = relationship_object.count()
+
+	relationship_dic = {}
+
+	for r in relationship_object:
+
+		relationshipvalues = {}
+		nameoriginal = ""
+
+		if r['person2__fk_descriptor_name__descriptor_modern'] != None:
+			nameoriginal =  r['person2__fk_descriptor_name__descriptor_modern']
+		if r['person2__fk_descriptor_prefix1__prefix_english'] != None:
+			nameoriginal = nameoriginal + " " + r['person2__fk_descriptor_prefix1__prefix_english']
+		if r['person2__fk_descriptor_descriptor1__descriptor_modern'] != None:
+			nameoriginal = nameoriginal + " " + r['person2__fk_descriptor_descriptor1__descriptor_modern']
+		if r['person2__fk_descriptor_prefix2__prefix_english'] != None:
+			nameoriginal = nameoriginal + " " + r['person2__fk_descriptor_prefix2__prefix_english']
+		if r['person2__fk_descriptor_descriptor2__descriptor_modern'] != None:
+			nameoriginal = nameoriginal + " " + r['person2__fk_descriptor_descriptor2__descriptor_modern']
+		if r['person2__fk_descriptor_prefix3__prefix_english'] != None:
+			nameoriginal = nameoriginal + " " + r['person2__fk_descriptor_prefix3__prefix_english']
+
+		relationshipvalues['name'] = nameoriginal
+		relationshipvalues['role'] = r.relationship_role
+
+		relationship_dic[r.person2] = relationshipvalues
+
+	return(relationship_dic, relationshipnumber)	
+
 
 ### network diagrams
 def networkgenerator(reference_set):
@@ -1413,6 +1463,7 @@ def referenceset_references(individual_object):
 		'fk_event').select_related(
 		'fk_referencerole').order_by(
 		"fk_event__startdate", "fk_event__enddate").values(
+		'fk_event',
 		'pk_referenceindividual',
 		'fk_event__startdate',
 		'fk_event__enddate',

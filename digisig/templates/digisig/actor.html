@@ -133,7 +133,7 @@
 			{% for relationship in relationship_object %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
 					<td>{{relationship.relationship_role}} of 
-						<a href="{% url 'actor_page' digisig_entity_number=relationship.person2 %}">
+						<a href="{% url 'actor_page' digisig_entity_number=relationship.person2.id_individual %}">
 							{% if relationship.group_name != null %}{{relationship.group_name}}{% endif %}
 							{% if relationship.groupclass != null %} ({{relationship.groupclass}}){% endif %}
 							{% if relationship.grouporder != null %}: {{relationship.grouporder}}{% endif %}
