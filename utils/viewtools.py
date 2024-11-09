@@ -26,8 +26,6 @@ def networkgenerator(reference_set):
 
 	for r in reference_set:
 
-		print (r)
-
 		if r['fk_event'] in reference_dic:
 			eventid = r['fk_event']
 			reference_dic[eventid].append(r['fk_individual'])
