@@ -26,6 +26,8 @@ def networkgenerator(reference_set):
 
 	for r in reference_set:
 
+		print (r)
+
 		if r['fk_event'] in reference_dic:
 			eventid = r['fk_event']
 			reference_dic[eventid].append(r['fk_individual'])
@@ -35,22 +37,20 @@ def networkgenerator(reference_set):
 
 		person = r['fk_individual']
 
-		print (r)
-
 		nameoriginal = ""
 
 		if r['fk_individual__fk_descriptor_name__descriptor_modern'] != None:
 			nameoriginal =  r['fk_individual__fk_descriptor_name__descriptor_modern']
 		if r['fk_individual__fk_descriptor_prefix1__prefix_english'] != None:
 			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix1__prefix_english']
-		if r['fk_individual.fk_descriptor_descriptor1.descriptor_modern'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual.fk_descriptor_descriptor1.descriptor_modern']
-		if r['fk_individual.fk_descriptor_prefix2.prefix_english'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual.fk_descriptor_prefix2.prefix_english']
-		if r['fk_individual.fk_descriptor_descriptor2.descriptor_modern'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual.fk_descriptor_descriptor2.descriptor_modern']
-		if r['fk_individual.fk_descriptor_prefix3.prefix_english'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual.fk_descriptor_prefix3.prefix_english']
+		if r['fk_individual__fk_descriptor_descriptor1__descriptor_modern'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_descriptor1__descriptor_modern']
+		if r['fk_individual__fk_descriptor_prefix2__prefix_english'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix2__prefix_english']
+		if r['fk_individual__fk_descriptor_descriptor2__descriptor_modern'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_descriptor2__descriptor_modern']
+		if r['fk_individual__fk_descriptor_prefix3__prefix_english'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix3__prefix_english']
 
 		valuetarget = 1
 
@@ -748,7 +748,7 @@ def individualsearch():
 	return(individual_object)
 
 def referencecollectindividual(reference_set):
-	reference_set.select_related(
+	reference_set = reference_set.select_related(
 		'fk_individual__fk_descriptor_title').select_related(
 		'fk_individual__fk_descriptor_name').select_related(
 		'fk_individual__fk_descriptor_prefix1').select_related(
@@ -756,7 +756,16 @@ def referencecollectindividual(reference_set):
 		'fk_individual__fk_descriptor_prefix2').select_related(
 		'fk_individual__fk_descriptor_descriptor2').select_related(
 		'fk_individual__fk_descriptor_prefix3').select_related(
-		'fk_individual__fk_descriptor_descriptor3')
+		'fk_individual__fk_descriptor_descriptor3').values(
+		'fk_individual', 
+		'fk_event', 
+		'fk_individual__fullname_original',
+		'fk_individual__fk_descriptor_name__descriptor_modern',
+		'fk_individual__fk_descriptor_prefix1__prefix_english',
+		'fk_individual__fk_descriptor_descriptor1__descriptor_modern',
+		'fk_individual__fk_descriptor_prefix2__prefix_english',
+		'fk_individual__fk_descriptor_descriptor2__descriptor_modern',
+		'fk_individual__fk_descriptor_prefix3__prefix_english').order_by('pk_referenceindividual')
 
 	return(reference_set)
 

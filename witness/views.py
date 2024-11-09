@@ -509,9 +509,25 @@ def personnetwork_page(request, witness_entity_number):
 
 	reference_set = referencecollectindividual(reference_set)
 
-	reference_set = reference_set.values(
-		'fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by(
-		'pk_referenceindividual')
+	print (reference_set)
+
+	# reference
+
+	# reference_set = reference_set.values(
+	# 	'fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by(
+	# 	'pk_referenceindividual')
+
+	# reference_set = reference_set.values(
+	# 	'fk_individual', 
+	# 	'fk_event', 
+	# 	'fk_individual__fullname_original',
+	# 	'fk_individual__fk_descriptor_name__descriptor_modern',
+	# 	'fk_individual__fk_descriptor_prefix1__prefix_english',
+	# 	'fk_individual__fk_descriptor_descriptor1__descriptor_modern',
+	# 	'fk_individual__fk_descriptor_prefix2__prefix_english',
+	# 	'fk_individual__fk_descriptor_descriptor2__descriptor_modern',
+	# 	'fk_individual__fk_descriptor_prefix3__prefix_english').order_by('pk_referenceindividual')
+
 
 	linkslist, nodelist = networkgenerator(reference_set)
 
