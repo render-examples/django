@@ -364,31 +364,16 @@ def parishnetwork_page(request, witness_entity_number):
 
 	reference_set = referencecollectindividual(reference_set)
 
-	reference_set = reference_set.annotate(fullname= Concat('referencefullname', " "))
-
-
-
-# .annotate(fullname=Concat()
-
-# 		namevariable = ''
-# 		# try:
-# 		if (person.fk_group != None): namevariable = individual_object.fk_group.group_name
-# 		if (person.fk_descriptor_title != None): namevariable = namevariable + " " + individual_object.fk_descriptor_title.descriptor_modern
-# 		if (person.fk_descriptor_name != None): namevariable = namevariable + " " + individual_object.fk_descriptor_name.descriptor_modern
-# 		if (person.fk_descriptor_prefix1 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_prefix1.prefix_english
-# 		if (person.fk_descriptor_descriptor1 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_descriptor1.descriptor_modern
-# 		if (person.fk_descriptor_prefix2 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_prefix2.prefix_english
-# 		if (person.fk_descriptor_descriptor2 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_descriptor2.descriptor_modern
-# 		if (person.fk_descriptor_prefix3 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_prefix3.prefix_english
-# 		if (person.fk_descriptor_descriptor3 != None): namevariable = namevariable + " " + individual_object.fk_descriptor_descriptor3.descriptor_modern
-
-		# except:
-		# 	print ("problem with name")
-
-
-
 	reference_set = reference_set.values(
-		'fk_individual', 'fk_event', 'fk_individual__fullname_original').order_by('pk_referenceindividual')
+		'fk_individual', 
+		'fk_event', 
+		'fk_individual__fullname_original',
+		'fk_individual.fk_descriptor_name.descriptor_modern',
+		'fk_individual.fk_descriptor_prefix1.prefix_english',
+		'fk_individual.fk_descriptor_descriptor1.descriptor_modern',
+		'fk_individual.fk_descriptor_prefix2.prefix_english',
+		'fk_individual.fk_descriptor_descriptor2.descriptor_modern',
+		'fk_individual.fk_descriptor_prefix3.prefix_english').order_by('pk_referenceindividual')
 
 	linkslist, nodelist = networkgenerator(reference_set)
 

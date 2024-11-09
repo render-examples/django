@@ -35,7 +35,12 @@ def networkgenerator(reference_set):
 
 		person = r['fk_individual']
 
-		nameoriginal = r['fk_individual']
+		nameoriginal =  r['fk_individual.fk_descriptor_name.descriptor_modern'] 
+		# r['fk_individual.fk_descriptor_prefix1.prefix_english']
+		# r['fk_individual.fk_descriptor_descriptor1.descriptor_modern']
+		# r['fk_individual.fk_descriptor_prefix2.prefix_english']
+		# r['fk_individual.fk_descriptor_descriptor2.descriptor_modern']
+		# r['fk_individual.fk_descriptor_prefix3.prefix_english']
 
 		valuetarget = 1
 
