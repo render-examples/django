@@ -35,12 +35,22 @@ def networkgenerator(reference_set):
 
 		person = r['fk_individual']
 
-		nameoriginal =  r['fk_individual.fk_descriptor_name.descriptor_modern'] 
-		# r['fk_individual.fk_descriptor_prefix1.prefix_english']
-		# r['fk_individual.fk_descriptor_descriptor1.descriptor_modern']
-		# r['fk_individual.fk_descriptor_prefix2.prefix_english']
-		# r['fk_individual.fk_descriptor_descriptor2.descriptor_modern']
-		# r['fk_individual.fk_descriptor_prefix3.prefix_english']
+		print (r)
+
+		nameoriginal = ""
+
+		if r['fk_individual__fk_descriptor_name__descriptor_modern'] != None:
+			nameoriginal =  r['fk_individual__fk_descriptor_name__descriptor_modern']
+		if r['fk_individual__fk_descriptor_prefix1__prefix_english'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix1__prefix_english']
+		if r['fk_individual.fk_descriptor_descriptor1.descriptor_modern'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual.fk_descriptor_descriptor1.descriptor_modern']
+		if r['fk_individual.fk_descriptor_prefix2.prefix_english'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual.fk_descriptor_prefix2.prefix_english']
+		if r['fk_individual.fk_descriptor_descriptor2.descriptor_modern'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual.fk_descriptor_descriptor2.descriptor_modern']
+		if r['fk_individual.fk_descriptor_prefix3.prefix_english'] != None:
+			nameoriginal = nameoriginal + " " + r['fk_individual.fk_descriptor_prefix3.prefix_english']
 
 		valuetarget = 1
 

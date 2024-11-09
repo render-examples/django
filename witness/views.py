@@ -368,12 +368,12 @@ def parishnetwork_page(request, witness_entity_number):
 		'fk_individual', 
 		'fk_event', 
 		'fk_individual__fullname_original',
-		'fk_individual.fk_descriptor_name.descriptor_modern',
-		'fk_individual.fk_descriptor_prefix1.prefix_english',
-		'fk_individual.fk_descriptor_descriptor1.descriptor_modern',
-		'fk_individual.fk_descriptor_prefix2.prefix_english',
-		'fk_individual.fk_descriptor_descriptor2.descriptor_modern',
-		'fk_individual.fk_descriptor_prefix3.prefix_english').order_by('pk_referenceindividual')
+		'fk_individual__fk_descriptor_name__descriptor_modern',
+		'fk_individual__fk_descriptor_prefix1__prefix_english',
+		'fk_individual__fk_descriptor_descriptor1__descriptor_modern',
+		'fk_individual__fk_descriptor_prefix2__prefix_english',
+		'fk_individual__fk_descriptor_descriptor2__descriptor_modern',
+		'fk_individual__fk_descriptor_prefix3__prefix_english').order_by('pk_referenceindividual')
 
 	linkslist, nodelist = networkgenerator(reference_set)
 
