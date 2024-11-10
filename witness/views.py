@@ -210,6 +210,8 @@ def person_page(request, witness_entity_number):
 	# list of relationships for each actor
 	relationship_dic, relationshipnumber = relationship_dataset(witness_entity_number)
 
+	print (relationship_dic)
+
 	# list of references to the actor
 	reference_set = referenceset_references(individual_object)
 

@@ -93,22 +93,10 @@
 
 		<div>
 			<table id="entity2" style="display:none;">
-			{% for relationship in relationship_object %}
+			{% for key, value in relationship_dic.items %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-					<td>{{relationship.relationship_role}} of 
-						<a href="{% url 'person_page' witness_entity_number=relationship.person2.id_individual %}">
-							{% if relationship.group_name != null %}{{relationship.group_name}}{% endif %}
-							{% if relationship.groupclass != null %} ({{relationship.groupclass}}){% endif %}
-							{% if relationship.grouporder != null %}: {{relationship.grouporder}}{% endif %}
-							{% if relationship.descriptor_title != null %}{{relationship.descriptor_title}}{% endif %}
-							{% if relationship.descriptor_name != null %}{{relationship.descriptor_name}}{% endif %}
-							{% if relationship.prefix1 != null %}{{relationship.prefix1}}{% endif %}
-							{% if relationship.descriptor1 != null %}{{relationship.descriptor1}}{% endif %}
-							{% if relationship.prefix2 != null %}{{relationship.prefix2}}{% endif %}
-							{% if relationship.descriptor2 != null %}{{relationship.descriptor2}}{% endif %}
-							{% if relationship.prefix3 != null %}{{relationship.prefix3}}{% endif %}
-							{% if relationship.descriptor3 != null %}{{relationship.descriptor3}}{% endif %}
-						</a>
+					<td>{{value.role}} of 
+						<a href="{% url 'person_page' witness_entity_number=value.id_individual %}">{{value.name}}</a>
 					</td>
 				</tr>
 			{% endfor %}

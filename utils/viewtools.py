@@ -17,6 +17,7 @@ def relationship_dataset(witness_entity_number):
          
 	relationship_object = Digisigrelationshipview.objects.filter(
 		fk_individual = witness_entity_number).select_related(
+		'person2__fk_group').select_related(
 		'person2__fk_descriptor_title').select_related(
 		'person2__fk_descriptor_name').select_related(
 		'person2__fk_descriptor_prefix1').select_related(
@@ -42,7 +43,8 @@ def relationship_dataset(witness_entity_number):
 
 		relationshipvalues = {}
 		nameoriginal = ""
-
+		if r['person2__fk_group__group_name'] != None:
+			nameoriginal =  r['person2__fk_group__group_name']
 		if r['person2__fk_descriptor_name__descriptor_modern'] != None:
 			nameoriginal =  r['person2__fk_descriptor_name__descriptor_modern']
 		if r['person2__fk_descriptor_prefix1__prefix_english'] != None:
@@ -57,9 +59,10 @@ def relationship_dataset(witness_entity_number):
 			nameoriginal = nameoriginal + " " + r['person2__fk_descriptor_prefix3__prefix_english']
 
 		relationshipvalues['name'] = nameoriginal
-		relationshipvalues['role'] = r.relationship_role
+		relationshipvalues['role'] = r['relationship_role']
+		relationshipvalues['id_individual'] = r['person2__id_individual']
 
-		relationship_dic[r.person2] = relationshipvalues
+		relationship_dic[r['person2__id_individual']] = relationshipvalues
 
 	return(relationship_dic, relationshipnumber)	
 
