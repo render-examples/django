@@ -14,7 +14,7 @@ from django.conf import settings
 from time import time
 
 def relationship_dataset(witness_entity_number):
-         
+		 
 	relationship_object = Digisigrelationshipview.objects.filter(
 		fk_individual = witness_entity_number).select_related(
 		'person2__fk_group').select_related(
@@ -1460,12 +1460,38 @@ def eventset_references(event_object, event_dic):
 
 # 	return(reference_set)
 
-def referenceset_references(individual_object):
+
+def referenceset_references_v2(witness_entity_number):
+
+	reference_set = {}
+
+	reference_set = Referenceindividual.objects.filter(
+		fk_event__in=(Event.objects.filter(fk_event_event__fk_individual=witness_entity_number).values('pk_event'))).order_by('pk_referenceindividual')
+
+	position_dic = {}
+
+	print (type(witness_entity_number))
+
+	for r in reference_set:
+
+		eventvalue = r.fk_event.pk_event
+		position_dic.setdefault(eventvalue, {'total':0, 'position': 0})
+
+		position_dic[eventvalue]['total'] += 1
+
+		if str(r.fk_individual.id_individual) == witness_entity_number:
+			position_dic[eventvalue]['position'] += position_dic[eventvalue]['total']
+
+	print (position_dic)
+
+	return(reference_set)
+
+def referenceset_references(witness_entity_number):
 
 	reference_set = {}
 
 	reference_dic = Referenceindividual.objects.filter(
-		fk_individual=individual_object).select_related(
+		fk_individual=witness_entity_number).select_related(
 		'fk_event').select_related(
 		'fk_referencerole').order_by(
 		"fk_event__startdate", "fk_event__enddate").values(

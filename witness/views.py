@@ -200,20 +200,21 @@ def search(request, searchtype):
 
 def person_page(request, witness_entity_number):
 
+	template = loader.get_template('witness/person.html')
+
+	#Person info
 	individual_object = individualsearch()
 	individual_object = individual_object.get(id_individual=witness_entity_number)
-
 	pagetitle= namecompiler(individual_object)
-
-	template = loader.get_template('witness/person.html')
 
 	# list of relationships for each actor
 	relationship_dic, relationshipnumber = relationship_dataset(witness_entity_number)
 
-	print (relationship_dic)
+	# list of references to the actor
+	reference_set2 = referenceset_references_v2(witness_entity_number)
 
 	# list of references to the actor
-	reference_set = referenceset_references(individual_object)
+	reference_set = referenceset_references(witness_entity_number)
 
 	# parish where active
 	parishstats = {}
