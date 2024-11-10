@@ -28,6 +28,7 @@ def relationship_dataset(witness_entity_number):
 		'person2__fk_descriptor_descriptor3').values(
 		'relationship_role',
 		'person2__id_individual',
+		'person2__fk_group__group_name',
 		'person2__fk_descriptor_name__descriptor_modern',
 		'person2__fk_descriptor_prefix1__prefix_english',
 		'person2__fk_descriptor_descriptor1__descriptor_modern',
@@ -42,6 +43,9 @@ def relationship_dataset(witness_entity_number):
 	for r in relationship_object:
 
 		relationshipvalues = {}
+
+		print (r['person2__fk_group__group_name'])
+
 		nameoriginal = ""
 		if r['person2__fk_group__group_name'] != None:
 			nameoriginal =  r['person2__fk_group__group_name']
