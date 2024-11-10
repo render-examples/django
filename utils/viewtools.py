@@ -36,15 +36,14 @@ def relationship_dataset(witness_entity_number):
 		'person2__fk_descriptor_descriptor2__descriptor_modern',
 		'person2__fk_descriptor_prefix3__prefix_english').order_by('person2')
 
-	relationshipnumber = relationship_object.count()
-
 	relationship_dic = {}
+	relationshipnumber = 0
 
 	for r in relationship_object:
 
-		relationshipvalues = {}
+		relationshipnumber += 1
 
-		print (r['person2__fk_group__group_name'])
+		relationshipvalues = {}
 
 		nameoriginal = ""
 		if r['person2__fk_group__group_name'] != None:
