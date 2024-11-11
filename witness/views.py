@@ -388,13 +388,18 @@ def parishnetwork_page(request, witness_entity_number):
 
 def part_page(request, witness_entity_number):
 
-	part_object = Part.objects.get(id_part=witness_entity_number)
-	event_object = part_object.fk_event
-	item_object = part_object.fk_item
+	externallinkset = externallinkgenerator(witness_entity_number)
 
-	pagetitle = item_object.fk_repository.repository_fulltitle + " " + item_object.shelfmark
+	part_object = Part.objects.select_related(
+		'fk_item').select_related(
+		'fk_event').select_related(
+		'fk_item__fk_repository').get(id_part=witness_entity_number)
+
+	pagetitle = part_object.fk_item.fk_repository.repository_fulltitle + " " + part_object.fk_item.shelfmark
 
 	event_dic = {}
+	event_object = part_object.fk_event
+	item_object = part_object.fk_item
 	event_dic["part_object"] = part_object
 	event_dic = eventset_datedata(event_object, event_dic)
 	event_dic = eventset_locationdata(event_object, event_dic)
@@ -402,7 +407,6 @@ def part_page(request, witness_entity_number):
 
 	place_object = event_dic["location"]
 	mapdic = mapgenerator(place_object, 0)
-	externallinkset = externallinkgenerator(witness_entity_number)
 
 	#for part images (code to show images not implemented yet)
 	representationset = {}
@@ -433,23 +437,6 @@ def part_page(request, witness_entity_number):
 
 	## prepare the data for each displayed seal manifestation
 
-	manifestation_set = {}
-
-	try:
-		for e in manifestation_object:
-			manifestation_dic = {}
-			manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-			manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-			manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
-			manifestation_set[e.id_manifestation] = manifestation_dic
-
-		totalrows = manifestation_object.count
-		totaldisplay = len(manifestation_set)
-
-	except:
-		totalrows = 0
-		totaldisplay = 0
-
 	template = loader.get_template('witness/item.html')
 	context = {
 		'pagetitle': pagetitle,
@@ -457,9 +444,9 @@ def part_page(request, witness_entity_number):
 		'event_dic': event_dic,
 		'mapdic': mapdic,
 		'representationset': representationset,
-		'manifestationset': manifestation_set,
-		'totalrows': totalrows,
-		'totaldisplay': totaldisplay,
+		# 'manifestationset': manifestation_set,
+		# 'totalrows': totalrows,
+		# 'totaldisplay': totaldisplay,
 		'externallink_object': externallinkset,
 		#'location': location,
 		#'location_dict': location_dict,
