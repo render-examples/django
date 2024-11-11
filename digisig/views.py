@@ -1637,7 +1637,6 @@ def collection_page(request, digisig_entity_number):
 ############################## Item #############################
 
 def item_page(request, digisig_entity_number):
-	starttime = time()
 
 	try:
 		manifestation_object = sealsearch()
@@ -1651,7 +1650,9 @@ def item_page(request, digisig_entity_number):
 		event_object = firstmanifestation.fk_support.fk_part.fk_event
 
 	except:
-		part_object = Part.objects.get(fk_item=digisig_entity_number)
+		part_object = Part.objects.filter(fk_item=digisig_entity_number).select_related(
+			'fk_item__fk_repository').select_related(
+			'fk_event').first()
 		event_object = part_object.fk_event
 		item_object = part_object.fk_item
 
@@ -1712,8 +1713,6 @@ def item_page(request, digisig_entity_number):
 	except:
 		totalrows = 0
 		totaldisplay = 0
-
-	print("Compute Time:", time()-starttime)
 
 	template = loader.get_template('digisig/item.html')
 	context = {
