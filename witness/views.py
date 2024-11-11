@@ -125,23 +125,15 @@ def search(request, searchtype):
 
 		londonevents = Location.objects.filter(fk_region=87).values('locationname__locationreference__fk_event')
 
-		# print (len(londonevents))
-
 		individual_object = individualsearch()
-
-		# print (len(individual_object))
 
 		individual_set1 = individual_object.exclude(
 			id_individual=10000019).filter(
 			fk_individual_event__in=londonevents)
 
-		# print (len(individual_set1))        
-
 		individual_object = individual_object.exclude(
 			id_individual=10000019).filter(
-			fk_individual_event__in=londonevents).distinct('id_individual')
-
-		# print (len(individual_object))
+			fk_individual_event__in=londonevents).distinct('id_individual').order_by('id_individual')
 
 		if request.method == "POST":
 			form = PeopleForm(request.POST)
@@ -221,7 +213,6 @@ def person_page(request, witness_entity_number):
 	parishnamevalues = {}
 
 	for r in reference_set.values():
-		#parishvalue = r['location_id']
 		parisholdid = r['location_pk']
 		parishname = r['location']
 		if parisholdid in parishstats:
@@ -229,6 +220,9 @@ def person_page(request, witness_entity_number):
 		else:
 			parishstats[parisholdid] = 1
 			parishnamevalues[parisholdid] = parishname
+
+
+	print (reference_set)
 
 	mapparishes = []
 
