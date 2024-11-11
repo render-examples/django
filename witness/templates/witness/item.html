@@ -97,7 +97,12 @@
 				<td><a href="{% url 'entity' event_dic.location_id %}">{{event_dic.location}}</td>
 				{% endif %}
 			</tr>
-			
+
+			<tr>
+				<th>Digisig Link</th>
+				<td><a href="https://www.digisig.org/entity/{{item_object.id_item}}" target="_blank">Digisig</td>
+			</tr>
+
 		</table>
 
 		{% if event_dic.location_id != 50015247 %} 
