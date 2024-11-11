@@ -388,21 +388,9 @@ def parishnetwork_page(request, witness_entity_number):
 
 def part_page(request, witness_entity_number):
 
-	try:
-		manifestation_object = sealsearch()
-		manifestation_object = manifestation_object.filter(
-			fk_support__fk_part=witness_entity_number).order_by(
-			"fk_support__fk_number_currentposition")
-
-		firstmanifestation = manifestation_object.first()
-		item_object = firstmanifestation.fk_support.fk_part.fk_item
-		part_object = firstmanifestation.fk_support.fk_part
-		event_object = firstmanifestation.fk_support.fk_part.fk_event
-
-	except:
-		part_object = Part.objects.get(id_part=witness_entity_number)
-		event_object = part_object.fk_event
-		item_object = part_object.fk_item
+	part_object = Part.objects.get(id_part=witness_entity_number)
+	event_object = part_object.fk_event
+	item_object = part_object.fk_item
 
 	pagetitle = item_object.fk_repository.repository_fulltitle + " " + item_object.shelfmark
 
