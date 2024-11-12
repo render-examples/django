@@ -69,17 +69,43 @@
       <table id="entity2" style="display:none;">
         <tr> 
           <th>Name</th>
-          <th>Occurrences</th>
+          <th>References</th>
+          <th>Ref. as witness</th>
+          <th>Active</th>
         </tr>
-      {% for key, person in individual_set.items %}
+      {% for person in individual_list %}
         {% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+          {% if person.id_individual == 10000019 %}
+          <td> 
+            {{person.actor_name}}
+          </td>
+          {% else %}
           <td> 
             <a href="{% url 'person_page' witness_entity_number=person.id_individual %}">{{person.actor_name}}</a>
           </td>
+          {% endif %}
           <td>
             {{person.occurences}}
           </td>
-        </tr>
+          {% if person.id_individual == 10000019 %}
+          <td> 
+          </td>
+          {% else %}
+          <td>
+            {{person.witnessref}}
+          </td>
+          {% endif %}
+          {% if person.mindate > 1999 %}
+          <td>Undetermined 
+          </td>
+          {% else %}
+          <td>
+            <i>c.</i> {{person.mindate}}
+            {% if person.mindate < person.maxdate %}
+             to {{person.maxdate}}
+             {% endif %}
+          </td>
+          {% endif %}
       {% endfor %}
       </table>
     </div>

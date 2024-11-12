@@ -121,7 +121,7 @@
 					<th>Witness position</th>
 				</tr>
 
-			{% for key, r in reference_set.items %}
+			{% for r in reference_list %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
 					<td><a href="{% url 'entity' witness_entity_number=r.part_id %}">{{r.item_shelfmark}}</a></td>
 					<td>{{r.date}}</td>

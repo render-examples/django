@@ -7,8 +7,7 @@ from time import time
 # from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from django.db.models import Q, F
-from django.db.models import Count
-from django.db.models import Sum
+from django.db.models import Count, Sum, Max, Min
 # from django.db.models.functions import Concat
 # from django.db.models import CharField
 from django.core import serializers
@@ -211,7 +210,7 @@ def person_page(request, witness_entity_number):
 	# parish where active
 	parishstats = {}
 	parishnamevalues = {}
-	reference_list = []
+	ref_list = []
 
 	for r in reference_set.values():
 		parisholdid = r['location_pk']
@@ -222,9 +221,9 @@ def person_page(request, witness_entity_number):
 			parishstats[parisholdid] = 1
 			parishnamevalues[parisholdid] = parishname
 
-		reference_list.append(r)
+		ref_list.append(r)
 	
-	print (reference_list)
+	reference_list = sorted (ref_list, key=lambda x: x["date"])
 
 	mapparishes = []
 
@@ -267,6 +266,7 @@ def person_page(request, witness_entity_number):
 		'individual_object': individual_object,
 		'relationship_dic': relationship_dic,
 		'relationshipnumber' : relationshipnumber,
+		'reference_list' : reference_list,
 		# 'manifestation_set': manifestation_set,
 		# 'totalrows': totalrows,
 		# 'totaldisplay': totaldisplay,
@@ -302,20 +302,35 @@ def parish_page(request, witness_entity_number):
 	individual_object = individualsearch()
 
 	individual_object = individual_object.filter(
-		fk_individual_event__fk_event__fk_event_locationreference__fk_locationname__fk_location=qlondonparish).annotate(occurences=
-		Count('fk_individual_event'))
+		fk_individual_event__fk_event__fk_event_locationreference__fk_locationname__fk_location=qlondonparish).annotate(
+		occurences=
+		Count('fk_individual_event')).annotate(
+		witnessref=Count('fk_individual_event', filter=Q(fk_individual_event__fk_referencerole=1))).annotate(
+		earlydate=Min('fk_individual_event__fk_event__startdate')).annotate(
+		latedate=Max('fk_individual_event__fk_event__enddate'))
 
 	case_value = individual_object.aggregate(Sum('occurences'))
 	totalcases = case_value['occurences__sum']
 
-	individual_set = {}
+	individual_list = []
 
 	for i in individual_object:
 		individual_info = {}
 		individual_info['actor_name'] = namecompiler(i)
 		individual_info['id_individual'] = i.id_individual
 		individual_info['occurences'] = i.occurences
-		individual_set[i.id_individual] = individual_info
+		individual_info['witnessref'] = i.witnessref
+		try:
+			individual_info['mindate'] = i.earlydate.year
+		except:
+			individual_info['mindate'] = 2000
+		try:
+			individual_info['maxdate'] = i.latedate.year
+		except:
+			pass
+		individual_list.append(individual_info)
+
+	individual_list = sorted (individual_list, key=lambda x: x["mindate"])
 
 	mapparishes = []
 
@@ -335,7 +350,7 @@ def parish_page(request, witness_entity_number):
 	context = {
 		'parish': parish,
 		'totalcases': totalcases,
-		'individual_set': individual_set,
+		'individual_list': individual_list,
 		'qlondonparish': qlondonparish,
 		'parishes_dict': mapparishes,
 		}

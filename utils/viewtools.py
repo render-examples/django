@@ -1513,12 +1513,16 @@ def referenceset_references(witness_entity_number):
 
 			#date
 			if r['fk_event__startdate'] != None:
-				reference_row['startyear'] = int(str(r['fk_event__startdate'])[:4])
-				reference_row['endyear'] = int(str(r['fk_event__enddate'])[:4])
-				if reference_row['endyear'] > reference_row['startyear']:
-					reference_row['date'] = str(reference_row['startyear']) + " - " + str(reference_row['endyear'])
+				reference_row['startyear'] = r['fk_event__startdate']
+				reference_row['endyear'] = r['fk_event__enddate']
+
+				startyear = int(str(r['fk_event__startdate'])[:4])
+				endyear = int(str(r['fk_event__enddate'])[:4])
+
+				if endyear > startyear:
+					reference_row['date'] = str(startyear) + " - " + str(endyear)
 				else:
-					reference_row['date'] = reference_row['startyear']
+					reference_row['date'] = str(startyear)
 			else:
 				if r['fk_event__repository_startdate'] != None:
 					try:
