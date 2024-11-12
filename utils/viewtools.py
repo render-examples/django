@@ -1523,12 +1523,19 @@ def referenceset_references(witness_entity_number):
 					reference_row['date'] = str(startyear) + " - " + str(endyear)
 				else:
 					reference_row['date'] = str(startyear)
+			elif r['fk_event__repository_startdate'] != None:
+				reference_row['startyear'] = r['fk_event__repository_startdate']
+				reference_row['endyear'] = r['fk_event__repository_enddate']
+
+				startyear = int(str(r['fk_event__repository_startdate'])[:4])
+				endyear = int(str(r['fk_event__repository_enddate'])[:4])
+
+				if endyear > startyear:
+					reference_row['date'] = str(startyear) + " - " + str(endyear)
+				else:
+					reference_row['date'] = str(startyear)
 			else:
-				if r['fk_event__repository_startdate'] != None:
-					try:
-						reference_row['date'] = str['fk_event__repository_startdate'] + " to " + str(['fk_event__repository_enddate'])
-					except:
-						reference_row['date'] = ""
+				reference_row['date'] = "20000"
 			#role
 			reference_row["role"] = r['fk_referencerole__referencerole']
 
@@ -1542,12 +1549,6 @@ def referenceset_references(witness_entity_number):
 			reference_row["item_shelfmark"] = r['fk_event__part__fk_item__shelfmark']
 			reference_row["item_id"] = r['fk_event__part__fk_item__id_item']
 			reference_row["part_id"] = r['fk_event__part__id_part']
-
-			#location
-			# locationreference_object = Locationreference.objects.filter(
-			# 	location_reference_primary=0).select_related(
-			# 	'fk_locationname__fk_location__fk_region').get(
-			# 	fk_event=r.fk_event)
 			reference_row["region"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region']
 			reference_row["location_id"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location']
 			reference_row["location"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
