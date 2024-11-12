@@ -8,11 +8,78 @@ import statistics
 import math
 import os
 import pandas as pd 
+import json
 
 from django.conf import settings
 
 from time import time
+from asgiref.sync import sync_to_async
 
+## a function to apply this complex filter to actor searches
+
+@sync_to_async
+def mapparishesdata(reference_set):
+
+	parishstats = {}
+	parishnamevalues = {}
+	ref_list = []
+
+	for r in reference_set.values():
+		parisholdid = r['location_pk']
+		parishname = r['location']
+		if parisholdid in parishstats:
+			parishstats[parisholdid] += 1
+		else:
+			parishstats[parisholdid] = 1
+			parishnamevalues[parisholdid] = parishname
+
+		ref_list.append(r)
+	
+	reference_list = sorted (ref_list, key=lambda x: x["date"])
+
+	mapparishes = []
+	mapparishes1 = get_object_or_404(Jsonstorage, id_jsonfile=2)
+	mapparishes = json.loads(mapparishes1.jsonfiletxt)
+
+	for i in mapparishes:
+		if i == "features":
+			for b in mapparishes[i]:
+				j = b["properties"]
+
+				parishvalue = j["fk_locatio"]
+				try:
+					j["cases"] = parishstats[parishvalue]
+					j["parishname"] = parishnamevalues[parishvalue]
+					#print ("found", parishvalue)
+				except:
+					pass
+					#print ("can't find", parishvalue)
+
+	return(reference_list, mapparishes)
+
+
+@sync_to_async
+def individualsearch2(witness_entity_number):
+
+	individual_object = Individual.objects.select_related(
+	'fk_group').select_related(
+	'fk_descriptor_title').select_related(
+	'fk_descriptor_name').select_related(
+	'fk_descriptor_prefix1').select_related(
+	'fk_descriptor_descriptor1').select_related(
+	'fk_separator_1').select_related(
+	'fk_descriptor_prefix2').select_related(
+	'fk_descriptor_descriptor2').select_related(
+	'fk_descriptor_prefix3').select_related(
+	'fk_descriptor_descriptor3').select_related(
+	'fk_group__fk_group_order').select_related(
+	'fk_group__fk_group_class')
+
+	individual_object = individual_object.get(id_individual=witness_entity_number)
+
+	return(individual_object)
+
+@sync_to_async
 def relationship_dataset(witness_entity_number):
 		 
 	relationship_object = Digisigrelationshipview.objects.filter(
@@ -1461,7 +1528,7 @@ def eventset_references(event_object, event_dic):
 
 # 	return(reference_set)
 
-
+@sync_to_async
 def referenceset_references(witness_entity_number):
 
 	reference_set = {}

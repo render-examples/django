@@ -24,6 +24,7 @@ import json
 import os
 import pickle
 
+from asgiref.sync import sync_to_async
 
 # Create your views here.
 def index(request):
@@ -31,12 +32,11 @@ def index(request):
 	pagetitle = 'title'
 	template = loader.get_template('witness/index.html')
 
-
-	londoners_total = Individual.objects.filter(fk_individual_event__gt=1).distinct('id_individual').count()
+	#londoners_total = Individual.objects.filter(fk_individual_event__gt=1).distinct('id_individual').count()
 
 	context = {
 		'pagetitle': pagetitle,
-		'londoners_total': londoners_total,
+		#'londoners_total': londoners_total,
 		}
 
 	return HttpResponse(template.render(context, request))
@@ -189,61 +189,55 @@ def search(request, searchtype):
 		template = loader.get_template('witness/search_person.html')
 		return HttpResponse(template.render(context, request))
 
-def person_page(request, witness_entity_number):
+async def person_page(request, witness_entity_number):
 
 	template = loader.get_template('witness/person.html')
 
-	#Person info
-	individual_object = individualsearch()
-	individual_object = individual_object.get(id_individual=witness_entity_number)
+	individual_object = await individualsearch2(witness_entity_number)
 	pagetitle= namecompiler(individual_object)
 
 	# list of relationships for each actor
-	relationship_dic, relationshipnumber = relationship_dataset(witness_entity_number)
+	relationship_dic, relationshipnumber = await relationship_dataset(witness_entity_number)
 
 	# list of references to the actor
-	reference_set = referenceset_references(witness_entity_number)
+	reference_set = await referenceset_references(witness_entity_number)
 
 	# # list of references to the actor
 	# reference_set = referenceset_references(witness_entity_number)
 
 	# parish where active
-	parishstats = {}
-	parishnamevalues = {}
-	ref_list = []
+	# parishstats = {}
+	# parishnamevalues = {}
+	# ref_list = []
 
-	for r in reference_set.values():
-		parisholdid = r['location_pk']
-		parishname = r['location']
-		if parisholdid in parishstats:
-			parishstats[parisholdid] += 1
-		else:
-			parishstats[parisholdid] = 1
-			parishnamevalues[parisholdid] = parishname
+	# for r in reference_set.values():
+	# 	parisholdid = r['location_pk']
+	# 	parishname = r['location']
+	# 	if parisholdid in parishstats:
+	# 		parishstats[parisholdid] += 1
+	# 	else:
+	# 		parishstats[parisholdid] = 1
+	# 		parishnamevalues[parisholdid] = parishname
 
-		ref_list.append(r)
+	# 	ref_list.append(r)
 	
-	reference_list = sorted (ref_list, key=lambda x: x["date"])
+	# reference_list = sorted (ref_list, key=lambda x: x["date"])
 
-	mapparishes = []
+	reference_list, mapparishes = await mapparishesdata(reference_set)
 
-	## data for colorpeth map
-	mapparishes1 = get_object_or_404(Jsonstorage, id_jsonfile=2)
-	mapparishes = json.loads(mapparishes1.jsonfiletxt)
+	# for i in mapparishes:
+	# 	if i == "features":
+	# 		for b in mapparishes[i]:
+	# 			j = b["properties"]
 
-	for i in mapparishes:
-		if i == "features":
-			for b in mapparishes[i]:
-				j = b["properties"]
-
-				parishvalue = j["fk_locatio"]
-				try:
-					j["cases"] = parishstats[parishvalue]
-					j["parishname"] = parishnamevalues[parishvalue]
-					#print ("found", parishvalue)
-				except:
-					pass
-					#print ("can't find", parishvalue)
+	# 			parishvalue = j["fk_locatio"]
+	# 			try:
+	# 				j["cases"] = parishstats[parishvalue]
+	# 				j["parishname"] = parishnamevalues[parishvalue]
+	# 				#print ("found", parishvalue)
+	# 			except:
+	# 				pass
+	# 				#print ("can't find", parishvalue)
 	
 	# #adjust values if form submitted
 	# if request.method == 'POST':
@@ -260,6 +254,7 @@ def person_page(request, witness_entity_number):
 	# else:
 	#     form = LondonparishForm(initial=parishstats, instance=reference_set)
 
+	print (individual_object)
 
 	context = {
 		'pagetitle': pagetitle,
@@ -267,9 +262,6 @@ def person_page(request, witness_entity_number):
 		'relationship_dic': relationship_dic,
 		'relationshipnumber' : relationshipnumber,
 		'reference_list' : reference_list,
-		# 'manifestation_set': manifestation_set,
-		# 'totalrows': totalrows,
-		# 'totaldisplay': totaldisplay,
 		'parishes_dict': mapparishes,
 		'reference_set': reference_set,
 		# 'form': form,
@@ -277,6 +269,9 @@ def person_page(request, witness_entity_number):
 
 	template = loader.get_template('witness/person.html')
 	return HttpResponse(template.render(context, request))
+
+
+
 
 def entity(request, witness_entity_number):
 
