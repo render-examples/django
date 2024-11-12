@@ -1,12 +1,12 @@
 databases:
   - name: dbs_production
-    plan: free
+    plan: starter
     databaseName: dbs_production
     user: digisig
 
 services:
   - type: web
-    plan: free
+    plan: starter
     name: sealquery
     runtime: python
     buildCommand: "./build.sh"
