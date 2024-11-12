@@ -211,6 +211,7 @@ def person_page(request, witness_entity_number):
 	# parish where active
 	parishstats = {}
 	parishnamevalues = {}
+	reference_list = []
 
 	for r in reference_set.values():
 		parisholdid = r['location_pk']
@@ -221,8 +222,9 @@ def person_page(request, witness_entity_number):
 			parishstats[parisholdid] = 1
 			parishnamevalues[parisholdid] = parishname
 
-
-	print (reference_set)
+		reference_list.append(r)
+	
+	print (reference_list)
 
 	mapparishes = []
 
