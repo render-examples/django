@@ -17,6 +17,49 @@ from asgiref.sync import sync_to_async
 
 ## a function to apply this complex filter to actor searches
 
+
+@sync_to_async
+def mapparishesdata2(witness_entity_number):
+
+	reference_set = Referenceindividual.objects.filter(
+		fk_individual=witness_entity_number).values(
+	'fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location',
+	'fk_event__fk_event_locationreference__fk_locationname__fk_location__location')
+
+	parishstats = {}
+	parishnamevalues = {}
+	ref_list = []
+
+	for r in reference_set:
+		print (r)
+		parisholdid = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
+		parishname = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
+		if parisholdid in parishstats:
+			parishstats[parisholdid] += 1
+		else:
+			parishstats[parisholdid] = 1
+			parishnamevalues[parisholdid] = parishname
+
+	mapparishes = []
+	mapparishes1 = get_object_or_404(Jsonstorage, id_jsonfile=2)
+	mapparishes = json.loads(mapparishes1.jsonfiletxt)
+
+	for i in mapparishes:
+		if i == "features":
+			for b in mapparishes[i]:
+				j = b["properties"]
+
+				parishvalue = j["fk_locatio"]
+				try:
+					j["cases"] = parishstats[parishvalue]
+					j["parishname"] = parishnamevalues[parishvalue]
+					#print ("found", parishvalue)
+				except:
+					pass
+					#print ("can't find", parishvalue)
+
+	return(mapparishes)
+
 @sync_to_async
 def mapparishesdata(reference_set):
 
@@ -1531,11 +1574,11 @@ def eventset_references(event_object, event_dic):
 @sync_to_async
 def referenceset_references(witness_entity_number):
 
-	reference_set = {}
+	eventset= Event.objects.filter(
+			fk_event_event__fk_individual=witness_entity_number).values('pk_event')
 
 	reference_dic = Referenceindividual.objects.filter(
-		fk_event__in=(Event.objects.filter(
-			fk_event_event__fk_individual=witness_entity_number).values('pk_event'))).select_related(
+		fk_event__in=eventset).select_related(
 	'fk_referencerole').select_related(
 	'fk_event').select_related(
 	'fk_individual').order_by(
@@ -1571,6 +1614,9 @@ def referenceset_references(witness_entity_number):
 			if str(r['fk_individual']) == witness_entity_number:
 				position_dic[eventvalue]['position'] += position_dic[eventvalue]['total']
 
+
+	reference_set = {}
+
 	# assembles the references to the person
 	for r in reference_dic:
 
@@ -1580,8 +1626,8 @@ def referenceset_references(witness_entity_number):
 
 			#date
 			if r['fk_event__startdate'] != None:
-				reference_row['startyear'] = r['fk_event__startdate']
-				reference_row['endyear'] = r['fk_event__enddate']
+				#reference_row['startyear'] = r['fk_event__startdate']
+				#reference_row['endyear'] = r['fk_event__enddate']
 
 				startyear = int(str(r['fk_event__startdate'])[:4])
 				endyear = int(str(r['fk_event__enddate'])[:4])
@@ -1591,8 +1637,8 @@ def referenceset_references(witness_entity_number):
 				else:
 					reference_row['date'] = str(startyear)
 			elif r['fk_event__repository_startdate'] != None:
-				reference_row['startyear'] = r['fk_event__repository_startdate']
-				reference_row['endyear'] = r['fk_event__repository_enddate']
+				#reference_row['startyear'] = r['fk_event__repository_startdate']
+				#reference_row['endyear'] = r['fk_event__repository_enddate']
 
 				startyear = int(str(r['fk_event__repository_startdate'])[:4])
 				endyear = int(str(r['fk_event__repository_enddate'])[:4])
@@ -1623,6 +1669,108 @@ def referenceset_references(witness_entity_number):
 			reference_set[r['pk_referenceindividual']] = reference_row
 
 	return(reference_set)
+
+
+def referenceset_references2(witness_entity_number):
+
+	eventset= Event.objects.filter(
+			fk_event_event__fk_individual=witness_entity_number).values('pk_event')
+
+	reference_dic = Referenceindividual.objects.filter(
+		fk_event__in=eventset).select_related(
+	'fk_referencerole').select_related(
+	'fk_event').select_related(
+	'fk_individual').order_by(
+	'pk_referenceindividual').values(
+	'fk_event',
+	'fk_individual',
+	'pk_referenceindividual',
+	'fk_event__startdate',
+	'fk_event__enddate',
+	'fk_event__repository_startdate',
+	'fk_event__repository_enddate',
+	'fk_referencerole__referencerole',
+	'fk_event__part__fk_item__shelfmark',
+	'fk_event__part__fk_item__id_item',
+	'fk_event__part__id_part',
+	'fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region',
+	'fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location',
+	'fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location',
+	'fk_event__fk_event_locationreference__fk_locationname__fk_location__location')
+
+	position_dic = {}
+
+	# determines where a person is located in the witness list
+	for r in reference_dic:
+
+		if r['fk_referencerole__referencerole'] == 'Witness':
+
+			eventvalue = r['fk_event']
+			position_dic.setdefault(eventvalue, {'total':0, 'position': 0, 'startdate':r['fk_event__startdate'], 'dateend':r['fk_event__enddate']})
+
+			position_dic[eventvalue]['total'] += 1
+
+			if str(r['fk_individual']) == witness_entity_number:
+				position_dic[eventvalue]['position'] += position_dic[eventvalue]['total']
+
+
+	reference_list = []
+
+	# assembles the references to the person
+	for r in reference_dic:
+
+		if str(r['fk_individual']) == witness_entity_number:
+
+			reference_row = {}
+
+			#date
+			if r['fk_event__startdate'] != None:
+				#reference_row['startyear'] = r['fk_event__startdate']
+				#reference_row['endyear'] = r['fk_event__enddate']
+
+				startyear = int(str(r['fk_event__startdate'])[:4])
+				endyear = int(str(r['fk_event__enddate'])[:4])
+
+				if endyear > startyear:
+					reference_row['date'] = str(startyear) + " - " + str(endyear)
+				else:
+					reference_row['date'] = str(startyear)
+			elif r['fk_event__repository_startdate'] != None:
+				#reference_row['startyear'] = r['fk_event__repository_startdate']
+				#reference_row['endyear'] = r['fk_event__repository_enddate']
+
+				startyear = int(str(r['fk_event__repository_startdate'])[:4])
+				endyear = int(str(r['fk_event__repository_enddate'])[:4])
+
+				if endyear > startyear:
+					reference_row['date'] = str(startyear) + " - " + str(endyear)
+				else:
+					reference_row['date'] = str(startyear)
+			else:
+				reference_row['date'] = "20000"
+			#role
+			reference_row["role"] = r['fk_referencerole__referencerole']
+
+			if r['fk_referencerole__referencerole'] == "Witness":
+				eventvalue = r['fk_event']
+				reference_row["position"] = position_dic[eventvalue]['position']
+				reference_row["total"] = position_dic[eventvalue]['total']
+
+			#item
+			# part_object = Part.objects.select_related('fk_item').get(fk_event=r.fk_event)
+			reference_row["item_shelfmark"] = r['fk_event__part__fk_item__shelfmark']
+			reference_row["item_id"] = r['fk_event__part__fk_item__id_item']
+			reference_row["part_id"] = r['fk_event__part__id_part']
+			reference_row["region"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region']
+			reference_row["location_id"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location']
+			reference_row["location"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
+			reference_row["location_pk"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
+			reference_list.append(reference_row)
+	
+	reference_list = sorted (reference_list, key=lambda x: x["date"])
+
+	return(reference_list)
+
 
 # def referenceset_references_old(witness_entity_number):
 

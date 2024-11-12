@@ -199,79 +199,40 @@ async def person_page(request, witness_entity_number):
 	# list of relationships for each actor
 	relationship_dic, relationshipnumber = await relationship_dataset(witness_entity_number)
 
-	# list of references to the actor
-	reference_set = await referenceset_references(witness_entity_number)
-
-	# # list of references to the actor
-	# reference_set = referenceset_references(witness_entity_number)
-
-	# parish where active
-	# parishstats = {}
-	# parishnamevalues = {}
-	# ref_list = []
-
-	# for r in reference_set.values():
-	# 	parisholdid = r['location_pk']
-	# 	parishname = r['location']
-	# 	if parisholdid in parishstats:
-	# 		parishstats[parisholdid] += 1
-	# 	else:
-	# 		parishstats[parisholdid] = 1
-	# 		parishnamevalues[parisholdid] = parishname
-
-	# 	ref_list.append(r)
-	
-	# reference_list = sorted (ref_list, key=lambda x: x["date"])
-
-	reference_list, mapparishes = await mapparishesdata(reference_set)
-
-	# for i in mapparishes:
-	# 	if i == "features":
-	# 		for b in mapparishes[i]:
-	# 			j = b["properties"]
-
-	# 			parishvalue = j["fk_locatio"]
-	# 			try:
-	# 				j["cases"] = parishstats[parishvalue]
-	# 				j["parishname"] = parishnamevalues[parishvalue]
-	# 				#print ("found", parishvalue)
-	# 			except:
-	# 				pass
-	# 				#print ("can't find", parishvalue)
-	
-	# #adjust values if form submitted
-	# if request.method == 'POST':
-	#     form = LondonparishForm(request.POST)
-		
-	#     if form.is_valid():
-	#         londonparish = form.cleaned_data['londonparish']
-	#         #make sure values are not empty then try and convert to ints
-	#         if len(londonparish) > 0:
-	#             qlondonparish = int(londonparish)
-	#             targetphrase = "parish_page"
-	#             return redirect(targetphrase, qlondonparish)
-
-	# else:
-	#     form = LondonparishForm(initial=parishstats, instance=reference_set)
-
-	print (individual_object)
+	# mapparishes = await mapparishesdata2(reference_set)
+	mapparishes = await mapparishesdata2(witness_entity_number)
 
 	context = {
 		'pagetitle': pagetitle,
 		'individual_object': individual_object,
 		'relationship_dic': relationship_dic,
 		'relationshipnumber' : relationshipnumber,
-		'reference_list' : reference_list,
+		#'reference_list' : reference_list,
 		'parishes_dict': mapparishes,
-		'reference_set': reference_set,
-		# 'form': form,
+		#'reference_set': reference_set,
 		}
 
 	template = loader.get_template('witness/person.html')
 	return HttpResponse(template.render(context, request))
 
+def person_ajax(request, witness_entity_number):
+
+	# list of references to the actor
+	reference_list = referenceset_references2(witness_entity_number)
+
+	datareferences = json.dumps(reference_list)
+
+	return (JsonResponse(datareferences, safe=False))
 
 
+def map_person_ajax(request, witness_entity_number):
+
+	# mapparishes = await mapparishesdata2(reference_set)
+	mapparishes = mapparishesdata2(witness_entity_number)
+
+	mapparishes = json.dumps(mapparishes)
+
+	return(JsonResponse(mapparishes))
 
 def entity(request, witness_entity_number):
 

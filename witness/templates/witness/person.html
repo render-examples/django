@@ -13,6 +13,9 @@
 <!--Mapping --> 
 <script type="text/javascript" src="https://stamen-maps.a.ssl.fastly.net/js/tile.stamen.js?v1.3.0"></script>
 
+<!-- Include jQuery from a CDN (ensure this is placed before your custom script) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 	<div class="search-people-banner"></div>
 	<div class="sidepanel-left"></div>
 	<div class="sidepanel-right"></div>
@@ -121,7 +124,7 @@
 					<th>Witness position</th>
 				</tr>
 
-			{% for r in reference_list %}
+<!-- 			{% for r in reference_list %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
 					<td><a href="{% url 'entity' witness_entity_number=r.part_id %}">{{r.item_shelfmark}}</a></td>
 
@@ -141,9 +144,55 @@
 
 				</tr>
 			{% endfor %}
-			</table>
+ -->
+ 			<tbody>
+ 			</tbody>
+
+ 			</table>
 		</div>
 	</div>
+
+<script>
+        $(document).ready(function() {
+            // Send AJAX request to get data
+            $.ajax({
+                url: '{% url "person_ajax" witness_entity_number=individual_object.id_individual %}',  // URL for the person_ajax view
+                method: 'GET',
+                success: function(response) {
+
+                	const jsonData = response;
+
+                	const data = JSON.parse(jsonData);
+
+                	console.log("success");
+                    // Check if we have reference data
+                    if (response.length > 0) {
+                        var tableBody = $('#entity3 tbody');
+                        tableBody.empty();  // Clear existing table rows
+                        
+                        // Loop through the references and add rows to the table
+                        data.forEach(function(item) {
+                            var row = '<tr>' +
+                                      '<td>' + item.item_shelfmark + '</td>' +
+                                      '<td>' + item.date + '</td>' +
+                                      '<td>' + item.location + '</td>' +
+                                      '<td>' + item.role + '</td>' +
+                                      '<td>' + item.position + '</td>' +
+                                      '</tr>';
+                            tableBody.append(row);
+                        });
+                    } else {
+                        alert("No references found.");
+                    }
+                },
+                error: function() {
+                    alert("Error fetching data.");
+                }
+            });
+        });
+</script>
+
+
 
 
 <script>
