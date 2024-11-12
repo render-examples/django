@@ -41,30 +41,6 @@ class Digisigrelationshipview(models.Model):
         db_table = 'digisig_relationship_view'
 
 
-#### Digisig
-class Digisigreferenceview(models.Model):
-    fk_event  = models.IntegerField(blank=True, null=True)
-    startdate = models.DateField(blank=True, null=True)
-    enddate = models.DateField(blank=True, null=True)
-    repository_startdate = models.DateField(blank=True, null=True)
-    repository_enddate = models.DateField(blank=True, null=True)
-    fk_region  = models.IntegerField(blank=True, null=True)
-    pk_location  = models.IntegerField(blank=True, null=True)
-    id_location  = models.IntegerField(blank=True, null=True)
-    location = models.TextField(blank=True, null=True)
-    pk_referenceindividual = models.AutoField(primary_key=True)
-    fk_individual  = models.IntegerField(blank=True, null=True)
-    fk_referencerole  = models.IntegerField(blank=True, null=True)
-    referencerole = models.TextField(blank=True, null=True)
-    id_part  = models.IntegerField(blank=True, null=True)
-    fk_item  = models.IntegerField(blank=True, null=True)
-    shelfmark = models.TextField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = '2024_references'
-
-
 ### normal tables
 
 class Access(models.Model):
