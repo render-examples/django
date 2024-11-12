@@ -29,5 +29,5 @@ urlpatterns = [
 	re_path(r'page/seal/(?P<witness_entity_number>[0-9]{8})', views.seal_page, name='seal_page'),
 	re_path(r'entity/(?P<witness_entity_number>[0-9]{8})', views.entity, name='entity'),
 
-] + debug_toolbar_urls()
+] #+ debug_toolbar_urls()
 # ]

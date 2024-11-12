@@ -26,4 +26,4 @@ urlpatterns = [
 
     re_path(r'entity/(?P<digisig_entity_number>[0-9]{8})', views.entity, name='entity'),
 
-] + debug_toolbar_urls()
+] #+ debug_toolbar_urls()
