@@ -19,6 +19,75 @@ from asgiref.sync import sync_to_async
 
 from django.urls import reverse
 
+
+
+
+#####parish search
+
+#forms support
+@sync_to_async
+def londonparishes_options():
+
+	londonparishes_options = []
+
+	for e in Location.objects.filter(fk_locationtype=1, fk_region=87).order_by('location'):
+		londonparishes_options.append((e.id_location, e.location))
+
+	return(londonparishes_options)
+
+
+#####person search
+
+@sync_to_async
+def londonpeople_options_choices():
+
+	name = forms.CharField(label='id_name', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: John'}))
+
+@sync_to_async
+def personsearch_events():
+
+	londonevents = Location.objects.filter(fk_region=87).values('locationname__locationreference__fk_event')
+
+	return (londonevents)
+
+@sync_to_async
+def personsearch_people(qnamelen, qname, qpagination, londonevents):
+	individual_object = individualsearch()
+
+	individual_set1 = individual_object.exclude(
+		id_individual=10000019).filter(
+		fk_individual_event__in=londonevents)
+
+	individual_object = individual_object.exclude(
+		id_individual=10000019).filter(
+		fk_individual_event__in=londonevents).distinct('id_individual').order_by('id_individual')
+
+	if qnamelen > 0:
+		individual_object = individual_object.filter(
+			Q(
+				fullname_modern__icontains=qname) | Q(
+				fullname_original__icontains=qname) | Q(
+				fk_descriptor_title__descriptor_original__icontains=qname)| Q(
+				fk_descriptor_name__descriptor_original__icontains=qname)| Q(
+				fk_descriptor_prefix1__prefix__icontains=qname)| Q(
+				fk_descriptor_descriptor1__descriptor_original__icontains=qname)| Q(
+				fk_descriptor_prefix2__prefix__icontains=qname)| Q(
+				fk_descriptor_descriptor2__descriptor_original__icontains=qname)| Q(
+				fk_descriptor_prefix3__prefix__icontains=qname)| Q(
+				fk_descriptor_descriptor3__descriptor_original__icontains=qname)) 
+
+	individual_object, totalrows, totaldisplay, qpagination = defaultpagination(individual_object, qpagination) 
+
+	individual_set = {}
+
+	for i in individual_object:
+		individual_info = {}
+		individual_info['actor_name'] = namecompiler(i)
+		individual_info['id_individual'] = i.id_individual
+		individual_set[i.id_individual] = individual_info
+
+	return(individual_set, totalrows, totaldisplay, qpagination)
+
 ## a function to apply this complex filter to actor searches
 
 @sync_to_async

@@ -213,17 +213,19 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 
   info2.addTo(map1);
 
-  // get color depending on population density value
+// get color depending on population density value
   function getColor(d) {
-    return d > 1280 ? '#49006a' :
-      d > 640  ? '#7a0177' :
-      d > 320  ? '#ae017e' :
-      d > 160  ? '#dd3497' :
-      d > 80  ? '#f768a1' :
-      d > 40   ? '#fa9fb5' :
-      d > 20   ? '#fcc5c0' :  
-      d > 10   ? '#fde0dd' : '#d9d9d9';
+    return d > 1500 ? '#49006a' :
+      d > 1000  ? '#7a0177' :
+      d > 500  ? '#ae017e' :
+      d > 250  ? '#dd3497' :
+      d > 100  ? '#f768a1' :
+      d > 50   ? '#fa9fb5' :
+      d > 25   ? '#fcc5c0' :  
+      d > 0   ? '#fde0dd' : 
+      '#d9d9d9';
   }
+
 
   function style(feature) {
     return {
@@ -282,25 +284,53 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 
   var legend2 = L.control({position: 'bottomright'});
 
+ 
+
   legend2.onAdd = function (map) {
+      var div = L.DomUtil.create('div', 'info legend');
+      var grades = [0, 1, 25, 50, 100, 250, 500, 1000, 1500];
+      var labels = [];
+      var from, to;
 
-    var div = L.DomUtil.create('div', 'info legend');
-    var grades = [0, 10, 20, 40, 80, 160, 320, 640, 1280];
-    var labels = [];
-    var from, to;
 
-    for (var i = 0; i < grades.length; i++) {
-      from = grades[i];
-      to = grades[i + 1];
+      for (var i = 0; i < grades.length; i++) {
+          from = grades[i];
+          to = grades[i + 1];
 
-      labels.push(
-        '<i style="background:' + getColor(from + 1) + '"></i> ' +
-        from + (to ? '&ndash;' + to : '+'));
-    }
+          console.log(from)
 
-    div.innerHTML = labels.join('<br>');
-    return div;
+          if (i === 0) {
+              // First grade, show only the value "0"
+              labels.push(
+                  '<i style="background:' + getColor(from) + '"></i> ' +
+                  from);
+          } else if (i === 1) {
+              // Second grade, show only the value "1"
+              labels.push(
+                  '<i style="background:' + getColor(from) + '"></i> ' +
+                  from);
+          } else if (i === grades.length - 1) {
+            console.log("hello");
+              // Last grade, show only the value (e.g., "30")
+              labels.push(
+                  '<i style="background:' + getColor(from + 1) + '"></i> ' +
+                  from + '+');
+              console.log(getColor(from +1));
+          } else {
+              // For other grades, use the range format
+              labels.push(
+                  '<i style="background:' + getColor(from + 1) + '"></i> ' +
+                  from + '&ndash;' + (to - 1)); // Adjust the upper bound to make the range inclusive
+          }
+      }
+
+      div.innerHTML = labels.join('<br>');
+      return div;
   };
+
+
+
+
 
   legend2.addTo(map1);
 

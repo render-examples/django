@@ -85,18 +85,19 @@ def exhibit(request):
 	return redirect(targetphrase, 50013947)
 
 
-def search(request, searchtype):
+async def search(request, searchtype):
 
 ### Parish
 
 	if searchtype == "parish":
 
-		#default
-		qlondonparish= 50013947
+		londonparishes_options_choices = await londonparishes_options()
+
+		form = LondonparishForm(request.POST or None)
+		form.fields['londonparish'].choices = londonparishes_options_choices
 
 		#adjust values if form submitted
 		if request.method == 'POST':
-			form = LondonparishForm(request.POST)
 			
 			if form.is_valid():
 				londonparish = form.cleaned_data['londonparish']
@@ -107,7 +108,7 @@ def search(request, searchtype):
 					return redirect(targetphrase, qlondonparish)
 
 		else:
-			form = LondonparishForm()
+			pass
 
 		template = loader.get_template('witness/search_parish.html')
 		context = {
@@ -122,58 +123,32 @@ def search(request, searchtype):
 
 		pagetitle = 'title'
 
-		londonevents = Location.objects.filter(fk_region=87).values('locationname__locationreference__fk_event')
+		londonevents = await personsearch_events()
 
-		individual_object = individualsearch()
-
-		individual_set1 = individual_object.exclude(
-			id_individual=10000019).filter(
-			fk_individual_event__in=londonevents)
-
-		individual_object = individual_object.exclude(
-			id_individual=10000019).filter(
-			fk_individual_event__in=londonevents).distinct('id_individual').order_by('id_individual')
+		form = PeopleForm(request.POST or None)
 
 		if request.method == "POST":
-			form = PeopleForm(request.POST)
+			#form = PeopleForm(request.POST)
 			if form.is_valid():
-				qname = form.cleaned_data['name']   
 				qpagination = form.cleaned_data['pagination']
-
-				if len(qname) > 0:
-					individual_object = individual_object.filter(
-						Q(
-							fullname_modern__icontains=qname) | Q(
-							fullname_original__icontains=qname) | Q(
-							fk_descriptor_title__descriptor_original__icontains=qname)| Q(
-							fk_descriptor_name__descriptor_original__icontains=qname)| Q(
-							fk_descriptor_prefix1__prefix__icontains=qname)| Q(
-							fk_descriptor_descriptor1__descriptor_original__icontains=qname)| Q(
-							fk_descriptor_prefix2__prefix__icontains=qname)| Q(
-							fk_descriptor_descriptor2__descriptor_original__icontains=qname)| Q(
-							fk_descriptor_prefix3__prefix__icontains=qname)| Q(
-							fk_descriptor_descriptor3__descriptor_original__icontains=qname)) 
-
+				qname = form.cleaned_data['name']
+				qnamelen = len(qname)
+				# if qnamelen > 0:
+				# 	individual_object = await personsearch_people(qnamelen, qname, londonevents)
 				form = PeopleForm(request.POST)
 
 		else:
-			form = PeopleForm()
+			qnamelen = 0
+			qname = ""
+			#individual_object = await personsearch_people(qnamelen, qname, qpagination, londonevents)
+			#form = PeopleForm()
 			qpagination = 1
 
-		individual_object, totalrows, totaldisplay, qpagination = defaultpagination(individual_object, qpagination) 
+		individual_set, totalrows, totaldisplay, qpagination = await personsearch_people(qnamelen, qname, qpagination, londonevents) 
 
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
-		pagecounternextnext = qpagination +2        
-
-		individual_set = {}
-
-		for i in individual_object:
-			individual_info = {}
-			individual_info['actor_name'] = namecompiler(i)
-			individual_info['id_individual'] = i.id_individual
-
-			individual_set[i.id_individual] = individual_info
+		pagecounternextnext = qpagination +2  
 
 		context = {
 			'pagetitle': pagetitle,
@@ -268,8 +243,6 @@ async def parish_page(request, witness_entity_number):
 		}
 
 	return HttpResponse(template.render(context, request))
-
-
 
 
 def parishnetwork_page(request, witness_entity_number):
