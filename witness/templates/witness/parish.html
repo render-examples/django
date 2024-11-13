@@ -7,11 +7,14 @@
 
 <!--leaflet -->   
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <!--Mapping --> 
 <script type="text/javascript" src="https://stamen-maps.a.ssl.fastly.net/js/tile.stamen.js?v1.3.0"></script>
+
+<!-- Include jQuery from a CDN (ensure this is placed before your custom script) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
   <div class="search-people-banner"></div>
   <div class="sidepanel-left"></div>
@@ -27,7 +30,7 @@
       <table>
         <tr>
           <th>Parish Witness Graph</th>
-          <td><a class="help" href="{% url 'parishnetwork_page' witness_entity_number=qlondonparish %}" target="_blank">Link</a></td>
+          <td><a class="help" href="{% url 'parishnetwork_page' witness_entity_number=parish.id_location %}" target="_blank">Link</a></td>
         <tr>       
       <tr>
         <th>Place</th>
@@ -73,7 +76,11 @@
           <th>Ref. as witness</th>
           <th>Active</th>
         </tr>
-      {% for person in individual_list %}
+
+      <tbody>
+      </tbody>
+
+<!--       {% for person in individual_list %}
         {% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
           {% if person.id_individual == 10000019 %}
           <td> 
@@ -107,9 +114,67 @@
           </td>
           {% endif %}
       {% endfor %}
-      </table>
+ -->      </table>
     </div>
   </div>
+
+
+<script>
+    $(document).ready(function() {
+        var isDataLoaded = false; // Flag to check if the data has already been loaded
+
+        // Attach click event to the button (assuming the button has the id "loadDataButton")
+        $('#entitybutton2').on('click', function() {
+            if (isDataLoaded) {
+                return; // If the data has already been loaded, do nothing on further clicks
+            }
+
+            // Set flag to true after the first click
+            isDataLoaded = true;
+
+            // Send AJAX request to get data
+            $.ajax({
+                url: '{% url "parishpersonajax" witness_entity_number=parish.id_location %}',  // URL for the person_ajax view
+                method: 'GET',
+                success: function(response) {
+                    const jsonData = response;
+                    const data = JSON.parse(jsonData);
+
+                    // Check if we have reference data
+                    if (data.length > 0) {
+                        var tableBody = $('#entity2 tbody');
+                        tableBody.empty();  // Clear existing table rows
+                        
+                        // Loop through the references and add rows to the table
+                        data.forEach(function(item, index) {
+                            var rowClass = (index % 2 === 0) ? '' : 'class="even"';  // Alternate row colors
+
+                            var row = '<tr ' + rowClass + '>' +
+                                      '<td><a href="' + item.id_individual + '">' + item.actor_name + '</a></td>' +
+                                      '<td>' + item.maxdate + '</td>' +
+                                      '<td>' + item.mindate + '</td>' +
+                                      '<td>' + item.occurences + '</td>' +
+                                      '<td>' + item.witnessref + '</td>' +
+                                      '</tr>';
+                            tableBody.append(row);
+                        });
+                    } else {
+                        alert("No references found.");
+                    }
+                },
+                error: function() {
+                    alert("Error fetching data.");
+                }
+            });
+        });
+    });
+</script>
+
+
+
+
+
+
 
 
 <script>

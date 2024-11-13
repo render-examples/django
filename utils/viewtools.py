@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
 from django.core.paginator import Paginator
 from django.core import serializers
+from django.db.models import Count, Sum, Max, Min
+from django.db.models import Q, F
 
 import statistics
 import math
@@ -15,8 +17,76 @@ from django.conf import settings
 from time import time
 from asgiref.sync import sync_to_async
 
+from django.urls import reverse
+
 ## a function to apply this complex filter to actor searches
 
+@sync_to_async
+def parishvalue(witness_entity_number):
+	parish = Location.objects.get(id_location=witness_entity_number)
+
+	return(parish)
+
+@sync_to_async
+def parish_map(witness_entity_number, parish):
+
+	totalcases = Referenceindividual.objects.filter(fk_event__fk_event_locationreference__fk_locationname__fk_location=witness_entity_number).count()
+
+	mapparishes = []
+
+	## data for colorpeth map
+	mapparishes1 = get_object_or_404(Jsonstorage, id_jsonfile=2)
+	mapparishes = json.loads(mapparishes1.jsonfiletxt)
+
+	for i in mapparishes:
+		if i == "features":
+			for b in mapparishes[i]:
+				t = b["properties"]
+				if t["fk_locatio"] == parish.pk_location:
+					t["cases"] = totalcases
+					t["parishname"] = parish.location
+
+	return(mapparishes)
+
+
+@sync_to_async
+def parish_fetch(witness_entity_number):
+	individual_object = individualsearch()
+
+	individual_object = individual_object.filter(
+		fk_individual_event__fk_event__fk_event_locationreference__fk_locationname__fk_location=witness_entity_number).annotate(
+		occurences=
+		Count('fk_individual_event')).annotate(
+		witnessref=Count('fk_individual_event', filter=Q(fk_individual_event__fk_referencerole=1))).annotate(
+		earlydate=Min('fk_individual_event__fk_event__startdate')).annotate(
+		latedate=Max('fk_individual_event__fk_event__enddate'))
+
+	return(individual_object)
+
+@sync_to_async
+def parish_individuallistfetch(individual_object):
+
+	individual_list = []
+
+	for i in individual_object:
+		individual_info = {}
+		individual_info['actor_name'] = namecompiler(i)
+		individual_info['id_individual'] = i.id_individual
+		individual_info['occurences'] = i.occurences
+		individual_info['witnessref'] = i.witnessref
+		try:
+			individual_info['mindate'] = i.earlydate.year
+		except:
+			individual_info['mindate'] = 2000
+		try:
+			individual_info['maxdate'] = i.latedate.year
+		except:
+			pass
+		individual_list.append(individual_info)
+
+	individual_list = sorted (individual_list, key=lambda x: x["mindate"])
+
+	return(individual_list)
 
 @sync_to_async
 def mapparishesdata2(witness_entity_number):
@@ -31,7 +101,6 @@ def mapparishesdata2(witness_entity_number):
 	ref_list = []
 
 	for r in reference_set:
-		print (r)
 		parisholdid = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
 		parishname = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
 		if parisholdid in parishstats:
@@ -1670,7 +1739,7 @@ def referenceset_references(witness_entity_number):
 
 	return(reference_set)
 
-
+@sync_to_async
 def referenceset_references2(witness_entity_number):
 
 	eventset= Event.objects.filter(
@@ -1765,6 +1834,7 @@ def referenceset_references2(witness_entity_number):
 			reference_row["location_id"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location']
 			reference_row["location"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
 			reference_row["location_pk"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
+			reference_row["part_url"] = reverse('entity', kwargs={'witness_entity_number': r['fk_event__part__id_part']}),
 			reference_list.append(reference_row)
 	
 	reference_list = sorted (reference_list, key=lambda x: x["date"])

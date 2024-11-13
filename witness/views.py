@@ -215,24 +215,25 @@ async def person_page(request, witness_entity_number):
 	template = loader.get_template('witness/person.html')
 	return HttpResponse(template.render(context, request))
 
-def person_ajax(request, witness_entity_number):
+async def person_ajax(request, witness_entity_number):
 
 	# list of references to the actor
-	reference_list = referenceset_references2(witness_entity_number)
+	reference_list = await referenceset_references2(witness_entity_number)
 
 	datareferences = json.dumps(reference_list)
 
 	return (JsonResponse(datareferences, safe=False))
 
 
-def map_person_ajax(request, witness_entity_number):
+async def parishpersonajax(request, witness_entity_number):
 
-	# mapparishes = await mapparishesdata2(reference_set)
-	mapparishes = mapparishesdata2(witness_entity_number)
+	individual_object = await parish_fetch(witness_entity_number)
+	individual_list = await parish_individuallistfetch(individual_object)
 
-	mapparishes = json.dumps(mapparishes)
+	datareferences = json.dumps(individual_list)
 
-	return(JsonResponse(mapparishes))
+	return(JsonResponse(datareferences, safe=False)) 
+
 
 def entity(request, witness_entity_number):
 
@@ -249,69 +250,27 @@ def entity(request, witness_entity_number):
 
 	return redirect(targetphrase)
 
-def parish_page(request, witness_entity_number):
-
-	qlondonparish = witness_entity_number
+async def parish_page(request, witness_entity_number):
  
-	parish = Location.objects.get(id_location=qlondonparish)
+	parish = await parishvalue(witness_entity_number)
 
-	individual_object = individualsearch()
+	# individual_object = await parish_fetch(witness_entity_number)
+	# individual_list = await parish_individuallistfetch(individual_object)
+	#case_value, totalcases = await parishcases_fetch(individual_object)
 
-	individual_object = individual_object.filter(
-		fk_individual_event__fk_event__fk_event_locationreference__fk_locationname__fk_location=qlondonparish).annotate(
-		occurences=
-		Count('fk_individual_event')).annotate(
-		witnessref=Count('fk_individual_event', filter=Q(fk_individual_event__fk_referencerole=1))).annotate(
-		earlydate=Min('fk_individual_event__fk_event__startdate')).annotate(
-		latedate=Max('fk_individual_event__fk_event__enddate'))
-
-	case_value = individual_object.aggregate(Sum('occurences'))
-	totalcases = case_value['occurences__sum']
-
-	individual_list = []
-
-	for i in individual_object:
-		individual_info = {}
-		individual_info['actor_name'] = namecompiler(i)
-		individual_info['id_individual'] = i.id_individual
-		individual_info['occurences'] = i.occurences
-		individual_info['witnessref'] = i.witnessref
-		try:
-			individual_info['mindate'] = i.earlydate.year
-		except:
-			individual_info['mindate'] = 2000
-		try:
-			individual_info['maxdate'] = i.latedate.year
-		except:
-			pass
-		individual_list.append(individual_info)
-
-	individual_list = sorted (individual_list, key=lambda x: x["mindate"])
-
-	mapparishes = []
-
-	## data for colorpeth map
-	mapparishes1 = get_object_or_404(Jsonstorage, id_jsonfile=2)
-	mapparishes = json.loads(mapparishes1.jsonfiletxt)
-
-	for i in mapparishes:
-		if i == "features":
-			for b in mapparishes[i]:
-				t = b["properties"]
-				if t["fk_locatio"] == parish.pk_location:
-					t["cases"] = totalcases
-					t["parishname"] = parish.location
+	mapparishes = await parish_map(witness_entity_number, parish)
 
 	template = loader.get_template('witness/parish.html')
 	context = {
 		'parish': parish,
-		'totalcases': totalcases,
-		'individual_list': individual_list,
-		'qlondonparish': qlondonparish,
+		# 'individual_list': individual_list,
 		'parishes_dict': mapparishes,
 		}
 
 	return HttpResponse(template.render(context, request))
+
+
+
 
 def parishnetwork_page(request, witness_entity_number):
 

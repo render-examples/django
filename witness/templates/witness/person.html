@@ -116,13 +116,15 @@
 
 		<div >
 			<table id="entity3" style="display:none;">
-				<tr>
+				<thead>
+				<tr class="even">
 					<th>Item</th>
 					<th>Date</th>
 					<th>Location</th>
 					<th>Role</th>
 					<th>Witness position</th>
 				</tr>
+				</thead>
 
 <!-- 			{% for r in reference_list %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
@@ -153,27 +155,37 @@
 	</div>
 
 <script>
-        $(document).ready(function() {
+    $(document).ready(function() {
+        var isDataLoaded = false; // Flag to check if the data has already been loaded
+
+        // Attach click event to the button (assuming the button has the id "loadDataButton")
+        $('#entitybutton3').on('click', function() {
+            if (isDataLoaded) {
+                return; // If the data has already been loaded, do nothing on further clicks
+            }
+
+            // Set flag to true after the first click
+            isDataLoaded = true;
+
             // Send AJAX request to get data
             $.ajax({
                 url: '{% url "person_ajax" witness_entity_number=individual_object.id_individual %}',  // URL for the person_ajax view
                 method: 'GET',
                 success: function(response) {
+                    const jsonData = response;
+                    const data = JSON.parse(jsonData);
 
-                	const jsonData = response;
-
-                	const data = JSON.parse(jsonData);
-
-                	console.log("success");
                     // Check if we have reference data
-                    if (response.length > 0) {
+                    if (data.length > 0) {
                         var tableBody = $('#entity3 tbody');
                         tableBody.empty();  // Clear existing table rows
                         
                         // Loop through the references and add rows to the table
-                        data.forEach(function(item) {
-                            var row = '<tr>' +
-                                      '<td>' + item.item_shelfmark + '</td>' +
+                        data.forEach(function(item, index) {
+                            var rowClass = (index % 2 === 0) ? '' : 'class="even"';  // Alternate row colors
+
+                            var row = '<tr ' + rowClass + '>' +
+                                      '<td><a href="' + item.part_url + '">' + item.item_shelfmark + '</a></td>' +
                                       '<td>' + item.date + '</td>' +
                                       '<td>' + item.location + '</td>' +
                                       '<td>' + item.role + '</td>' +
@@ -190,6 +202,7 @@
                 }
             });
         });
+    });
 </script>
 
 
@@ -240,7 +253,8 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 			d > 6  ? '#f768a1' :
 			d > 4   ? '#fa9fb5' :
 			d > 2   ? '#fcc5c0' :  
-			d > 0   ? '#fde0dd' : '#d9d9d9';
+			d > 0   ? '#fde0dd' : 
+			'#d9d9d9';
 	}
 
 	function style(feature) {
@@ -300,25 +314,50 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 
 	var legend2 = L.control({position: 'bottomright'});
 
+
+
 	legend2.onAdd = function (map) {
+	    var div = L.DomUtil.create('div', 'info legend');
+	    var grades = [0, 1, 2, 4, 6, 8, 10, 20, 30];
+	    var labels = [];
+	    var from, to;
 
-		var div = L.DomUtil.create('div', 'info legend');
-		var grades = [0, 1, 2, 4, 6, 8, 10, 20, 30];
-		var labels = [];
-		var from, to;
 
-		for (var i = 0; i < grades.length; i++) {
-			from = grades[i];
-			to = grades[i + 1];
+	    for (var i = 0; i < grades.length; i++) {
+	        from = grades[i];
+	        to = grades[i + 1];
 
-			labels.push(
-				'<i style="background:' + getColor(from + 1) + '"></i> ' +
-				from + (to ? '&ndash;' + to : '+'));
-		}
+	        console.log(from)
 
-		div.innerHTML = labels.join('<br>');
-		return div;
+	        if (i === 0) {
+	            // First grade, show only the value "0"
+	            labels.push(
+	                '<i style="background:' + getColor(from) + '"></i> ' +
+	                from);
+	        } else if (i === 1) {
+	            // Second grade, show only the value "1"
+	            labels.push(
+	                '<i style="background:' + getColor(from) + '"></i> ' +
+	                from);
+	        } else if (i === grades.length - 1) {
+	        	console.log("hello");
+	            // Last grade, show only the value (e.g., "30")
+	            labels.push(
+	                '<i style="background:' + getColor(from + 1) + '"></i> ' +
+	                from + '+');
+	            console.log(getColor(from +1));
+	        } else {
+	            // For other grades, use the range format
+	            labels.push(
+	                '<i style="background:' + getColor(from + 1) + '"></i> ' +
+	                from + '&ndash;' + (to - 1)); // Adjust the upper bound to make the range inclusive
+	        }
+	    }
+
+	    div.innerHTML = labels.join('<br>');
+	    return div;
 	};
+
 
 	legend2.addTo(map1);
 
