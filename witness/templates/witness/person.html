@@ -29,8 +29,8 @@
 			<h3>Person details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
 			<table>
 				<tr>
-					<th>Witness Graph</th>
-					<td><a class="help" href="{% url 'personnetwork_page' witness_entity_number=individual_object.id_individual %}" target="_blank">Link</a></td>
+					<th><button style="background-color:red;"><a class="help" href="{% url 'personnetwork_page' witness_entity_number=individual_object.id_individual %}" target="_blank">Witness Graph</a></button></th>
+					<td></td>
 				<tr>
 
 				{% if individual_object.fk_group.fk_group_class != null %}
@@ -48,26 +48,6 @@
 				{% endif %}				 
 				</table>
 		</div>
-
-<!-- 		<div class="searchfilter">		
-			<div class="filter">
-				<form id="form" action="/person" method="post">
-			    	{% csrf_token %}
-					{{ form.non_field_errors }}
-					<div class="fieldWrapper">		
-						{{ form.londonparish.errors }}
-						<label for="{{ form.londonparish.id_for_label }}">londonparish <i class="fas fa-question-circle"></i></a></label>
-						{{ form.londonparish }}
-					</div>		
-					<div class="fieldWrapper">
-				    	<input class="submit" type="submit" value="Submit">
-			    	</div>
-			    	<div class="fieldWrapper">
-			    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
-			    	</div>
-				</form>
-			</div>
-		</div> -->
 	</div>
 
 	<div class="entity-permalink" id="entity-permalink">
@@ -126,7 +106,8 @@
 				</tr>
 				</thead>
 
-<!-- 			{% for r in reference_list %}
+ 			<tbody>
+			{% for r in reference_list %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
 					<td><a href="{% url 'entity' witness_entity_number=r.part_id %}">{{r.item_shelfmark}}</a></td>
 
@@ -146,8 +127,6 @@
 
 				</tr>
 			{% endfor %}
- -->
- 			<tbody>
  			</tbody>
 
  			</table>
@@ -159,7 +138,7 @@
         var isDataLoaded = false; // Flag to check if the data has already been loaded
 
         // Attach click event to the button (assuming the button has the id "loadDataButton")
-        $('#entitybutton3').on('click', function() {
+        $('#entitybutton3b').on('click', function() {
             if (isDataLoaded) {
                 return; // If the data has already been loaded, do nothing on further clicks
             }

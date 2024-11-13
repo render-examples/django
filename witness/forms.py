@@ -121,10 +121,10 @@ personorder_options = []
 
 class PeopleForm(forms.Form):
 	name = forms.CharField(label='id_name', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: John'}))
-	group = forms.ChoiceField(choices=Choices, required=False)
+	# group = forms.ChoiceField(choices=Choices, required=False)
 	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)
-	personclass = forms.ChoiceField(choices=personclass_options, required=False)
-	personorder = forms.ChoiceField(choices=personorder_options, required=False) 
+	# personclass = forms.ChoiceField(choices=personclass_options, required=False)
+	# personorder = forms.ChoiceField(choices=personorder_options, required=False) 
 
 
 

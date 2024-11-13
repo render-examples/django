@@ -199,6 +199,161 @@ def mapparishesdata2(witness_entity_number):
 	return(mapparishes)
 
 @sync_to_async
+def mapparishesdata3(witness_entity_number):
+    # Prefetch only necessary related data
+    reference_set = Referenceindividual.objects.filter(fk_individual=witness_entity_number).select_related(
+        'fk_referencerole', 'fk_event', 'fk_event__part__fk_item', 'fk_event__fk_event_locationreference__fk_locationname__fk_location'
+    ).values(
+        'fk_event', 'fk_individual', 'pk_referenceindividual',
+        'fk_event__startdate', 'fk_event__enddate', 
+        'fk_event__repository_startdate', 'fk_event__repository_enddate',
+        'fk_referencerole__referencerole', 'fk_event__part__fk_item__shelfmark',
+        'fk_event__part__fk_item__id_item', 'fk_event__part__id_part',
+        'fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region',
+        'fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location',
+        'fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location',
+        'fk_event__fk_event_locationreference__fk_locationname__fk_location__location'
+    )
+
+    parishstats = {}
+    parishnamevalues = {}
+    reference_list = []
+
+    # Prepare reference list and statistics for parishes
+    for r in reference_set:
+        parish_id = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
+        parish_name = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
+
+        # Track parish statistics
+        parishstats[parish_id] = parishstats.get(parish_id, 0) + 1
+        parishnamevalues[parish_id] = parish_name
+
+        # Build reference row
+        reference_row = {
+            "role": r['fk_referencerole__referencerole'],
+            "item_shelfmark": r['fk_event__part__fk_item__shelfmark'],
+            "item_id": r['fk_event__part__fk_item__id_item'],
+            "part_id": r['fk_event__part__id_part'],
+            "region": r['fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region'],
+            "location_id": r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location'],
+            "location": r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location'],
+            "location_pk": r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location'],
+            "part_url": reverse('entity', kwargs={'witness_entity_number': r['fk_event__part__id_part']}),
+        }
+
+        # Handle date formatting
+        start_date = r.get('fk_event__startdate') or r.get('fk_event__repository_startdate')
+        end_date = r.get('fk_event__enddate') or r.get('fk_event__repository_enddate')
+
+        if start_date and end_date:
+            start_year = int(str(start_date)[:4])
+            end_year = int(str(end_date)[:4])
+            reference_row['date'] = f"{start_year} - {end_year}" if end_year > start_year else str(start_year)
+        else:
+            reference_row['date'] = "20000"
+
+        reference_list.append(reference_row)
+
+    # Sort reference list by date (assuming the 'date' field is properly formatted)
+    reference_list.sort(key=lambda x: x["date"])
+
+    # Fetch mapparishes from JSON storage
+    mapparishes_obj = get_object_or_404(Jsonstorage, id_jsonfile=2)
+    mapparishes = json.loads(mapparishes_obj.jsonfiletxt)
+
+    # Update mapparishes features with parish stats
+    for feature in mapparishes.get("features", []):
+        parish_value = feature["properties"].get("fk_location")
+        
+        if parish_value:
+            feature["properties"]["cases"] = parishstats.get(parish_value, 0)
+            feature["properties"]["parishname"] = parishnamevalues.get(parish_value, '')
+
+    return mapparishes, reference_list
+
+
+# def mapparishesdata3(witness_entity_number):
+
+# 	reference_set = Referenceindividual.objects.filter(
+# 		fk_individual=witness_entity_number).select_related(
+# 			'fk_referencerole', 'fk_event', 'fk_individual',
+# 			'fk_event__part__fk_item', 'fk_event__fk_event_locationreference__fk_locationname__fk_location'
+# 		).values(
+# 			'fk_event', 'fk_individual', 'pk_referenceindividual',
+# 			'fk_event__startdate', 'fk_event__enddate', 
+# 			'fk_event__repository_startdate', 'fk_event__repository_enddate',
+# 			'fk_referencerole__referencerole', 'fk_event__part__fk_item__shelfmark',
+# 			'fk_event__part__fk_item__id_item', 'fk_event__part__id_part',
+# 			'fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region',
+# 			'fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location',
+# 			'fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location',
+# 			'fk_event__fk_event_locationreference__fk_locationname__fk_location__location'
+# 		)
+
+# 	parishstats = {}
+# 	parishnamevalues = {}
+# 	ref_list = []
+
+# 	# Prepare reference list
+# 	reference_list = []
+
+# 	for r in reference_set:
+# 		parisholdid = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
+# 		parishname = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
+# 		if parisholdid in parishstats:
+# 			parishstats[parisholdid] += 1
+# 		else:
+# 			parishstats[parisholdid] = 1
+# 			parishnamevalues[parisholdid] = parishname
+
+# 		reference_row = {}
+# 		reference_row["role"] = r['fk_referencerole__referencerole']
+# 		reference_row["item_shelfmark"] = r['fk_event__part__fk_item__shelfmark']
+# 		reference_row["item_id"] = r['fk_event__part__fk_item__id_item']
+# 		reference_row["part_id"] = r['fk_event__part__id_part']
+# 		reference_row["region"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region']
+# 		reference_row["location_id"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location']
+# 		reference_row["location"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
+# 		reference_row["location_pk"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
+# 		reference_row["part_url"] = reverse('entity', kwargs={'witness_entity_number': r['fk_event__part__id_part']})
+# 		reference_list.append(reference_row)
+
+# 		# Handle date formatting
+# 		if r['fk_event__startdate']:
+# 			startyear = int(str(r['fk_event__startdate'])[:4])
+# 			endyear = int(str(r['fk_event__enddate'])[:4])
+# 			reference_row['date'] = f"{startyear} - {endyear}" if endyear > startyear else str(startyear)
+# 		elif r['fk_event__repository_startdate']:
+# 			startyear = int(str(r['fk_event__repository_startdate'])[:4])
+# 			endyear = int(str(r['fk_event__repository_enddate'])[:4])
+# 			reference_row['date'] = f"{startyear} - {endyear}" if endyear > startyear else str(startyear)
+# 		else:
+# 			reference_row['date'] = "20000"
+
+# 	# Sort the reference list by date
+# 	reference_list = sorted(reference_list, key=lambda x: x["date"])
+
+# 	mapparishes = []
+# 	mapparishes1 = get_object_or_404(Jsonstorage, id_jsonfile=2)
+# 	mapparishes = json.loads(mapparishes1.jsonfiletxt)
+
+# 	for i in mapparishes:
+# 		if i == "features":
+# 			for b in mapparishes[i]:
+# 				j = b["properties"]
+
+# 				parishvalue = j["fk_locatio"]
+# 				try:
+# 					j["cases"] = parishstats[parishvalue]
+# 					j["parishname"] = parishnamevalues[parishvalue]
+# 					#print ("found", parishvalue)
+# 				except:
+# 					pass
+# 					#print ("can't find", parishvalue)
+
+# 	return(mapparishes)
+
+@sync_to_async
 def mapparishesdata(reference_set):
 
 	parishstats = {}
@@ -1910,63 +2065,88 @@ def referenceset_references2(witness_entity_number):
 
 	return(reference_list)
 
+@sync_to_async
+def referenceset_references3(witness_entity_number):
+	# Use a single query to get all relevant events
+	eventset = Event.objects.filter(
+		fk_event_event__fk_individual=witness_entity_number).values('pk_event')
+	
+	# Query references with the necessary fields and related data all at once
+	reference_dic = Referenceindividual.objects.filter(
+		fk_event__in=eventset
+	).select_related(
+		'fk_referencerole', 'fk_event', 'fk_individual',
+		'fk_event__part__fk_item', 'fk_event__fk_event_locationreference__fk_locationname__fk_location'
+	).values(
+		'fk_event', 'fk_individual', 'pk_referenceindividual',
+		'fk_event__startdate', 'fk_event__enddate', 
+		'fk_event__repository_startdate', 'fk_event__repository_enddate',
+		'fk_referencerole__referencerole', 'fk_event__part__fk_item__shelfmark',
+		'fk_event__part__fk_item__id_item', 'fk_event__part__id_part',
+		'fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region',
+		'fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location',
+		'fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location',
+		'fk_event__fk_event_locationreference__fk_locationname__fk_location__location'
+	)
 
-# def referenceset_references_old(witness_entity_number):
+	position_dic = {}
 
-# 	reference_set = {}
+	# Combining position calculation and role assignment in a single loop
+	for r in reference_dic:
+		if r['fk_referencerole__referencerole'] == 'Witness':
+			eventvalue = r['fk_event']
+			position_dic.setdefault(eventvalue, {'total': 0, 'position': 0, 'startdate': r['fk_event__startdate'], 'dateend': r['fk_event__enddate']})
 
-# 	reference_dic = Referenceindividual.objects.filter(
-# 		fk_individual=witness_entity_number).select_related(
-# 		'fk_event').select_related(
-# 		'fk_referencerole').order_by(
-# 		"fk_event__startdate", "fk_event__enddate").values(
-# 		'fk_event',
-# 		'pk_referenceindividual',
-# 		'fk_event__startdate',
-# 		'fk_event__enddate',
-# 		'fk_event__repository_startdate',
-# 		'fk_event__repository_enddate',
-# 		'fk_referencerole__referencerole',
-# 		'fk_event__part__fk_item__shelfmark',
-# 		'fk_event__part__fk_item__id_item',
-# 		'fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region',
-# 		'fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location',
-# 		'fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location',
-# 		'fk_event__fk_event_locationreference__fk_locationname__fk_location__location')
+			# Update position and total for the event
+			position_dic[eventvalue]['total'] += 1
+			if str(r['fk_individual']) == witness_entity_number:
+				position_dic[eventvalue]['position'] += position_dic[eventvalue]['total']
 
-# 	for r in reference_dic:
+	# Prepare reference list
+	reference_list = []
+	#base_url = reverse('entity')  # Precompute the base URL outside the loop
+	
+	for r in reference_dic:
+		if str(r['fk_individual']) == witness_entity_number:
+			reference_row = {}
 
-# 		reference_row = {}
+			# Handle date formatting
+			if r['fk_event__startdate']:
+				startyear = int(str(r['fk_event__startdate'])[:4])
+				endyear = int(str(r['fk_event__enddate'])[:4])
+				reference_row['date'] = f"{startyear} - {endyear}" if endyear > startyear else str(startyear)
+			elif r['fk_event__repository_startdate']:
+				startyear = int(str(r['fk_event__repository_startdate'])[:4])
+				endyear = int(str(r['fk_event__repository_enddate'])[:4])
+				reference_row['date'] = f"{startyear} - {endyear}" if endyear > startyear else str(startyear)
+			else:
+				reference_row['date'] = "20000"
 
-# 		#date
-# 		if r['fk_event__startdate'] != None:
-# 			reference_row['date'] = str(r['fk_event__startdate']) + "-" + str(r['fk_event__enddate'])
-# 		else:
-# 			if r['fk_event__repository_startdate'] != None:
-# 				try:
-# 					reference_row['date'] = str['fk_event__repository_startdate'] + " - " + str(['fk_event__repository_enddate'])
-# 				except:
-# 					reference_row['date'] = ""
-# 		#role
-# 		reference_row["role"] = r['fk_referencerole__referencerole']
+			# Role
+			reference_row["role"] = r['fk_referencerole__referencerole']
+			if r['fk_referencerole__referencerole'] == "Witness":
+				eventvalue = r['fk_event']
+				reference_row["position"] = position_dic[eventvalue]['position']
+				reference_row["total"] = position_dic[eventvalue]['total']
 
-# 		#item
-# 		# part_object = Part.objects.select_related('fk_item').get(fk_event=r.fk_event)
-# 		reference_row["item_shelfmark"] = r['fk_event__part__fk_item__shelfmark']
-# 		reference_row["item_id"] = r['fk_event__part__fk_item__id_item']
+			# Item info
+			reference_row["item_shelfmark"] = r['fk_event__part__fk_item__shelfmark']
+			reference_row["item_id"] = r['fk_event__part__fk_item__id_item']
+			reference_row["part_id"] = r['fk_event__part__id_part']
+			reference_row["region"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region']
+			reference_row["location_id"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location']
+			reference_row["location"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
+			reference_row["location_pk"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
+			reference_row["part_url"] = reverse('entity', kwargs={'witness_entity_number': r['fk_event__part__id_part']})
+			# Precompute the URL once
+			#reference_row["part_url"] = f"{base_url}?witness_entity_number={r['fk_event__part__id_part']}"
 
-# 		#location
-# 		# locationreference_object = Locationreference.objects.filter(
-# 		# 	location_reference_primary=0).select_related(
-# 		# 	'fk_locationname__fk_location__fk_region').get(
-# 		# 	fk_event=r.fk_event)
-# 		reference_row["region"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__fk_region']
-# 		reference_row["location_id"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__id_location']
-# 		reference_row["location"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__location']
-# 		reference_row["location_pk"] = r['fk_event__fk_event_locationreference__fk_locationname__fk_location__pk_location']
-# 		reference_set[r['pk_referenceindividual']] = reference_row
+			reference_list.append(reference_row)
 
-# 	return(reference_set)
+	# Sort the reference list by date
+	reference_list = sorted(reference_list, key=lambda x: x["date"])
+
+	return reference_list
 
 
 #externallinks for object

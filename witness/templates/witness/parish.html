@@ -70,13 +70,15 @@
 
     <div>
       <table id="entity2" style="display:none;">
+        <thead>
         <tr> 
           <th>Name</th>
+          <th>Active from</th>
+          <th>Active to</th>
           <th>References</th>
-          <th>Ref. as witness</th>
-          <th>Active</th>
+          <th>References as witness</th>
         </tr>
-
+      </thead>
       <tbody>
       </tbody>
 
@@ -149,14 +151,20 @@
                         data.forEach(function(item, index) {
                             var rowClass = (index % 2 === 0) ? '' : 'class="even"';  // Alternate row colors
 
+                            // Check if the id_individual is 10000019
+                            var actorCell = (item.id_individual === 10000019) 
+                                            ? item.actor_name  // No link, just the actor name
+                                            : '<a href="' + item.id_individual + '">' + item.actor_name + '</a>';  // Regular link
+
                             var row = '<tr ' + rowClass + '>' +
-                                      '<td><a href="' + item.id_individual + '">' + item.actor_name + '</a></td>' +
-                                      '<td>' + item.maxdate + '</td>' +
+                                      '<td>' + actorCell + '</td>' +  // Use actorCell with or without link
                                       '<td>' + item.mindate + '</td>' +
+                                      '<td>' + item.maxdate + '</td>' +
                                       '<td>' + item.occurences + '</td>' +
                                       '<td>' + item.witnessref + '</td>' +
                                       '</tr>';
-                            tableBody.append(row);
+
+                            tableBody.append(row);                            
                         });
                     } else {
                         alert("No references found.");
@@ -285,7 +293,6 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
   var legend2 = L.control({position: 'bottomright'});
 
  
-
   legend2.onAdd = function (map) {
       var div = L.DomUtil.create('div', 'info legend');
       var grades = [0, 1, 25, 50, 100, 250, 500, 1000, 1500];
