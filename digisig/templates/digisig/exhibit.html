@@ -1,0 +1,36 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>Reflectance Transformation Imaging</h1>
+	</div>
+
+	<div class="mainpage"></div>
+	<div class="entity_main">
+		<div class="youtube-container">
+			<iframe class="youtube-iframe" src="https://www.youtube.com/embed/NvI481KDkQ4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+		</div>
+		<!-- <div id="openlime"></div> -->
+	</div>
+
+	<div class="entity_exhibit">
+		<div class="div-caption">
+		Examples<button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
+		</div>
+		{% for r in representation_set.values %}
+		<div class= "exhibit_item tooltip">
+			<div><a href="{% url 'representation_page' digisig_entity_number=r.id_num %}" target="_blank" rel="noopener noreferrer"><img src="{{r.fk_connection__thumb}}{{r.representation_thumbnail_hash}}" alt="{{r.id_num}}" width="100" height="100"></a></div>
+		  	<div class="tooltiptext"></div> 			
+		</div>
+		{% endfor %}
+		<div id="choice" hidden>{{choice}}</div>
+	</div>
+
+{% endblock %}

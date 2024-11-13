@@ -1,0 +1,370 @@
+{% extends "witness/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+
+<!--leaflet -->		
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!--Mapping --> 
+<script type="text/javascript" src="https://stamen-maps.a.ssl.fastly.net/js/tile.stamen.js?v1.3.0"></script>
+
+<!-- Include jQuery from a CDN (ensure this is placed before your custom script) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+	<div class="search-people-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title"><h1>{{pagetitle}}</h1></div>
+
+	<div class="mainpage" id="maingpage"></div>
+
+	<div class="entity_detail" id="entity_detail">
+		<div>
+			<h3>Person details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
+			<table>
+				<tr>
+					<th>Witness Graph</th>
+					<td><a class="help" href="{% url 'personnetwork_page' witness_entity_number=individual_object.id_individual %}" target="_blank">Link</a></td>
+				<tr>
+
+				{% if individual_object.fk_group.fk_group_class != null %}
+				<tr>
+					<th>Class</th>
+					<td>{{individual_object.fk_group.fk_group_class}}</td>
+				<tr>
+				{% endif %}
+		
+				{% if individual_object.fk_group.fk_group_order != null %}
+				<tr>
+					<th>Order</th>
+					<td>{{individual_object.fk_group.fk_group_order}}</td>
+				</tr>
+				{% endif %}				 
+				</table>
+		</div>
+
+<!-- 		<div class="searchfilter">		
+			<div class="filter">
+				<form id="form" action="/person" method="post">
+			    	{% csrf_token %}
+					{{ form.non_field_errors }}
+					<div class="fieldWrapper">		
+						{{ form.londonparish.errors }}
+						<label for="{{ form.londonparish.id_for_label }}">londonparish <i class="fas fa-question-circle"></i></a></label>
+						{{ form.londonparish }}
+					</div>		
+					<div class="fieldWrapper">
+				    	<input class="submit" type="submit" value="Submit">
+			    	</div>
+			    	<div class="fieldWrapper">
+			    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
+			    	</div>
+				</form>
+			</div>
+		</div> -->
+	</div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+			Permalink
+			<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+			<form action="#">
+				<label>Copy this URL to link to this page:</label>
+				<input id="input" class="text" name="" value="http://www.witness.org/entity/{{individual_object.id_individual}}" type="text" readonly>
+			</form>
+		</div>
+	</div>
+	
+
+	<div class="entity_chart_3" id="entity_chart_3">
+		<div id="mapid1"></div>
+	</div>
+
+	{{ parishes_dict|json_script:"mapdata2" }}
+
+	{% if relationshipnumber > 0 %}
+	<div class="entity_relationship" id="entity_relationship">
+		<div class="div-caption">
+			Relationships <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity2" style="display:none;">
+			{% for key, value in relationship_dic.items %}
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+					<td>{{value.role}} of 
+						<a href="{% url 'person_page' witness_entity_number=value.id_individual %}">{{value.name}}</a>
+					</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+	</div>
+	{% endif %}
+
+
+	<div class="entity_event" id="entity_event">
+		<div class="div-caption">
+			References <button id="entitybutton3" onclick="tbtoggle('entity3', 'entitybutton3')" class="entity">+</button>
+		</div>
+
+		<div >
+			<table id="entity3" style="display:none;">
+				<thead>
+				<tr class="even">
+					<th>Item</th>
+					<th>Date</th>
+					<th>Location</th>
+					<th>Role</th>
+					<th>Witness position</th>
+				</tr>
+				</thead>
+
+<!-- 			{% for r in reference_list %}
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}					
+					<td><a href="{% url 'entity' witness_entity_number=r.part_id %}">{{r.item_shelfmark}}</a></td>
+
+					{% if r.date == "20000" %}
+					<td>Undetermined</td>
+					{% else %}
+					<td>{{r.date}}</td>
+					{% endif %}
+
+					<td><a href="{% url 'entity' witness_entity_number=r.location_id %}">{{r.location}}</a></td>
+					<td>{{r.role}}</td>
+
+					{% if r.position != null %}
+					<td>{{r.position}} of {{r.total}}</td>
+					{% else %}<td></td>
+					{% endif %}
+
+				</tr>
+			{% endfor %}
+ -->
+ 			<tbody>
+ 			</tbody>
+
+ 			</table>
+		</div>
+	</div>
+
+<script>
+    $(document).ready(function() {
+        var isDataLoaded = false; // Flag to check if the data has already been loaded
+
+        // Attach click event to the button (assuming the button has the id "loadDataButton")
+        $('#entitybutton3').on('click', function() {
+            if (isDataLoaded) {
+                return; // If the data has already been loaded, do nothing on further clicks
+            }
+
+            // Set flag to true after the first click
+            isDataLoaded = true;
+
+            // Send AJAX request to get data
+            $.ajax({
+                url: '{% url "person_ajax" witness_entity_number=individual_object.id_individual %}',  // URL for the person_ajax view
+                method: 'GET',
+                success: function(response) {
+                    const jsonData = response;
+                    const data = JSON.parse(jsonData);
+
+                    // Check if we have reference data
+                    if (data.length > 0) {
+                        var tableBody = $('#entity3 tbody');
+                        tableBody.empty();  // Clear existing table rows
+                        
+                        // Loop through the references and add rows to the table
+                        data.forEach(function(item, index) {
+                            var rowClass = (index % 2 === 0) ? '' : 'class="even"';  // Alternate row colors
+
+                            var row = '<tr ' + rowClass + '>' +
+                                      '<td><a href="' + item.part_url + '">' + item.item_shelfmark + '</a></td>' +
+                                      '<td>' + item.date + '</td>' +
+                                      '<td>' + item.location + '</td>' +
+                                      '<td>' + item.role + '</td>' +
+                                      '<td>' + item.position + '</td>' +
+                                      '</tr>';
+                            tableBody.append(row);
+                        });
+                    } else {
+                        alert("No references found.");
+                    }
+                },
+                error: function() {
+                    alert("Error fetching data.");
+                }
+            });
+        });
+    });
+</script>
+
+
+
+
+<script>
+
+	//map 2
+
+	var geojsonFeature2 = JSON.parse(document.getElementById('mapdata2').textContent);
+	var countieslen = Object.keys(geojsonFeature2).length;
+
+	if (countieslen > 1) { 
+
+	var map1 = L.map('mapid1', {scrollWheelZoom:false}).setView([51.515556,-0.093056], 14);
+var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+});
+	
+	map1.addLayer(layer2);
+
+	L.geoJSON(geojsonFeature2, {style: style}).addTo(map1);
+
+	// control that shows state info on hover
+	var info2 = L.control();
+
+	info2.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info');
+		this.update();
+		return this._div;
+	};
+
+	info2.update = function (props) {
+		this._div.innerHTML = '<h4>Cases per Parish</h4>' +  (props ?
+			'<b>' + props.location + '</b><br />' + props.cases + ' cases' : 'Hover over a Parish');
+	};
+
+	info2.addTo(map1);
+
+	// get color depending on population density value
+	function getColor(d) {
+		return d > 30 ? '#49006a' :
+			d > 20  ? '#7a0177' :
+			d > 10  ? '#ae017e' :
+			d > 8  ? '#dd3497' :
+			d > 6  ? '#f768a1' :
+			d > 4   ? '#fa9fb5' :
+			d > 2   ? '#fcc5c0' :  
+			d > 0   ? '#fde0dd' : 
+			'#d9d9d9';
+	}
+
+	function style(feature) {
+		return {
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '3',
+			fillOpacity: 0.7,
+			fillColor: getColor(feature.properties.cases)
+		};
+	}
+
+	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
+
+		info2.update(layer.feature.properties);
+	}
+
+	var geojson2;
+
+	function resetHighlight(e) {
+		geojson2.resetStyle(e.target);
+		info2.update();
+	}
+
+	function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	}
+
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: zoomToFeature
+		});
+	}
+
+	/* global statesData */
+	geojson2 = L.geoJson(geojsonFeature2, {
+		style: style,
+		onEachFeature: onEachFeature
+	}).addTo(map1);
+
+	map1.attributionControl.addAttribution('');
+
+	var legend2 = L.control({position: 'bottomright'});
+
+
+
+	legend2.onAdd = function (map) {
+	    var div = L.DomUtil.create('div', 'info legend');
+	    var grades = [0, 1, 2, 4, 6, 8, 10, 20, 30];
+	    var labels = [];
+	    var from, to;
+
+
+	    for (var i = 0; i < grades.length; i++) {
+	        from = grades[i];
+	        to = grades[i + 1];
+
+	        console.log(from)
+
+	        if (i === 0) {
+	            // First grade, show only the value "0"
+	            labels.push(
+	                '<i style="background:' + getColor(from) + '"></i> ' +
+	                from);
+	        } else if (i === 1) {
+	            // Second grade, show only the value "1"
+	            labels.push(
+	                '<i style="background:' + getColor(from) + '"></i> ' +
+	                from);
+	        } else if (i === grades.length - 1) {
+	        	console.log("hello");
+	            // Last grade, show only the value (e.g., "30")
+	            labels.push(
+	                '<i style="background:' + getColor(from + 1) + '"></i> ' +
+	                from + '+');
+	            console.log(getColor(from +1));
+	        } else {
+	            // For other grades, use the range format
+	            labels.push(
+	                '<i style="background:' + getColor(from + 1) + '"></i> ' +
+	                from + '&ndash;' + (to - 1)); // Adjust the upper bound to make the range inclusive
+	        }
+	    }
+
+	    div.innerHTML = labels.join('<br>');
+	    return div;
+	};
+
+
+	legend2.addTo(map1);
+
+}
+
+
+</script>
+
+
+{% endblock %}

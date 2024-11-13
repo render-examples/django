@@ -1,0 +1,74 @@
+<head>
+  <style> body { margin: 0; } </style>
+
+  <script src="//unpkg.com/3d-force-graph"></script>
+<!--  <script src="../../dist/3d-force-graph.js"></script>-->
+
+  <style>
+    .node-label {
+      font-size: 16px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background-color: rgba(0,0,0,0.5);
+      user-select: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="3d-graph"></div>
+
+  {{ graphdata|json_script:"graphdata" }}
+  {{ linkslist|json_script:"linklist" }}
+  {{ nodelist|json_script:"nodelist" }}
+
+
+  <script type="importmap">{ "imports": { "three": "https://unpkg.com/three/build/three.module.js" }}
+  </script>
+  
+
+<script>
+  var graphdata2 = JSON.parse(document.getElementById('graphdata').textContent);
+  var nodes = JSON.parse(document.getElementById('nodelist').textContent);
+  var links = JSON.parse(document.getElementById('linklist').textContent);
+
+   var obj = new Object();
+   obj.nodes = nodes;
+   obj.links = links;
+
+ </script>
+
+
+  <script type="module">
+    import { CSS2DRenderer, CSS2DObject } from '//unpkg.com/three/examples/jsm/renderers/CSS2DRenderer.js';
+
+    const Graph = ForceGraph3D({
+      extraRenderers: [new CSS2DRenderer()]
+    })
+    (document.getElementById('3d-graph'))
+      .graphData(obj)
+      .nodeRelSize(4)
+      .onNodeRightClick(node => {
+        window.open('https://www.witnessinglondon.org/page/person/' + node.id, '_blank')})
+      .onNodeDragEnd(node => {
+          node.fx = node.x;
+          node.fy = node.y;
+          node.fz = node.z;
+        })
+      .nodeThreeObject(node => {
+        const nodeEl = document.createElement('div');
+        nodeEl.textContent = node.name;
+        nodeEl.style.color = node.color;
+        nodeEl.className = 'node-label';
+        return new CSS2DObject(nodeEl);
+      })
+      .nodeThreeObjectExtend(true)
+    ;
+
+      // Spread nodes a little wider
+    Graph.d3Force('charge').strength(-1000);
+
+  </script>
+
+
+</body>

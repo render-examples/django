@@ -1,0 +1,86 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+
+	<div class="main-title">
+		<h1>{{term_object.term_name}}</h1>
+	</div>
+
+	<div class="mainpage"></div>
+			
+	<div class="entity_detail" id="entity_detail">
+		<h3>Τerm details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3>
+		<table>
+			<tr>
+				<td>Term</td>
+				<th>{{term_object.term_name}}</th>
+			</tr>
+			<tr>
+				<td>Definition</td>
+				<th style="width:90%">{{term_object.term_definition}}</th>
+		</table>
+	</div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{term_object.id_term}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+
+	<div class="entity_main">
+		<div class="div-caption">
+			Related terms <button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
+		</div>
+		<table id="entity1" style="display:none;">
+			<tr>
+				<td>Subject</td>
+				<td>Predicate</td>
+				<td>Object</td>
+			</tr>
+		{% for statement in statement_object %}
+			<tr>
+				<th>{{statement.label_predicate}}</th>
+				<th>{{statement.skos_vocabulary_uri}}</th>
+				<th><a href="{% url 'entity' digisig_entity_number=statement.skos_data_object %}">{{statement.label_object}}</a></th>
+			</tr>
+		{% endfor %}
+		</table>
+	</div>
+
+	<div class="entity_rdf">
+		<div hidden id="rdfajax">{% url 'ajax' digisig_entity_number=term_object.id_term %}</div>
+		<div class="div-caption">
+			RDF 
+			<button id="entitybutton2" onclick="tbtoggle2('entity2', 'entitybutton2')" class="entity">+</button>
+			<button class="RDF-download"><a href="{% url 'data' digisig_entity_number=term_object.id_term %}">Download</a></button> 
+		</div>
+
+		<div>
+		<table id="entity2" style="display:none;">
+			<tr>
+				<th id="rdfelement">
+<!-- 					{% for line in rdftext %}
+					{{line}}<br>
+					{% endfor %} -->
+				</th>
+			</tr>
+		</table>
+		</div>
+	</div>
+
+
+
+
+{% endblock %}

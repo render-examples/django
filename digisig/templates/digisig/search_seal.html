@@ -1,0 +1,294 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+{% block content %}
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+
+	<div class="main-title"><h1>{{pagetitle}}</h1></div>
+
+	<div class="mainpage"></div>
+
+	<div class="guidance-bar">
+		<div class="div-caption">
+			Guidance Notes<button id="guidancebutton1" onclick="tbtoggle('guidance', 'guidancebutton1')" class="entity">+</button>
+		</div>
+	</div>
+
+	<div class="guidance" id="guidance" style="display:none;">
+		<p>June 16, 2022</p>
+		<p>This page enables researchers to search for <a href="{% url 'term_page' digisig_entity_number=10001307 %}" target="_blank">seal impressions</a>, <a href="{% url 'term_page' digisig_entity_number=10001317 %}" target="_blank">seal matrices</a> and <a href="{% url 'term_page' digisig_entity_number=10001327 %}" target="_blank">seal casts</a>.</p>
+
+		<p>In Digisig, the various physical embodiments of seals are termed <a href="{% url 'term_page' digisig_entity_number=10001297 %}" target="_blank">manifestations</a>. A manifestation can be either positive or negative.</p> 
+
+		<p>Positive manifestations are typically seal impressions (marks made in a plastic material -- typically wax -- by a seal matrix). However, positive impressions can also be the result of casting, which involves the use of a mould. Multiple positive examples of a particular seal can exist. For example, many impressions of the <a href="{% url 'entity' digisig_entity_number=10213781 %}" target="_blank">first seal of King Henry III</a> survive.</p> 
+
+		<p>Negative manifestations are usually the seal matrices (stamps) that people used to make seal impressions. Moulds, taken from seal impressions, are also negative manifestations.</p>
+
+		<p>Query result sets can be limited in a several ways. As each manifestation is an example of particular seal, searches can be limited based on features of the seal, such as shape or class. Moreover, as each manifestation is embodied in a physical object that was created a particular moment and place, a query can be limited by date and place, and according to where the manifestation is now preserved.</p>        
+
+			<ul>
+			  <li><button><a href="{% url 'term_page' digisig_entity_number=10001477 %}">SHAPE</a></button> Seals take a wide variety of different shapes</a>. For a list of shapes with definitions and examples, consult the <a href="{% url 'information' infotype='terminology' %}">terminology</a> page.</li>
+			  <li><button><a href="{% url 'term_page' digisig_entity_number=10001497 %}">CLASS</a></button> The particular words that catalogues use to describe the same graphical content can vary. To allow researchers to find seals with particular graphical contents, DIGISIG employs a classification system, which is detailed on the <a href="{% url 'information' infotype='terminology' %}">terminology</a> page. The classification system is hierarchical, with parent and child classes, so researchers can search at both a general level (eg: animal) and at a more specific level (eg: griffin). Seals are classified based on the information supplied by seal cataloguers. What the cataloguer identifies as the central element of the design determines the classification. The classes enable researchers to perform searches and they provide a point of departure for further research into the significance of seals in their original historical contexts.</li>
+			  <li><button> <a href="{% url 'term_page' digisig_entity_number=10001967 %}">Region</a></button> localities, counties, or regions</li>
+			</ul> 
+	</div>
+
+	<div class="results-bar">
+		<div class="div-caption">
+			Results ({{totaldisplay}} of {{totalrows}})<button id="resultsbutton1" onclick="tbtoggle('results', 'resultsbutton1')" class="entity">-</button>
+		</div>
+	</div>
+
+	<div class="results" id="results">
+		<div class="searchfilter">		
+			<div class="filter">
+			<h2>Filter</h2>
+
+			<form id="form" action="/search/seals" method="post">
+	    	{% csrf_token %}
+	    	{{ form.non_field_errors }}
+	    	<div>Seal Fields</div>
+
+			<div class="fieldWrapper">
+			    {{ form.group.errors }}
+			    <label for="{{ form.group.id_for_label }}">Group</label>
+			    {{ form.group }}
+			</div>
+
+			<div class="fieldWrapper">
+			    {{ form.shape.errors }}
+			    <label for="{{ form.shape.id_for_label }}">Shape <a class="help" href="{% url 'entity' digisig_entity_number=10001477 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+			    {{ form.shape }}
+			</div>
+			<div class="fieldWrapper">
+			    {{ form.classname.errors }}
+			    <label for="{{ form.classname.id_for_label }}">Class <a class="help" href="{% url 'entity' digisig_entity_number=10001497 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+			    {{ form.classname }}
+			</div>
+	    	<div>Record Fields</div>
+			<div class="fieldWrapper">
+				{{ form.repository.errors}}
+				<label for="{{ form.repository.id_for_label }}">Repository <a class="help" href="{% url 'entity' digisig_entity_number=10001387 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+				{{ form.repository }}
+			</div>
+			<div class="fieldWrapper">
+			    {{ form.series.errors }}
+			    <label for="{{ form.series.id_for_label }}">Series <a class="help" href="{% url 'entity' digisig_entity_number=10001397 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+			    {{ form.series }}
+			</div>
+			<div class="fieldWrapper" id="normal">
+			    {{ form.name.errors }}
+			    <label for="{{ form.name.id_for_label }}">Identifier <a class="help" href="{% url 'entity' digisig_entity_number=10001487 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+			    {{ form.name }}
+			</div>
+			<div class="fieldWrapper">
+			    {{ form.representation.errors }}
+			    <label for="{{ form.representation.id_for_label }}">Representation <a class="help" href="{% url 'entity' digisig_entity_number=10001457 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+			    {{ form.representation }}
+			</div>
+ 			<div class="fieldWrapper">
+			    {{ form.location.errors }}
+			    <label for="{{ form.location.id_for_label }}">Region <a class="help" href="{% url 'entity' digisig_entity_number=10001347 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+			    {{ form.location }}
+			</div>
+
+			<div class="fieldWrapper">
+			    {{ form.timegroup.errors }}
+			    <label for="{{ form.timegroup.id_for_label }}">Period <a class="help" href="{% url 'entity' digisig_entity_number=10001467 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+			    {{ form.timegroup }}
+			</div>
+
+			<div style="display: none" class="fieldWrapper">
+			    {{ form.pagination.errors }}
+			    <label  for="{{ form.pagination.id_for_label }}">Pagination</label>
+			    {{ form.pagination }}
+			</div>
+			<div class="fieldWrapper">
+	    		<input class="submit" type="submit" value="Submit">
+	    	</div>
+			</form>
+		</div>
+
+    	<div class="fieldWrapper">
+    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
+    	</div>
+    </div>
+
+	<div class="searchresults">
+
+		{% for m in manifestation_set.values %}
+		<div class="heading">
+			<h4><a class="headingbtn" href="{% url 'entity' digisig_entity_number=m.id_manifestation %}">{{m.imagestate_term}}</a></h4>
+		</div>
+		
+		<div></div>
+
+		<div>
+			<table>
+			<tr>
+				<th class="indent">Held by </th>
+				<td>{{m.repository_fulltitle}}</td>
+			</tr>
+
+			<tr>
+				<th class="indent">Part of item</th>
+				<td><a href="{% url 'item_page' digisig_entity_number=m.id_item %}">{{m.shelfmark}}</a>
+				{% if m.number != 'Undetermined'%}(seal {{m.number}}){% endif %}
+				</td>
+			</tr>
+
+			{% if m.label_manifestation_repository != null %}
+			<tr>
+				<th class="indent">Reference<a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+				<td>{{m.label_manifestation_repository}}
+				</td>
+			</tr>
+			{% endif %}
+
+			<tr>
+				{% if m.repository_location != null %}
+				<th class="indent">Place </th>
+				<td><a href="{% url 'place_page' digisig_entity_number=m.id_location %}">{{m.repository_location}}</a></td>
+				{% endif %}
+			</tr>
+			<tr>
+				{% if m.repository_startdate != null %}
+				<th class="indent">Date</th>
+				<td>{{m.repository_startdate}}
+				{% if m.repository_enddate != null %}- {{m.repository_enddate}}{% endif %}</td>
+				{% endif %}
+			</tr>
+
+			<tr>
+				<th class="indent">Example of </th>
+				<td><a href="{% url 'seal_page' digisig_entity_number=m.id_seal %}">Seal details</a></td>
+			</tr>
+
+			{% for key, value in m.sealdescriptions.items %}
+			<tr>
+				<th class="indent">
+					{% if forloop.first %} Described in {% endif %}
+				</th>
+				<td><a href="{% url 'sealdescription_page' digisig_entity_number=value.sealdescription_id %}">{{value.collection}} ({{value.identifier}})</a></td>
+			</tr>
+			{% endfor %}
+			</table>
+		</div>
+
+
+		<div class="figure">
+			{% if m.representation_thumbnail_hash != null %}
+			<figure>
+				<img class="modalimage" id="modalimagebase{{forloop.counter}}" loading="lazy" src="{{m.thumb}}{{m.representation_thumbnail_hash}}" alt="{{m.id_representation}}" onclick="image({{forloop.counter}})">
+			</figure>
+
+			<!-- The Modal -->
+			<div id="myModal{{forloop.counter}}" class="modal" style="display: none;">
+			  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
+			  <img class="modal-content" id="modalimg{{forloop.counter}}" src="{{m.medium}}{{m.representation_filename_hash}}" alt="{{m.id_representation}}">
+			  <div class="modal-caption" id="caption{{forloop.counter}}"><a href="{% url 'entity' m.id_representation %}">Representation details</a></div>
+			</div>
+			{% endif %}
+		</div>
+
+		{% endfor %}
+		
+
+
+		<div class= "pagination">
+			{% if pagecountercurrent > 1 %}
+		<button id="page_button_previous" onclick="page_button(-1)">Previous</button>
+			{% endif %}
+		<button id="page_button_1" onclick="page_button(1)">{{pagecountercurrent}}</button>
+		<button id="page_button_2" onclick="page_button(2)">{{pagecounternext}}</button>
+		<button id="page_button_2" onclick="page_button(3)">{{pagecounternextnext}}</button>
+		<button id="page_button_next" onclick="page_button(1)">Next</button>
+		</div>
+	</div>
+</div>
+
+<script>
+
+// if the form data is changed then reset the page counter back to 1
+	document.getElementById("form").addEventListener("input", formupdate_event);
+	function formupdate_event() {
+		document.getElementById("id_pagination").value = 1;
+	}
+
+// clear all user inputs from the select boxes in the form 
+	function myFunction() {
+		document.getElementById("id_pagination").value = 1; 
+		document.getElementById("id_repository").value = '2'; 
+		document.getElementById("id_series").value = ''; 
+		// document.getElementById("id_nature").value = ''; 
+		document.getElementById("id_representation").value = ''; 
+		document.getElementById("id_timegroup").value = ''; 
+		document.getElementById("id_shape").value = ''; 
+		document.getElementById("id_name").value = '';
+		document.getElementById("id_classname").value = '';
+		document.getElementById("id_location").value = '';
+	}
+
+// allow the user to progress to the subsequent page 
+	function page_button(numberofpages) {
+		var pagevalue = document.getElementById("id_pagination").value;
+		pagevalue = parseInt(pagevalue) + numberofpages;
+		document.getElementById("id_pagination").value = pagevalue;
+		document.getElementById("form").submit(); 
+	}
+
+
+// the set of series and repository numbers
+	const series_data = JSON.parse('{{ series_object|safe }}');
+	
+// action on selection of a repository -- should limit options from series list and make series available
+	document.getElementById("id_repository").onchange = function () {
+    //check to see if form has a value
+    var statusrepository = document.getElementById('id_repository').value;
+
+    if (statusrepository = "") {
+        document.getElementById('series_label').style="opacity:0.6";
+    } else {
+      // as a repository has been selected, enable the series form
+      // document.getElementById("series_label").style="opacity:1";
+      // document.getElementById("series_options").style="opacity:1";
+      // document.getElementById("series_options").disabled = false;      
+
+      //find number of options and limit series list
+      var seriesoptionslength = document.getElementById('id_series').options.length;
+          var x = document.getElementById('id_series');
+
+
+        //console.log(series_data[0].fields.fk_repository);
+        //console.log(series_data[0].pk);
+
+          for (var j = 0; j < seriesoptionslength; j++) {
+          document.getElementById("id_series").options[j].hidden = true;
+          var t = document.getElementById("id_series").options[j].value;
+        var statusrepository = document.getElementById('id_repository').value;
+
+        for (var key in series_data) {
+          if (series_data[key].pk == t) {
+            var repositorynumber = series_data[key].fields.fk_repository;
+          }
+        }
+
+          // var repositorynumber = series_data[j].fields.fk_repository;
+          // var seriesnumber2 = series_data[j].pk;
+        var repositorynumber2 = Number(repositorynumber);
+
+          if (repositorynumber2 == statusrepository) {
+            document.getElementById("id_series").options[j].hidden = false;
+          }
+
+      }             
+    }
+    } 
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- Leaflet stuff -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+	<div class="item-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>{{pagetitle}}</h1>
+	</div>
+
+	<div class="mainpage"></div>
+			
+	<div class="entity_detail" id="entity_detail">		
+		<h3>
+			Item details 
+			{% if authenticationstatus == "authenticated" %}
+			<button class="permalink"><a href="{% url 'edit_item' witness_entity_number=item_object.id_item %}">Edit</a></button>
+			{% endif %} 
+			<button onclick="toggle('entity-permalink')" class="permalink entity">Permalink</button>
+		</h3>
+		
+		<table>
+			<tr>
+				<th>Held by</th>
+				<td>{{item_object.fk_repository}}</td>	
+
+				<td rowspan="6">
+				{% for rep in representationset.values %}
+					<figure>
+						<img class="modalimage" id="modalimagebaseitem{{forloop.counter}}" src="{{rep.connection_thumb}}{{rep.representation_thumbnail}}" alt="{{rep.id_representation}}" onclick="image2({{forloop.counter}}, 'item')">
+					</figure>
+
+ 						<!-- The Modal -->
+ 						<div id="myModalitem{{forloop.counter}}" class="modal" style="display: none;">
+						  <span class="close" onclick="modalclose2({{forloop.counter}}, 'item')">&times;</span>
+				  			{% if authenticationstatus == "authenticated" %}
+						  <img class="modal-content" id="modalimgitem{{forloop.counter}}" src="{{rep.connection_medium}}{{rep.representation_filename}}" alt="{{rep.id_representation}}" loading="lazy">
+
+						   {% else %}
+						  <img class="modal-content" id="modalimgitem{{forloop.counter}}" src="{{rep.connection_thumb}}{{rep.representation_filename}}" alt="{{rep.id_representation}}" loading="lazy">
+
+							{% endif %}  
+
+						  <div class="modal-caption" id="captionitem{{forloop.counter}}"><a href="{% url 'entity' rep.id_representation %}">Representation details</a>
+						  </div>
+						</div>
+
+				{% endfor %}	
+				</td>
+			</tr>
+			<tr>
+				<th>Reference <a class="help" href="{% url 'entity' witness_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+				<td>{{item_object.shelfmark}}
+			{% for linktext2 in externallink_object %}
+				 <a href="{{linktext2.external_link}}" target="_blank">External Link</a>
+			{% endfor %}
+				</td>
+			</tr>
+
+			{% if event_dic.year1 != null %}
+			<tr>		
+				<th>Date (Repository)</th>
+				<td>{{event_dic.year1}}
+					{% if event_dic.year2 > event_dic.year1 %} - {{event_dic.year2}} {% endif %}
+				</td>
+			</tr>
+			{% endif %}
+
+			{% if event_dic.year3 != null %}
+			<tr>
+				<th>Date (Digisig)</th>
+				<td>{{event_dic.year3}}
+					{% if event_dic.year4 > event_dic.year3 %} - {{event_dic.year4}} {% endif %}
+				</td>
+			</tr>
+			{% endif %}
+
+			<tr>		
+				{% if event_dic.repository_location != null %}
+				<th>Location (Repository)</th>
+				<td>{{event_dic.repository_location}}</td>
+				{% endif %}
+			</tr>
+
+			<tr>
+				{% if event_dic.location != null %}
+				<th>Location (Digisig)</th>
+				<td><a href="{% url 'entity' event_dic.location_id %}">{{event_dic.location}}</td>
+				{% endif %}
+			</tr>
+
+			<tr>
+				<th>Digisig Link</th>
+				<td><a href="https://www.digisig.org/entity/{{item_object.id_item}}" target="_blank">Digisig</td>
+			</tr>
+
+		</table>
+
+		{% if event_dic.location_id != 50015247 %} 
+		<div class="item_map">
+			<div id="mapid"> </div>
+		</div>
+		{% endif %}	
+	</div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{item_object.id_item}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+
+	<div class="entity_event" id="entity_event">
+		<div class="div-caption">
+			Event and Participants <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
+		</div>
+
+		<div>
+		<table id="entity2" style="display:none;">
+
+			<tr> 
+				<th class="indent"> Part </th>
+				<td> {{event_dic.part_object.id_part}}</td>
+			</tr>
+
+			<tr> 
+				<th class="indent"> Event </th>
+				<td> {{event_dic.part_object.id_part}}</td>
+			</tr>
+
+
+			<tr> 
+				<th class="indent"> Description (Repository)</th>
+				<td> {{event_dic.part_object.part_description}}</td>
+			</tr>
+
+			{% for reference in event_dic.referenceset %}
+			<tr> 
+				{% if reference.fk_individual.id_individual != 10000019 %}
+				<th class="indent"></th>
+				<td> 
+					<a href="{% url 'entity' witness_entity_number=reference.fk_individual.id_individual %}">{{reference.fk_individual}}</a> 
+				</td>
+
+				<td> {{reference.fk_referencerole}}</td>
+				<td> {{reference.fk_referenceoffice}}</td>
+				{% endif %}
+			</tr>
+		 	{% endfor %}
+
+	 </table>
+	</div>
+
+	</div>
+
+
+{{ mapdic|json_script:"mapdata" }}
+
+<script>
+function onEachFeature(feature, layer) {
+    // does this feature have a property named popupContent?
+    if (feature.properties && feature.properties.popupContent) {
+        layer.bindPopup(feature.properties.popupContent);
+    }
+}
+
+	const longitude = '{{ event_dic.location_longitude|safe }}';
+	const latitude = '{{ event_dic.location_latitude|safe }}';
+
+	var geojsonFeature = JSON.parse(document.getElementById('mapdata', {scrollWheelZoom:false}).textContent);
+	var mymap = L.map('mapid').setView([latitude,longitude], 4);	
+	// var layer = new L.StamenTileLayer("watercolor");
+	var layer = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+});
+	mymap.addLayer(layer);
+	L.geoJSON(geojsonFeature, {onEachFeature: onEachFeature}).addTo(mymap);
+
+</script>
+
+
+{% endblock %}
