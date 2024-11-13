@@ -1,6 +1,6 @@
 databases:
   - name: dbs_production
-    plan: Basic-4gb
+    plan: Basic-1gb
     databaseName: dbs_production
     user: digisig
 
