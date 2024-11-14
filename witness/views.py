@@ -172,19 +172,20 @@ async def person_page(request, witness_entity_number):
 	pagetitle= namecompiler(individual_object)
 
 	# list of relationships for each actor
-	relationship_dic, relationshipnumber = await relationship_dataset(witness_entity_number)
+	# relationship_dic, relationshipnumber = await relationship_dataset(witness_entity_number)
 
-	# mapparishes = await mapparishesdata2(reference_set)
-	#mapparishes = await mapparishesdata2(witness_entity_number)
+	mapparishes, ref_list = await mapparishesdata2(witness_entity_number)
 
-	# mapparishes = await mapparishesdata2(reference_set)
-	mapparishes, reference_list = await mapparishesdata3(witness_entity_number)
+	# print (ref_list)
+
+	# list of references to the actor
+	reference_list = await referenceset_references5(witness_entity_number, ref_list)
 
 	context = {
 		'pagetitle': pagetitle,
 		'individual_object': individual_object,
-		'relationship_dic': relationship_dic,
-		'relationshipnumber' : relationshipnumber,
+		#'relationship_dic': relationship_dic,
+		#'relationshipnumber' : relationshipnumber,
 		'reference_list' : reference_list,
 		'parishes_dict': mapparishes,
 		#'reference_set': reference_set,
@@ -195,13 +196,23 @@ async def person_page(request, witness_entity_number):
 
 async def person_ajax(request, witness_entity_number):
 
-	# list of references to the actor
+	#list of references to the actor
 	reference_list = await referenceset_references3(witness_entity_number)
 
 	datareferences = json.dumps(reference_list)
 
 	return (JsonResponse(datareferences, safe=False))
 
+async def personrelationships_ajax(request, witness_entity_number):
+
+	# list of relationships for each actor
+	relationship_dic, relationshipnumber = await relationship_dataset(witness_entity_number)
+
+	datareferences = json.dumps(relationship_dic)
+
+	print (datareferences)
+
+	return (JsonResponse(datareferences, safe=False))
 
 async def parishpersonajax(request, witness_entity_number):
 

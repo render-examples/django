@@ -304,8 +304,6 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
           from = grades[i];
           to = grades[i + 1];
 
-          console.log(from)
-
           if (i === 0) {
               // First grade, show only the value "0"
               labels.push(
@@ -335,13 +333,9 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
       return div;
   };
 
-
-
-
-
   legend2.addTo(map1);
-
 }
+
 
 </script>
 

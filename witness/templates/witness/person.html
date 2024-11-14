@@ -68,7 +68,7 @@
 
 	{{ parishes_dict|json_script:"mapdata2" }}
 
-	{% if relationshipnumber > 0 %}
+
 	<div class="entity_relationship" id="entity_relationship">
 		<div class="div-caption">
 			Relationships <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
@@ -76,17 +76,22 @@
 
 		<div>
 			<table id="entity2" style="display:none;">
-			{% for key, value in relationship_dic.items %}
+<!-- 			{% for key, value in relationship_dic.items %}
 				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
 					<td>{{value.role}} of 
 						<a href="{% url 'person_page' witness_entity_number=value.id_individual %}">{{value.name}}</a>
 					</td>
 				</tr>
-			{% endfor %}
+			{% endfor %} -->
+
+			<thead>
+			</thead>
+			<tbody>
+			</tbody>
+
 			</table>
 		</div>
 	</div>
-	{% endif %}
 
 
 	<div class="entity_event" id="entity_event">
@@ -117,7 +122,7 @@
 					<td>{{r.date}}</td>
 					{% endif %}
 
-					<td><a href="{% url 'entity' witness_entity_number=r.location_id %}">{{r.location}}</a></td>
+					<td>{{r.location}}</td>
 					<td>{{r.role}}</td>
 
 					{% if r.position != null %}
@@ -132,6 +137,64 @@
  			</table>
 		</div>
 	</div>
+
+
+
+<script>
+    $(document).ready(function() {
+        var isDataLoaded = false; // Flag to check if the data has already been loaded
+
+        // Attach click event to the button (assuming the button has the id "loadDataButton")
+        $('#entitybutton2').on('click', function() {
+            if (isDataLoaded) {
+                return; // If the data has already been loaded, do nothing on further clicks
+            }
+
+            // Set flag to true after the first click
+            isDataLoaded = true;
+
+            // Send AJAX request to get data
+            $.ajax({
+                url: '{% url "personrelationships_ajax" witness_entity_number=individual_object.id_individual %}',  // URL for the person_ajax view
+                method: 'GET',
+                success: function(response) {
+                    // Parse the response assuming it's a JSON string
+                    const data = JSON.parse(response);
+
+                    // Check if we have any data
+                    if (Object.keys(data).length > 0) {
+                        var tableBody = $('#entity2 tbody');
+                        tableBody.empty();  // Clear existing table rows
+                        
+                        // Loop through the data and add rows to the table
+                        for (var key in data) {
+                            if (data.hasOwnProperty(key)) {
+                                var item = data[key];
+                                
+                                // Create a new table row
+                                var row = $('<tr></tr>');
+
+                                // Add table cells for name, role, and id
+                                row.append('<td>' + item.role + '</td>');
+                                row.append('<td> <a href="' + item.id_individual + '">' + item.name + '</a></td>');
+
+                                // Append the row to the table body
+                                tableBody.append(row);
+                            }
+                        }
+                    } else {
+                        alert("No references found.");
+                    }
+                },
+                error: function() {
+                    alert("Error fetching data.");
+                }
+            });
+        });
+    });
+</script>
+
+
 
 <script>
     $(document).ready(function() {
@@ -293,8 +356,6 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 
 	var legend2 = L.control({position: 'bottomright'});
 
-
-
 	legend2.onAdd = function (map) {
 	    var div = L.DomUtil.create('div', 'info legend');
 	    var grades = [0, 1, 2, 4, 6, 8, 10, 20, 30];
@@ -305,8 +366,6 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 	    for (var i = 0; i < grades.length; i++) {
 	        from = grades[i];
 	        to = grades[i + 1];
-
-	        console.log(from)
 
 	        if (i === 0) {
 	            // First grade, show only the value "0"
@@ -319,12 +378,10 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 	                '<i style="background:' + getColor(from) + '"></i> ' +
 	                from);
 	        } else if (i === grades.length - 1) {
-	        	console.log("hello");
 	            // Last grade, show only the value (e.g., "30")
 	            labels.push(
 	                '<i style="background:' + getColor(from + 1) + '"></i> ' +
 	                from + '+');
-	            console.log(getColor(from +1));
 	        } else {
 	            // For other grades, use the range format
 	            labels.push(
@@ -337,9 +394,7 @@ var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{
 	    return div;
 	};
 
-
 	legend2.addTo(map1);
-
 }
 
 
