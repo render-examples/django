@@ -73,8 +73,7 @@
         <thead>
         <tr> 
           <th>Name</th>
-          <th>Active from</th>
-          <th>Active to</th>
+          <th>Active</th>
           <th>References</th>
           <th>References as witness</th>
         </tr>
@@ -82,7 +81,7 @@
       <tbody>
       </tbody>
 
-<!--       {% for person in individual_list %}
+       {% for person in individual_list %}
         {% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
           {% if person.id_individual == 10000019 %}
           <td> 
@@ -93,17 +92,7 @@
             <a href="{% url 'person_page' witness_entity_number=person.id_individual %}">{{person.actor_name}}</a>
           </td>
           {% endif %}
-          <td>
-            {{person.occurences}}
-          </td>
-          {% if person.id_individual == 10000019 %}
-          <td> 
-          </td>
-          {% else %}
-          <td>
-            {{person.witnessref}}
-          </td>
-          {% endif %}
+
           {% if person.mindate > 1999 %}
           <td>Undetermined 
           </td>
@@ -115,13 +104,22 @@
              {% endif %}
           </td>
           {% endif %}
+
+          <td>
+            {{person.occurences}}
+          </td>
+
+          <td>
+            {{person.witnessref}}
+          </td>
+
       {% endfor %}
- -->      </table>
+      </table>
     </div>
   </div>
 
 
-<script>
+<!-- <script>
     $(document).ready(function() {
         var isDataLoaded = false; // Flag to check if the data has already been loaded
 
@@ -176,7 +174,7 @@
             });
         });
     });
-</script>
+</script> -->
 
 
 
