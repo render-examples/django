@@ -214,14 +214,7 @@ async def personrelationships_ajax(request, witness_entity_number):
 
 	return (JsonResponse(datareferences, safe=False))
 
-async def parishpersonajax(request, witness_entity_number):
 
-	individual_object = await parish_fetch(witness_entity_number)
-	individual_list = await parish_individuallistfetch(individual_object)
-
-	datareferences = json.dumps(individual_list)
-
-	return(JsonResponse(datareferences, safe=False)) 
 
 
 def entity(request, witness_entity_number):
@@ -243,8 +236,8 @@ async def parish_page(request, witness_entity_number):
  
 	parish = await parishvalue(witness_entity_number)
 
-	# individual_object = await parish_fetch(witness_entity_number)
-	# individual_list = await parish_individuallistfetch(individual_object)
+	individual_object = await parish_fetch(witness_entity_number)
+	individual_list = await parish_individuallistfetch(individual_object)
 	#case_value, totalcases = await parishcases_fetch(individual_object)
 
 	mapparishes = await parish_map(witness_entity_number, parish)
@@ -252,11 +245,21 @@ async def parish_page(request, witness_entity_number):
 	template = loader.get_template('witness/parish.html')
 	context = {
 		'parish': parish,
-		# 'individual_list': individual_list,
+		'individual_list': individual_list,
 		'parishes_dict': mapparishes,
 		}
 
 	return HttpResponse(template.render(context, request))
+
+
+async def parishpersonajax(request, witness_entity_number):
+
+	individual_object = await parish_fetch(witness_entity_number)
+	individual_list = await parish_individuallistfetch(individual_object)
+
+	datareferences = json.dumps(individual_list)
+
+	return(JsonResponse(datareferences, safe=False)) 
 
 
 def parishnetwork_page(request, witness_entity_number):

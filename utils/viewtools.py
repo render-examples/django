@@ -132,30 +132,30 @@ def parish_fetch(witness_entity_number):
 
 	return(individual_object)
 
-# @sync_to_async
-# def parish_individuallistfetch(individual_object):
+@sync_to_async
+def parish_individuallistfetch(individual_object):
 
-# 	individual_list = []
+	individual_list = []
 
-# 	for i in individual_object:
-# 		individual_info = {}
-# 		individual_info['actor_name'] = namecompiler(i)
-# 		individual_info['id_individual'] = i.id_individual
-# 		individual_info['occurences'] = i.occurences
-# 		individual_info['witnessref'] = i.witnessref
-# 		try:
-# 			individual_info['mindate'] = i.earlydate.year
-# 		except:
-# 			individual_info['mindate'] = 2000
-# 		try:
-# 			individual_info['maxdate'] = i.latedate.year
-# 		except:
-# 			pass
-# 		individual_list.append(individual_info)
+	for i in individual_object:
+		individual_info = {}
+		individual_info['actor_name'] = namecompiler(i)
+		individual_info['id_individual'] = i.id_individual
+		individual_info['occurences'] = i.occurences
+		individual_info['witnessref'] = i.witnessref
+		try:
+			individual_info['mindate'] = i.earlydate.year
+		except:
+			individual_info['mindate'] = 2000
+		try:
+			individual_info['maxdate'] = i.latedate.year
+		except:
+			pass
+		individual_list.append(individual_info)
 
-# 	individual_list = sorted (individual_list, key=lambda x: x["mindate"])
+	individual_list = sorted (individual_list, key=lambda x: x["mindate"])
 
-# 	return(individual_list)
+	return(individual_list)
 
 
 #### My original code for the maps function
