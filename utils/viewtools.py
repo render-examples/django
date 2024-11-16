@@ -517,6 +517,25 @@ def relationship_dataset(witness_entity_number):
 	return(relationship_dic, relationshipnumber)	
 
 
+def referencenamegenerator(r):
+
+	nameoriginal = ""
+
+	if r['fk_individual__fk_descriptor_name__descriptor_modern'] != None:
+		nameoriginal =  r['fk_individual__fk_descriptor_name__descriptor_modern']
+	if r['fk_individual__fk_descriptor_prefix1__prefix_english'] != None:
+		nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix1__prefix_english']
+	if r['fk_individual__fk_descriptor_descriptor1__descriptor_modern'] != None:
+		nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_descriptor1__descriptor_modern']
+	if r['fk_individual__fk_descriptor_prefix2__prefix_english'] != None:
+		nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix2__prefix_english']
+	if r['fk_individual__fk_descriptor_descriptor2__descriptor_modern'] != None:
+		nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_descriptor2__descriptor_modern']
+	if r['fk_individual__fk_descriptor_prefix3__prefix_english'] != None:
+		nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix3__prefix_english']
+
+	return (nameoriginal)
+
 ### network diagrams
 def networkgenerator(reference_set):
 
@@ -536,24 +555,25 @@ def networkgenerator(reference_set):
 			eventid = r['fk_event']
 			reference_dic[eventid] = [r['fk_individual']]
 
-		person = r['fk_individual']
+		nameoriginal = referencenamegenerator(r)
 
-		nameoriginal = ""
+		# nameoriginal = ""
 
-		if r['fk_individual__fk_descriptor_name__descriptor_modern'] != None:
-			nameoriginal =  r['fk_individual__fk_descriptor_name__descriptor_modern']
-		if r['fk_individual__fk_descriptor_prefix1__prefix_english'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix1__prefix_english']
-		if r['fk_individual__fk_descriptor_descriptor1__descriptor_modern'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_descriptor1__descriptor_modern']
-		if r['fk_individual__fk_descriptor_prefix2__prefix_english'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix2__prefix_english']
-		if r['fk_individual__fk_descriptor_descriptor2__descriptor_modern'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_descriptor2__descriptor_modern']
-		if r['fk_individual__fk_descriptor_prefix3__prefix_english'] != None:
-			nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix3__prefix_english']
+		# if r['fk_individual__fk_descriptor_name__descriptor_modern'] != None:
+		# 	nameoriginal =  r['fk_individual__fk_descriptor_name__descriptor_modern']
+		# if r['fk_individual__fk_descriptor_prefix1__prefix_english'] != None:
+		# 	nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix1__prefix_english']
+		# if r['fk_individual__fk_descriptor_descriptor1__descriptor_modern'] != None:
+		# 	nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_descriptor1__descriptor_modern']
+		# if r['fk_individual__fk_descriptor_prefix2__prefix_english'] != None:
+		# 	nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix2__prefix_english']
+		# if r['fk_individual__fk_descriptor_descriptor2__descriptor_modern'] != None:
+		# 	nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_descriptor2__descriptor_modern']
+		# if r['fk_individual__fk_descriptor_prefix3__prefix_english'] != None:
+		# 	nameoriginal = nameoriginal + " " + r['fk_individual__fk_descriptor_prefix3__prefix_english']
 
 		valuetarget = 1
+		person = r['fk_individual']
 
 		if person in personlist:
 			x=personlist.index(person)
