@@ -34,8 +34,6 @@ import pickle
 def index(request):
 	# return render(request, 'digisig/index.html', {})
 
-	starttime = time()
-
 	pagetitle = 'title'
 	template = loader.get_template('digisig/index.html')
 
@@ -55,7 +53,6 @@ def index(request):
 		'catalogue_total': catalogue_total,
 		}
 
-	print("Compute Time:", time()-starttime)
 	return HttpResponse(template.render(context, request))
 
 
@@ -73,7 +70,6 @@ def about(request):
 #### Exhibit 
 
 def exhibit(request):
-	starttime = time()
 	pagetitle = 'title'
 
 	# create the set of RTIs
@@ -106,7 +102,6 @@ def exhibit(request):
 
 	template = loader.get_template('digisig/exhibit.html')
 
-	print("Compute Time:", time()-starttime)					
 	return HttpResponse(template.render(context, request))
 
 
@@ -541,11 +536,9 @@ def analyze(request, analysistype):
 
 
 #################### Search #########################
-def search(request, searchtype):
-	starttime = time()
+async def search(request, searchtype):
 
 	if searchtype == "parish":
-		print ("what are you doing here?")
 		targetphrase = "parish"
 		return redirect(targetphrase)
 
@@ -641,7 +634,6 @@ def search(request, searchtype):
 			}
 
 		template = loader.get_template('digisig/search_actor.html')
-		print("Compute Time:", time()-starttime)
 		return HttpResponse(template.render(context, request))
 
 ### Search Item
@@ -750,7 +742,6 @@ def search(request, searchtype):
 			}
 
 		template = loader.get_template('digisig/search_item.html')
-		print("Compute Time:", time()-starttime)
 		return HttpResponse(template.render(context, request))
 
 ### Search Seals
@@ -758,23 +749,39 @@ def search(request, searchtype):
 	if searchtype == "seals":
 
 		pagetitle = 'Impressions, Matrices and Casts'
-		manifestation_object = sealsearch()
+		manifestation_object = await sealsearch()
+
+		#form
+		r_o, s_o, l_o, n_o, rep_o, t_o, shape_o, class_o, group_o= await manifestationsform_options()
+
+		form = ManifestationForm(request.POST or None)
+		form.fields['repository'].choices = r_o
+		form.fields['series'].choices = s_o	
+		form.fields['location'].choices = l_o
+		form.fields['nature'].choices = n_o
+		form.fields['representation'].choices = rep_o
+		form.fields['timegroup'].choices = t_o
+		form.fields['shape'].choices = shape_o
+		form.fields['classname'].choices = class_o
+		form.fields['group'].choices = group_o 
 
 		qpagination = 1
 
 		if request.method == 'POST':
-			form = ManifestationForm(request.POST)
+			#form = ManifestationForm(request.POST)
 
 			if form.is_valid(): 
-				manifestation_object, qpagination = sealsearchfilter(manifestation_object, form)
-				manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
+				manifestation_object, qpagination = await sealsearchfilter(manifestation_object, form)
+				# manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
 
-			else:
-				manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)			
+			# else:
+			# 	manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)			
 
 		else:
-			form = ManifestationForm()
-			manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)			
+			# form = ManifestationForm()
+			pass
+
+		manifestation_object, totalrows, totaldisplay, qpagination = await defaultpagination(manifestation_object, qpagination)			
 
 		pagecountercurrent = qpagination 
 		pagecounternext = qpagination + 1
@@ -786,16 +793,16 @@ def search(request, searchtype):
 
 		for e in manifestation_object:
 			manifestation_dic = {}
-			manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-			manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-			manifestation_dic = manifestation_fetchlocations(e, manifestation_dic)
-			manifestation_dic = manifestation_fetchstandardvalues(e, manifestation_dic)
+			manifestation_dic = await manifestation_fetchrepresentations(e, manifestation_dic)
+			manifestation_dic = await manifestation_fetchsealdescriptions(e, manifestation_dic)
+			manifestation_dic = await manifestation_fetchlocations(e, manifestation_dic)
+			manifestation_dic = await manifestation_fetchstandardvalues(e, manifestation_dic)
 
 			manifestation_set[e.id_manifestation] = manifestation_dic
 
 
 	# code prepares the array of series and repositories to pass to the frontend
-		series_object= seriesset()
+		series_object= await seriesset()
 
 		context = {
 			'pagetitle': pagetitle, 
@@ -811,7 +818,6 @@ def search(request, searchtype):
 
 		template = loader.get_template('digisig/search_seal.html')                    
 
-		print("Compute Time:", time()-starttime)
 		return HttpResponse(template.render(context, request))
 
 ###### Search Seal Descriptions ##########
@@ -837,20 +843,16 @@ def search(request, searchtype):
 							print("all collections")
 						else: sealdescription_object = sealdescription_object.filter(fk_collection=qcollection)
 						
-						print (len(sealdescription_object))
 				if len(qcataloguecode) > 0:
 					sealdescription_object = sealdescription_object.filter(sealdescription_identifier__icontains=qcataloguecode)
-					print (len(sealdescription_object))
 
 				if len(qcataloguemotif) > 0:
 					sealdescription_object = sealdescription_object.filter(
 						Q(motif_obverse__contains=qcataloguemotif) | Q(motif_reverse__icontains=qcataloguemotif)
 						)
-					print (len(sealdescription_object))
 
 				if len(qcataloguename) > 0:
 					sealdescription_object = sealdescription_object.filter(sealdescription_title__icontains=qcataloguename)
-					print (len(sealdescription_object))
 
 				form = SealdescriptionForm(request.POST)
 
@@ -875,7 +877,6 @@ def search(request, searchtype):
 			}
 
 		template = loader.get_template('digisig/search_sealdescription.html')
-		print("Compute Time:", time()-starttime)
 		return HttpResponse(template.render(context, request))
 
 
@@ -945,15 +946,12 @@ def search(request, searchtype):
 			}
 
 		template = loader.get_template('digisig/search_place.html')
-		print("Compute Time:", time()-starttime)
 		return HttpResponse(template.render(context, request))
 
 
 ######################### information ################################
 
 def information(request, infotype):
-
-	print (infotype)
 
 	if infotype == "changelog":
 		pagetitle = 'title'
@@ -978,8 +976,6 @@ def information(request, infotype):
 		shape_object = Terminology.objects.filter(digisig_column='shape').order_by('term_name')
 		nature_object = Terminology.objects.filter(digisig_column='nature').order_by('term_name')
 
-
-		print (class_object, shape_object)
 		context = {
 			'pagetitle': pagetitle,
 			'class_object': class_object,
@@ -1217,8 +1213,6 @@ def information(request, infotype):
 
 		time5 = gettime(start_time)
 
-		print (time1, time1b, time1c, time2, time2a, time2b, time3, time4, time5)
-
 		template = loader.get_template('digisig/machinelearning_info.html')
 
 		loadtime = gettime(start_time)
@@ -1430,7 +1424,6 @@ def actor_page(request, digisig_entity_number):
 		'reference_set': reference_set,
 		}
 
-	print("Compute Time:", time()-starttime)
 	return HttpResponse(template.render(context, request))
 
 
@@ -1440,7 +1433,6 @@ def actor_page(request, digisig_entity_number):
 
 def collection_page(request, digisig_entity_number):
 	pagetitle = 'Collection'
-	starttime = time()
 	
 	### This code prepares collection info box and the data for charts on the collection page
 
@@ -1457,7 +1449,6 @@ def collection_page(request, digisig_entity_number):
 	collection_dic["notes"] = collection.notes
 	contributor_dic = sealdescription_contributorgenerate(collection, collection_dic)
 
-	print("Compute Time1:", time()-starttime)
 
 	sealdescription_set = Sealdescription.objects.filter(fk_seal__gt=1).select_related('fk_seal')
 
@@ -1477,21 +1468,21 @@ def collection_page(request, digisig_entity_number):
 		collection_dic["totalseals"] = sealdescription_set.distinct(
 			'fk_seal').count()
 
-	print("Compute Time2:", time()-starttime)
+
 	### generate the collection info data for chart 1
 	actorscount = sealdescription_set.filter(fk_seal__fk_individual_realizer__gt=10000019).count()
 
-	print("Compute Time2a:", time()-starttime)
+
 	datecount =sealdescription_set.filter(fk_seal__date_origin__gt=1).count()
 
-	print("Compute Time2b:", time()-starttime)
+
 
 	classcount = sealdescription_set.filter(
 		fk_seal__fk_seal_face__fk_class__isnull=False).exclude(
 		fk_seal__fk_seal_face__fk_class=10000367).exclude(
 		fk_seal__fk_seal_face__fk_class=10001007).count()
 
-	print("Compute Time2c:", time()-starttime)
+
 
 	# placecount = Locationname.objects.exclude(
 	# 	locationreference__fk_locationstatus=2).filter(
@@ -1504,11 +1495,11 @@ def collection_page(request, digisig_entity_number):
 	# 	fk_seal__fk_seal_face__manifestation__fk_support__fk_part__fk_event__fk_event_locationreference__fk_locationname__fk_location=7042).count()
 
 
-	print("Compute Time2d:", time()-starttime)
+
 
 	facecount = sealdescription_set.filter(fk_seal__fk_seal_face__fk_faceterm=1).distinct('fk_seal__fk_seal_face').count() 
 
-	print("Compute Time2e:", time()-starttime)
+
 
 	actors = calpercent(collection_dic["totalseals"], actorscount)
 	date = calpercent(collection_dic["totalseals"], datecount)
@@ -1521,7 +1512,7 @@ def collection_page(request, digisig_entity_number):
 	data1 = [actors, date, fclass]
 	labels1 = ["actor", "date", "class"]
 
-	print("Compute Time3:", time()-starttime)
+
 	### generate the collection info data for chart 2 -- 'Percentage of seals per class',
 
 	result = Terminology.objects.filter(
@@ -1542,19 +1533,19 @@ def collection_page(request, digisig_entity_number):
 			data2.append((r.num_cases / totalcases) * 100)
 			labels2.append(r.term_name)
 
-	print("Compute Time3a:", time()-starttime)
+
 	### generate the collection info data for chart 3  -- 'Percentage of seals by period',
 
 	data3, labels3 = datedistribution(qcollection)
 
 	# ### generate the collection info data for chart 4 -- seals per region,
 
-	print("Compute Time3b:", time()-starttime)
+
 	## data for colorpeth map
 	maplayer1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
 	maplayer = json.loads(maplayer1.jsonfiletxt)
 
-	print("Compute Time3d:", time()-starttime)
+
 	## data for region map
 	# make circles data -- defaults -- note that this code is very similar to the function mapdata2
 	#data for region map 
@@ -1574,13 +1565,13 @@ def collection_page(request, digisig_entity_number):
 				'region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')).values(
 		'id_regiondisplay', 'id_regiondisplay', 'regiondisplay_label', 'numregions', 'regiondisplay_long', 'regiondisplay_lat')
 
-	print("Compute Time3e:", time()-starttime)
+
 
 	region_dict = mapgenerator3(regiondisplayset)
 
 	# ### generate the collection info data for chart 5 --  'Percentage of actors per class',
 
-	print("Compute Time4:", time()-starttime)
+
 
 	#for print group totals (legacy)
 	if (qcollection == 30000287):
@@ -1627,8 +1618,7 @@ def collection_page(request, digisig_entity_number):
 	}
 		
 	template = loader.get_template('digisig/collection.html') 
-
-	print("Compute Time5:", time()-starttime)                  
+                 
 	return HttpResponse(template.render(context, request))
 
 
@@ -1791,7 +1781,6 @@ def manifestation_page(request, digisig_entity_number):
 				'manifestation_object': manifestation_object,
 		}
 
-	print("Compute Time:", time()-starttime)
 	return HttpResponse(template.render(context, request))
 
 
@@ -1867,8 +1856,6 @@ def place_page(request, digisig_entity_number):
 		'pagecounternextnext': pagecounternextnext,
 		}
 
-	print("Compute Time:", time()-starttime)
-
 	return HttpResponse(template.render(context, request))
 
 
@@ -1928,7 +1915,6 @@ def representation_page(request, digisig_entity_number):
 		'representation_dic': representation_dic,
 		}
 
-	print("Compute Time:", time()-starttime)
 	return HttpResponse(template.render(context, request))
 
 
@@ -1968,24 +1954,18 @@ def seal_page(request, digisig_entity_number):
 ############################## Seal description #############################
 
 
-def sealdescription_page(request, digisig_entity_number):
-
-	starttime = time()
+async def sealdescription_page(request, digisig_entity_number):
 
 	template = loader.get_template('digisig/sealdescription.html')
 
-	sealdescription_object = Sealdescription.objects.select_related(
-		'fk_collection').select_related(
-		'fk_seal').get(
-		id_sealdescription=digisig_entity_number)
+	sealdescription_object = await sealdescription_fetchobject(digisig_entity_number)
 	
 	pagetitle = sealdescription_object.fk_collection.collection_title
 
-	sealdescription_dic = {}
-	sealdescription_dic= sealdescription_fetchrepresentation(sealdescription_object, sealdescription_dic)
-	sealdescription_dic = sealdescription_contributorgenerate(sealdescription_object.fk_collection, sealdescription_dic)
 
-	externallinkset = externallinkgenerator(digisig_entity_number)
+	sealdescription_dic= await sealdescription_fetchrepresentation(sealdescription_object)
+	sealdescription_dic = await sealdescription_contributorgenerate(sealdescription_object.fk_collection, sealdescription_dic)
+	externallinkset = await externallinkgenerator(digisig_entity_number)
 
 	context = {
 		'pagetitle': pagetitle,
@@ -1994,8 +1974,6 @@ def sealdescription_page(request, digisig_entity_number):
 		'externallinkset': externallinkset, 
 		}
 
-	print (sealdescription_dic)
-	print("Compute Time:", time()-starttime)
 	return HttpResponse(template.render(context, request))
 
 

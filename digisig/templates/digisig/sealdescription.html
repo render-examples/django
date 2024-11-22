@@ -52,7 +52,7 @@
 				<th>Identifier <a class="help" href="{% url 'entity' digisig_entity_number=10001597 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
 				<td>{{sealdescription_object.sealdescription_identifier}}
 
-					{% for link in externallinkset %}
+					{% for link in externallinkset.items %}
 					{% if link %}<a href="{{link.external_link}}" target="_blank">External Link</a>{% endif %}
 					{% endfor %}	
 				</td>

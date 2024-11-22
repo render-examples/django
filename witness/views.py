@@ -133,15 +133,11 @@ async def search(request, searchtype):
 				qpagination = form.cleaned_data['pagination']
 				qname = form.cleaned_data['name']
 				qnamelen = len(qname)
-				# if qnamelen > 0:
-				# 	individual_object = await personsearch_people(qnamelen, qname, londonevents)
 				form = PeopleForm(request.POST)
 
 		else:
 			qnamelen = 0
 			qname = ""
-			#individual_object = await personsearch_people(qnamelen, qname, qpagination, londonevents)
-			#form = PeopleForm()
 			qpagination = 1
 
 		individual_set, totalrows, totaldisplay, qpagination = await personsearch_people(qnamelen, qname, qpagination, londonevents) 

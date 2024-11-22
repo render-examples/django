@@ -1107,8 +1107,7 @@ def mapgenerator2(location_object):
 
 	return(mapdic, center_long, center_lat)
 
-
-
+@sync_to_async
 def seriesset():
 	series_object = serializers.serialize('json', Series.objects.all(), fields=('pk_series','fk_repository'))
 
@@ -1419,6 +1418,52 @@ def representationmetadata_sealdescription(representation_case, representation_d
 
 	return(representation_dic)
 
+@sync_to_async
+def manifestationsform_options():
+
+	repositories_options = [('','None')]
+	series_options = [('', 'None')]
+	location_options = [('', 'None')]
+	nature_options = [('', 'None')]
+	representation_options = [('', 'None')]
+	timegroup_options = [('', 'None')]
+	shape_options = [('', 'None')]
+	classname_options = [('', 'None')]
+	group_options = [('', 'None')]
+
+	for e in Repository.objects.order_by('repository_fulltitle'):
+		repositories_options.append((e.fk_repository, e.repository_fulltitle))
+
+	for e in Series.objects.order_by('series_name').distinct('series_name'):
+		appendvalue = str(e.fk_repository) + " : " + e.series_name
+		series_options.append((e.pk_series, appendvalue))
+
+	for e in Region.objects.order_by('region_label').distinct('region_label'):
+		location_options.append((e.pk_region, e.region_label))
+
+	for e in Nature.objects.order_by('nature_name').distinct('nature_name'):
+		nature_options.append((e.pk_nature, e.nature_name))
+
+	for e in RepresentationType.objects.order_by('representation_type').distinct('representation_type').exclude(pk_representation_type=5):
+		representation_options.append((e.pk_representation_type, e.representation_type))
+		
+	for e in TimegroupC.objects.order_by('pk_timegroup_c'):
+		timegroup_options.append((e.timegroup_c, e.timegroup_c_range))
+
+	for e in Shape.objects.order_by('shape').distinct('shape'):
+		shape_options.append((e.pk_shape, e.shape))
+
+	for e in Terminology.objects.filter(term_type=1).order_by('term_name').distinct('term_name'):
+		classname_options.append((e.id_term, e.term_name))
+
+	for e in Printgroup.objects.order_by('printgroup_order'):
+		group_options.append((e.pk_printgroup, e.printgroup))
+
+	return (repositories_options, series_options, location_options, nature_options, representation_options, timegroup_options, shape_options, classname_options, group_options)
+
+ 
+
+@sync_to_async
 def sealsearch():
 	manifestation_object = Manifestation.objects.all().select_related(
 	'fk_face__fk_seal').select_related(
@@ -1435,6 +1480,7 @@ def sealsearch():
 
 	return(manifestation_object)
 
+@sync_to_async
 def sealsearchfilter(manifestation_object, form):
 	qrepository = form.cleaned_data['repository']   
 	qseries = form.cleaned_data['series']
@@ -1529,6 +1575,7 @@ def sealsearchfilter(manifestation_object, form):
 
 	return(manifestation_object, qpagination)
 
+@sync_to_async
 def defaultpagination(pagination_object, qpagination):
 
 	pagination_object = Paginator(pagination_object, 10).page(qpagination)
@@ -1612,7 +1659,17 @@ def sealsearchmanifestationmetadata(manifestation_object):
 	return (manifestation_set)
 
 
+@sync_to_async
+def sealdescription_fetchobject(digisig_entity_number):
+	sealdescription_object = Sealdescription.objects.select_related(
+		'fk_collection').select_related(
+		'fk_seal').get(
+		id_sealdescription=digisig_entity_number)
+
+	return (sealdescription_object)
+
 #assembles the list of people credited with a work
+@sync_to_async
 def sealdescription_contributorgenerate(collection, contributor_dic):
 
 	collectioncontributions = Collectioncontributor.objects.filter(
@@ -1643,8 +1700,10 @@ def sealdescription_contributorgenerate(collection, contributor_dic):
 
 	return(contributor_dic)
 
+@sync_to_async
+def	sealdescription_fetchrepresentation(sealdescription_object):
 
-def	sealdescription_fetchrepresentation(sealdescription_object, sealdescription_dic):
+	sealdescription_dic = {}
 
 	try:
 		representation_set = Representation.objects.select_related(
@@ -1663,7 +1722,7 @@ def	sealdescription_fetchrepresentation(sealdescription_object, sealdescription_
 
 	return(sealdescription_dic)
 
-
+@sync_to_async
 def	manifestation_fetchrepresentations(e, manifestation_dic):
 
 	try:
@@ -1681,7 +1740,7 @@ def	manifestation_fetchrepresentations(e, manifestation_dic):
 
 	return(manifestation_dic)
 
-
+@sync_to_async
 def manifestation_fetchsealdescriptions(e, manifestation_dic):
 	sealdescription_set = Sealdescription.objects.filter(fk_seal=e.fk_face.fk_seal).select_related('fk_collection')
 
@@ -1699,6 +1758,7 @@ def manifestation_fetchsealdescriptions(e, manifestation_dic):
 	
 	return(manifestation_dic)
 
+@sync_to_async
 def manifestation_fetchlocations(e, manifestation_dic):
 	locationreference = Locationreference.objects.select_related(
 		'fk_locationname__fk_location').get(
@@ -1710,6 +1770,7 @@ def manifestation_fetchlocations(e, manifestation_dic):
 
 	return (manifestation_dic)
 
+@sync_to_async
 def manifestation_fetchstandardvalues (e, manifestation_dic):
 	facevalue = e.fk_face
 	sealvalue = facevalue.fk_seal
@@ -2386,10 +2447,9 @@ def referenceset_references5(witness_entity_number, ref_dic_locations):
 
 
 #externallinks for object
+@sync_to_async
 def externallinkgenerator(digisig_entity_number):
-	externallinkset = []
-	externallinkset = Externallink.objects.filter(internal_entity=digisig_entity_number)
-
+	externallinkset = Externallink.objects.filter(internal_entity=digisig_entity_number).values('external_link')
 	return (externallinkset)	
 
 
