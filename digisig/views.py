@@ -749,7 +749,6 @@ async def search(request, searchtype):
 	if searchtype == "seals":
 
 		pagetitle = 'Impressions, Matrices and Casts'
-		manifestation_object = await sealsearch()
 
 		form = ManifestationForm(request.POST or None)
 		form = await manifestationsform_options(form)
@@ -759,18 +758,22 @@ async def search(request, searchtype):
 
 		qpagination = 1
 
+		manifestation_object = await sealsearch2()
+
 		if request.method == 'POST':
 
 			if form.is_valid(): 
 				manifestation_object, qpagination = await sealsearchfilter(manifestation_object, form)
 
-		manifestation_object, totalrows, totaldisplay, qpagination = await defaultpagination(manifestation_object, qpagination)
+		manifestation_pageobject, totalrows, totaldisplay, qpagination = await defaultpagination(manifestation_object, qpagination)
 
 		pagecountercurrent = qpagination 
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2
 
-		manifestation_set, totalrows, totaldisplay, qpagination = sealsearch_searchset(manifestation_object)
+		manifestation_displayset = await manifestation_displaysetgenerate(manifestation_pageobject)
+
+		manifestation_set = await sealsearch_searchset(manifestation_displayset)
  
 		context = {
 			'pagetitle': pagetitle, 

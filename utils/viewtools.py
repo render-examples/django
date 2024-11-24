@@ -1488,7 +1488,7 @@ def sealsearch_searchset(manifestation_object):
 
 		manifestation_set[e.id_manifestation] = manifestation_dic
 
-	return (manifestation_set, totalrows, totaldisplay, qpagination)
+	return (manifestation_se)
 
 @sync_to_async
 def sealsearch():
@@ -1506,6 +1506,29 @@ def sealsearch():
 	Prefetch('fk_manifestation', queryset=Representation.objects.filter(primacy=1)))
 
 	return(manifestation_object)
+
+@sync_to_async
+def sealsearch2():
+	manifestation_object = Manifestation.objects.all().values('id_manifestation')
+
+	return(manifestation_object)
+
+@sync_to_async
+def manifestation_displaysetgenerate(manifestation_pageobject):
+
+	manifestation_set = Manifestation.objects.filter(id_manifestation__in=manifestation_pageobject).select_related(
+	'fk_face__fk_seal').select_related(
+	'fk_support__fk_part__fk_item__fk_repository').select_related(
+	'fk_support__fk_number_currentposition').select_related(
+	'fk_support__fk_attachment').select_related(
+	'fk_support__fk_supportstatus').select_related(
+	'fk_support__fk_nature').select_related(
+	'fk_imagestate').select_related(
+	'fk_position').select_related(
+	'fk_support__fk_part__fk_event').order_by(
+	'id_manifestation')
+
+	return(manifestation_displayset)
 
 @sync_to_async
 def sealsearchfilter(manifestation_object, form):
