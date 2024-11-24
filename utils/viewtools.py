@@ -1470,25 +1470,6 @@ def manifestationsform_options(form):
 	form.fields['group'].choices = group_options 
 
 	return (form)
-	#return (repositories_options, series_options, location_options, nature_options, representation_options, timegroup_options, shape_options, classname_options, group_options)
-
-@sync_to_async
-def sealsearch_searchset(manifestation_object):
-
-	## prepare the data for each displayed seal manifestation to be displayed
-
-	manifestation_set = {}
-
-	for e in manifestation_object:
-		manifestation_dic = {}
-		manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-		manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-		manifestation_dic = manifestation_fetchlocations(e, manifestation_dic)
-		manifestation_dic = manifestation_fetchstandardvalues(e, manifestation_dic)
-
-		manifestation_set[e.id_manifestation] = manifestation_dic
-
-	return (manifestation_se)
 
 @sync_to_async
 def sealsearch():
@@ -1509,26 +1490,90 @@ def sealsearch():
 
 @sync_to_async
 def sealsearch2():
-	manifestation_object = Manifestation.objects.all().values('id_manifestation')
+	manifestation_object = Manifestation.objects.all().values('id_manifestation').order_by('id_manifestation')
 
 	return(manifestation_object)
 
 @sync_to_async
 def manifestation_displaysetgenerate(manifestation_pageobject):
 
-	manifestation_set = Manifestation.objects.filter(id_manifestation__in=manifestation_pageobject).select_related(
-	'fk_face__fk_seal').select_related(
-	'fk_support__fk_part__fk_item__fk_repository').select_related(
-	'fk_support__fk_number_currentposition').select_related(
-	'fk_support__fk_attachment').select_related(
-	'fk_support__fk_supportstatus').select_related(
-	'fk_support__fk_nature').select_related(
-	'fk_imagestate').select_related(
-	'fk_position').select_related(
-	'fk_support__fk_part__fk_event').order_by(
-	'id_manifestation')
+	manifestation_set = Manifestation.objects.filter(
+		id_manifestation__in=manifestation_pageobject.object_list).select_related(
+		'fk_face__fk_seal').select_related(
+		'fk_support__fk_part__fk_item__fk_repository').select_related(
+		'fk_support__fk_number_currentposition').select_related(
+		'fk_support__fk_attachment').select_related(
+		'fk_support__fk_supportstatus').select_related(
+		'fk_support__fk_nature').select_related(
+		'fk_imagestate').select_related(
+		'fk_position').select_related(
+		'fk_support__fk_part__fk_event').order_by(
+		'id_manifestation')
 
-	return(manifestation_displayset)
+	representation_set = Representation.objects.filter(
+		fk_manifestation__in=manifestation_pageobject.objectlist).filter(
+		primacy=1).select_related(
+		'fk_connection').values('representation_set.representation_thumbnail_hash', 
+		'representation_set.representation_filename_hash', 
+		'representation_set.id_representation') 
+
+	representation_missing = Representation.objects.select_related('fk_connection').values('representation_set.representation_thumbnail_hash', 
+		'representation_set.representation_filename_hash', 
+		'representation_set.id_representation').get(id_representation=12204474)
+
+
+
+	seasldescription_set = Sealdescription.objects.filter(fk_seal__in=e.fk_face.fk_seal).select_related('fk_collection')
+
+	description_set = {}
+
+	for s in sealdescription_set:
+		description = {}
+		description["sealdescription_id"] = s.id_sealdescription
+		description["collection"] = s.fk_collection
+		description["identifier"] = s.sealdescription_identifier
+
+		description_set[s.id_sealdescription] = description
+
+	manifestation_dic["sealdescriptions"] = description_set
+	
+	return(manifestation_dic)
+
+@sync_to_async
+def manifestation_fetchlocations(e, manifestation_dic):
+	locationreference = Locationreference.objects.select_related(
+		'fk_locationname__fk_location').get(
+		fk_event=e.fk_support.fk_part.fk_event,fk_locationstatus=1)
+	locationname= locationreference.fk_locationname
+	location = locationreference.fk_locationname.fk_location
+	manifestation_dic["repository_location"] = locationreference.fk_locationname.fk_location.location
+	manifestation_dic["id_location"] = locationreference.fk_locationname.fk_location.id_location
+
+	return (manifestation_dic)
+
+
+
+
+	return(manifestation_set)
+
+
+@sync_to_async
+def sealsearch_searchset(manifestation_object):
+
+	## prepare the data for each displayed seal manifestation to be displayed
+
+	manifestation_set = {}
+
+	for e in manifestation_object:
+		manifestation_dic = {}
+		manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+		manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+		manifestation_dic = manifestation_fetchlocations(e, manifestation_dic)
+		manifestation_dic = manifestation_fetchstandardvalues(e, manifestation_dic)
+
+		manifestation_set[e.id_manifestation] = manifestation_dic
+
+	return (manifestation_set)
 
 @sync_to_async
 def sealsearchfilter(manifestation_object, form):
