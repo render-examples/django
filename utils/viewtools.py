@@ -1459,20 +1459,36 @@ def manifestationsform_options(form):
 	for e in Printgroup.objects.order_by('printgroup_order'):
 		group_options.append((e.pk_printgroup, e.printgroup))
 
-	form.fields['repository'].choices = r_o
-	form.fields['series'].choices = s_o	
-	form.fields['location'].choices = l_o
-	form.fields['nature'].choices = n_o
-	form.fields['representation'].choices = rep_o
-	form.fields['timegroup'].choices = t_o
-	form.fields['shape'].choices = shape_o
-	form.fields['classname'].choices = class_o
-	form.fields['group'].choices = group_o 
+	form.fields['repository'].choices = repositories_options
+	form.fields['series'].choices = series_options	
+	form.fields['location'].choices = location_options
+	form.fields['nature'].choices = nature_options
+	form.fields['representation'].choices = representation_options
+	form.fields['timegroup'].choices = timegroup_options
+	form.fields['shape'].choices = shape_options
+	form.fields['classname'].choices = classname_options
+	form.fields['group'].choices = group_options 
 
 	return (form)
 	#return (repositories_options, series_options, location_options, nature_options, representation_options, timegroup_options, shape_options, classname_options, group_options)
 
- 
+@sync_to_async
+def sealsearch_searchset(manifestation_object):
+
+	## prepare the data for each displayed seal manifestation to be displayed
+
+	manifestation_set = {}
+
+	for e in manifestation_object:
+		manifestation_dic = {}
+		manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
+		manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
+		manifestation_dic = manifestation_fetchlocations(e, manifestation_dic)
+		manifestation_dic = manifestation_fetchstandardvalues(e, manifestation_dic)
+
+		manifestation_set[e.id_manifestation] = manifestation_dic
+
+	return (manifestation_set, totalrows, totaldisplay, qpagination)
 
 @sync_to_async
 def sealsearch():

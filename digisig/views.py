@@ -752,50 +752,26 @@ async def search(request, searchtype):
 		manifestation_object = await sealsearch()
 
 		form = ManifestationForm(request.POST or None)
-		#form
 		form = await manifestationsform_options(form)
- 
-		#r_o, s_o, l_o, n_o, rep_o, t_o, shape_o, class_o, group_o= await manifestationsform_options(form)
+
+		# code prepares the array of series and repositories to pass to the frontend
+		series_object= await seriesset()
 
 		qpagination = 1
 
 		if request.method == 'POST':
-			#form = ManifestationForm(request.POST)
 
 			if form.is_valid(): 
 				manifestation_object, qpagination = await sealsearchfilter(manifestation_object, form)
-				# manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
 
-			# else:
-			# 	manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)			
-
-		else:
-			# form = ManifestationForm()
-			pass
-
-		manifestation_object, totalrows, totaldisplay, qpagination = await defaultpagination(manifestation_object, qpagination)			
+		manifestation_object, totalrows, totaldisplay, qpagination = await defaultpagination(manifestation_object, qpagination)
 
 		pagecountercurrent = qpagination 
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2
 
-		## prepare the data for each displayed seal manifestation
-
-		manifestation_set = {}
-
-		for e in manifestation_object:
-			manifestation_dic = {}
-			manifestation_dic = await manifestation_fetchrepresentations(e, manifestation_dic)
-			manifestation_dic = await manifestation_fetchsealdescriptions(e, manifestation_dic)
-			manifestation_dic = await manifestation_fetchlocations(e, manifestation_dic)
-			manifestation_dic = await manifestation_fetchstandardvalues(e, manifestation_dic)
-
-			manifestation_set[e.id_manifestation] = manifestation_dic
-
-
-	# code prepares the array of series and repositories to pass to the frontend
-		series_object= await seriesset()
-
+		manifestation_set, totalrows, totaldisplay, qpagination = sealsearch_searchset(manifestation_object)
+ 
 		context = {
 			'pagetitle': pagetitle, 
 			'manifestation_set': manifestation_set,
