@@ -1419,7 +1419,7 @@ def representationmetadata_sealdescription(representation_case, representation_d
 	return(representation_dic)
 
 @sync_to_async
-def manifestationsform_options():
+def manifestationsform_options(form):
 
 	repositories_options = [('','None')]
 	series_options = [('', 'None')]
@@ -1459,7 +1459,18 @@ def manifestationsform_options():
 	for e in Printgroup.objects.order_by('printgroup_order'):
 		group_options.append((e.pk_printgroup, e.printgroup))
 
-	return (repositories_options, series_options, location_options, nature_options, representation_options, timegroup_options, shape_options, classname_options, group_options)
+	form.fields['repository'].choices = r_o
+	form.fields['series'].choices = s_o	
+	form.fields['location'].choices = l_o
+	form.fields['nature'].choices = n_o
+	form.fields['representation'].choices = rep_o
+	form.fields['timegroup'].choices = t_o
+	form.fields['shape'].choices = shape_o
+	form.fields['classname'].choices = class_o
+	form.fields['group'].choices = group_o 
+
+	return (form)
+	#return (repositories_options, series_options, location_options, nature_options, representation_options, timegroup_options, shape_options, classname_options, group_options)
 
  
 

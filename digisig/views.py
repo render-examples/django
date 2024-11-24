@@ -751,19 +751,11 @@ async def search(request, searchtype):
 		pagetitle = 'Impressions, Matrices and Casts'
 		manifestation_object = await sealsearch()
 
-		#form
-		r_o, s_o, l_o, n_o, rep_o, t_o, shape_o, class_o, group_o= await manifestationsform_options()
-
 		form = ManifestationForm(request.POST or None)
-		form.fields['repository'].choices = r_o
-		form.fields['series'].choices = s_o	
-		form.fields['location'].choices = l_o
-		form.fields['nature'].choices = n_o
-		form.fields['representation'].choices = rep_o
-		form.fields['timegroup'].choices = t_o
-		form.fields['shape'].choices = shape_o
-		form.fields['classname'].choices = class_o
-		form.fields['group'].choices = group_o 
+		#form
+		form = await manifestationsform_options(form)
+ 
+		#r_o, s_o, l_o, n_o, rep_o, t_o, shape_o, class_o, group_o= await manifestationsform_options(form)
 
 		qpagination = 1
 
