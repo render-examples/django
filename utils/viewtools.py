@@ -1497,6 +1497,8 @@ def sealsearch2():
 @sync_to_async
 def manifestation_displaysetgenerate(manifestation_pageobject):
 
+	manifestation_display_dic = {}
+
 	manifestation_set = Manifestation.objects.filter(
 		id_manifestation__in=manifestation_pageobject.object_list).select_related(
 		'fk_face__fk_seal').select_related(
@@ -1508,19 +1510,78 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		'fk_imagestate').select_related(
 		'fk_position').select_related(
 		'fk_support__fk_part__fk_event').order_by(
-		'id_manifestation')
+		'id_manifestation').values(
+		'id_manifestation',
+		'fk_position', 
+		'fk_face__fk_seal', 
+		'fk_support__fk_part__fk_item', 
+		'fk_support__fk_part__fk_item__fk_repository__repository_fulltitle',
+		'fk_support__fk_part__fk_item__shelfmark',
+		'fk_support__fk_supportstatus',
+		'fk_support__fk_attachment',
+		'number',
+		'fk_support__fk_nature',
+		'label_manifestation_repository',
+		'fk_imagestate',
+		'fk_support__fk_part',
+		'fk_support__fk_part__fk_event__repository_startdate',
+		'fk_support__fk_part__fk_event__repository_enddate',
+		'fk_support__fk_part__fk_event__startdate',
+		'fk_support__fk_part__fk_event__enddate')
+
+	for e in manifestation_set:
+
+		manifetation_dic = {}
+
+		#manifestation_dic["manifestation"] = 
+		manifestation_dic["id_manifestation"] = e['id_manifestation']
+		manifestation_dic["fk_position"] = e['fk_position']
+		manifestation_dic["id_seal"] = e['fk_face__fk_seal']
+		manifestation_dic["id_item"] = e['fk_support__fk_part__fk_item']
+		manifestation_dic["repository_fulltitle"] = e['fk_support__fk_part__fk_item__fk_repository__repository_fulltitle']
+		manifestation_dic["shelfmark"] = e['fk_support__fk_part__fk_item__shelfmark']
+		manifestation_dic["fk_supportstatus"] = e['fk_support__fk_supportstatus']
+		manifestation_dic["fk_attachment"] = e['fk_support__fk_attachment']	
+		manifestation_dic["number"] = e['number']
+		manifestation_dic["support_type"] = e['fk_support__fk_nature']
+		manifestation_dic["label_manifestation_repository"] = e['label_manifestation_repository']
+		manifestation_dic["imagestate_term"] = e['fk_imagestate']
+		manifestation_dic["partvalue"] = e['fk_support__fk_part']
+		manifestation_dic["repository_startdate"] = e['fk_support__fk_part__fk_event__repository_startdate']
+		manifestation_dic["repository_enddate"] = e['fk_support__fk_part__fk_event__repository_startdate']
+		manifestation_dic["startdate"] = e['fk_support__fk_part__fk_event__startdate']
+		manifestation_dic["enddate"] = e['fk_support__fk_part__fk_event__endate']
+
+		manifestation_display_dic[e['id_manifestation']] = manifestation_dic
+
 
 	representation_set = Representation.objects.filter(
 		fk_manifestation__in=manifestation_pageobject.objectlist).filter(
-		primacy=1).select_related(
-		'fk_connection').values('representation_set.representation_thumbnail_hash', 
-		'representation_set.representation_filename_hash', 
-		'representation_set.id_representation') 
+		primacy=1).values('representation_thumbnail_hash', 
+		'representation_filename_hash', 
+		'id_representation') 
 
-	representation_missing = Representation.objects.select_related('fk_connection').values('representation_set.representation_thumbnail_hash', 
-		'representation_set.representation_filename_hash', 
-		'representation_set.id_representation').get(id_representation=12204474)
+	for r in represtation_set:
 
+		representation_dic = {}
+
+		representation_dic["representation_thumbnail_hash"] = r['representation_set__representation_thumbnail_hash']
+		representation_dic["representation_filename_hash"] = r['representation_set__representation_filename_hash']
+		representation_dic["id_representation"] = r['representation_set__id_representation']
+
+
+	representation_missing = Representation.objects.select_related(
+		'fk_connection').values(
+		'representation_set__representation_thumbnail_hash', 
+		'representation_set__representation_filename_hash', 
+		'representation_set__id_representation').get(
+		id_representation=12204474)
+
+		representation_dic_spare = {}
+
+		representation_dic_spare["representation_thumbnail_hash"] = representation_missing['representation_set__representation_thumbnail_hash']
+		representation_dic_spare["representation_filename_hash"] = representation_missing['representation_set__representation_filename_hash']
+		representation_dic_spare["id_representation"] = representation_missing['representation_set__id_representation']
 
 
 	seasldescription_set = Sealdescription.objects.filter(fk_seal__in=e.fk_face.fk_seal).select_related('fk_collection')
