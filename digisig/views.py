@@ -773,11 +773,11 @@ async def search(request, searchtype):
 
 		manifestation_displayset = await manifestation_displaysetgenerate(manifestation_pageobject)
 
-		manifestation_set = await sealsearch_searchset(manifestation_displayset)
+		#manifestation_set = await sealsearch_searchset(manifestation_displayset)
  
 		context = {
 			'pagetitle': pagetitle, 
-			'manifestation_set': manifestation_set,
+			'manifestation_set': manifestation_displayset,
 			'totalrows': totalrows,
 			'totaldisplay': totaldisplay,
 			'form': form,

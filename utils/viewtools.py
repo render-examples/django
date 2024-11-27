@@ -1497,6 +1497,28 @@ def sealsearch2():
 @sync_to_async
 def manifestation_displaysetgenerate(manifestation_pageobject):
 
+## gather the representations
+	representation_set = Representation.objects.filter(
+		fk_manifestation__in=manifestation_pageobject.object_list).filter(
+		primacy=1).values('representation_thumbnail_hash', 
+		'representation_filename_hash', 
+		'id_representation',
+		'fk_manifestation') 
+
+	# representation_missing = Representation.objects.values(
+	# 	'representation_thumbnail_hash', 
+	# 	'representation_filename_hash', 
+	# 	'id_representation',
+	# 	'fk_manifestation').get(
+	# 	id_representation=12204474)
+
+	# representation_dic_spare = {}
+	# representation_dic_spare["representation_thumbnail_hash"] = representation_missing['representation_thumbnail_hash']
+	# representation_dic_spare["representation_filename_hash"] = representation_missing['representation_filename_hash']
+	# representation_dic_spare["id_representation"] = representation_missing['id_representation']
+
+### maindata for manifestations
+
 	manifestation_display_dic = {}
 
 	manifestation_set = Manifestation.objects.filter(
@@ -1524,18 +1546,19 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		'label_manifestation_repository',
 		'fk_imagestate',
 		'fk_support__fk_part',
+		'fk_support__fk_part__fk_event',
 		'fk_support__fk_part__fk_event__repository_startdate',
 		'fk_support__fk_part__fk_event__repository_enddate',
 		'fk_support__fk_part__fk_event__startdate',
 		'fk_support__fk_part__fk_event__enddate')
 
 	listofseals = []
+	listofevents = []
+	description_set = {}
 
 	for e in manifestation_set:
 
 		manifestation_dic = {}
-
-		#manifestation_dic["manifestation"] = 
 		manifestation_dic["id_manifestation"] = e['id_manifestation']
 		manifestation_dic["fk_position"] = e['fk_position']
 		manifestation_dic["id_seal"] = e['fk_face__fk_seal']
@@ -1554,70 +1577,70 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		manifestation_dic["startdate"] = e['fk_support__fk_part__fk_event__startdate']
 		manifestation_dic["enddate"] = e['fk_support__fk_part__fk_event__enddate']
 
+		for r in representation_set:
+			if r['fk_manifestation'] == manifestation_dic["id_manifestation"]:
+				manifestation_dic["representation_thumbnail_hash"] = r['representation_thumbnail_hash']
+				manifestation_dic["representation_filename_hash"] = r['representation_filename_hash']
+				manifestation_dic["id_representation"] = r['id_representation']
+				pass
+
 		manifestation_display_dic[e['id_manifestation']] = manifestation_dic
 
+		description_set[e['fk_face__fk_seal']] = {}
+
 		listofseals.append(e['fk_face__fk_seal'])
+		listofevents.append(e['fk_support__fk_part__fk_event'])
 
-	representation_set = Representation.objects.filter(
-		fk_manifestation__in=manifestation_pageobject.object_list).filter(
-		primacy=1).values('representation_thumbnail_hash', 
-		'representation_filename_hash', 
-		'id_representation',
-		'fk_manifestation') 
+## gather the sealdescription references
+	sealdescription_set = Sealdescription.objects.filter(
+		fk_seal__in=listofseals).values(
+		'id_sealdescription',
+		'fk_collection',
+		'sealdescription_identifier',
+		'fk_seal')
 
-	for r in representation_set:
-
-		manifestation_display_dic[r['fk_manifestation']]["representation_thumbnail_hash"] = r['representation_thumbnail_hash']
-		manifestation_display_dic[r['fk_manifestation']]["representation_filename_hash"] = r['representation_filename_hash']
-		manifestation_display_dic[r['fk_manifestation']]["id_representation"] = r['id_representation']
-
-	representation_missing = Representation.objects.values(
-		'representation_thumbnail_hash', 
-		'representation_filename_hash', 
-		'id_representation',
-		'fk_manifestation').get(
-		id_representation=12204474)
-
-	representation_dic_spare = {}
-	representation_dic_spare["representation_thumbnail_hash"] = representation_missing['representation_thumbnail_hash']
-	representation_dic_spare["representation_filename_hash"] = representation_missing['representation_filename_hash']
-	representation_dic_spare["id_representation"] = representation_missing['id_representation']
-
-
-	seasldescription_set = Sealdescription.objects.filter(fk_seal__in=listofseals).select_related('fk_collection')
-
-	description_set = {}
+	description_value = {}
 
 	for s in sealdescription_set:
 		description = {}
-		description["sealdescription_id"] = s.id_sealdescription
-		description["collection"] = s.fk_collection
-		description["identifier"] = s.sealdescription_identifier
+		description["sealdescription_id"] = s['id_sealdescription']
+		description["collection"] = s['fk_collection']
+		description["identifier"] = s['sealdescription_identifier']
+		description["fk_seal"] = s['fk_seal']
+		description_value[s['id_sealdescription']] = description  
+		description_set[description["fk_seal"]][s['id_sealdescription']] = description_value
 
-		description_set[s.id_sealdescription] = description
+##gather the location references
+	locationreference_set = Locationreference.objects.filter(
+		fk_event__in=listofevents,fk_locationstatus=1).values(
+		'fk_locationname', 
+		'fk_locationname__fk_location', 
+		'fk_locationname__fk_location__location',
+		'fk_locationname__fk_location__id_location',
+		'fk_event')
 
+	location_set = {}
 
+	for l in locationreference_set:
+		location = {}
+		location["locationname"] = l['fk_locationname']
+		location["location"] = l['fk_locationname__fk_location']
+		location["repository_location"] = l['fk_locationname__fk_location__location']
+		location["id_location"] = l['fk_locationname__fk_location__id_location']
 
-	manifestation_dic["sealdescriptions"] = description_set
+		location_set[l['fk_event']] = location
+
+### final assembly
+
+	for m in manifestation_display_dic:
+		m["sealdescription"] = description_set[m["id_seal"]]
+		m["locationname"] = location_set[m['fk_event']["locationname"]]
+		m["location"] = location_set[m['fk_event']['location']]
+		m["repository_location"] = location_set[m['fk_event']['repository_location']]
+		m["id_location"] = location_set[m['fk_event']['id_location']]
+
 	
-	return(manifestation_dic)
-
-@sync_to_async
-def manifestation_fetchlocations(e, manifestation_dic):
-	locationreference = Locationreference.objects.select_related(
-		'fk_locationname__fk_location').get(
-		fk_event=e.fk_support.fk_part.fk_event,fk_locationstatus=1)
-	locationname= locationreference.fk_locationname
-	location = locationreference.fk_locationname.fk_location
-	manifestation_dic["repository_location"] = locationreference.fk_locationname.fk_location.location
-	manifestation_dic["id_location"] = locationreference.fk_locationname.fk_location.id_location
-
-	return (manifestation_dic)
-
-
-
-
-	return(manifestation_set)
+	return(manifestation_display_dic)
 
 
 @sync_to_async
