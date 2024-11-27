@@ -1563,6 +1563,7 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		manifestation_dic["fk_position"] = e['fk_position']
 		manifestation_dic["id_seal"] = e['fk_face__fk_seal']
 		manifestation_dic["id_item"] = e['fk_support__fk_part__fk_item']
+		manifestation_dic["fk_event"] = e['fk_support__fk_part__fk_event']
 		manifestation_dic["repository_fulltitle"] = e['fk_support__fk_part__fk_item__fk_repository__repository_fulltitle']
 		manifestation_dic["shelfmark"] = e['fk_support__fk_part__fk_item__shelfmark']
 		manifestation_dic["fk_supportstatus"] = e['fk_support__fk_supportstatus']
@@ -1599,16 +1600,13 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		'sealdescription_identifier',
 		'fk_seal')
 
-	description_value = {}
-
 	for s in sealdescription_set:
 		description = {}
 		description["sealdescription_id"] = s['id_sealdescription']
 		description["collection"] = s['fk_collection']
 		description["identifier"] = s['sealdescription_identifier']
-		description["fk_seal"] = s['fk_seal']
-		description_value[s['id_sealdescription']] = description  
-		description_set[description["fk_seal"]][s['id_sealdescription']] = description_value
+		description["fk_seal"] = s['fk_seal']  
+		description_set[description["fk_seal"]][s['id_sealdescription']] = description
 
 ##gather the location references
 	locationreference_set = Locationreference.objects.filter(
@@ -1632,13 +1630,12 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 
 ### final assembly
 
-	for m in manifestation_display_dic:
+	for key, m in manifestation_display_dic.items():
 		m["sealdescription"] = description_set[m["id_seal"]]
-		m["locationname"] = location_set[m['fk_event']["locationname"]]
-		m["location"] = location_set[m['fk_event']['location']]
-		m["repository_location"] = location_set[m['fk_event']['repository_location']]
-		m["id_location"] = location_set[m['fk_event']['id_location']]
-
+		m["locationname"] = location_set[m['fk_event']]["locationname"]
+		m["location"] = location_set[m['fk_event']]['location']
+		m["repository_location"] = location_set[m['fk_event']]['repository_location']
+		m["id_location"] = location_set[m['fk_event']]['id_location']
 	
 	return(manifestation_display_dic)
 
