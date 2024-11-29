@@ -1503,7 +1503,9 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		primacy=1).values('representation_thumbnail_hash', 
 		'representation_filename_hash', 
 		'id_representation',
-		'fk_manifestation') 
+		'fk_manifestation',
+		'fk_connection__thumb',
+		'fk_connection__medium') 
 
 	# representation_missing = Representation.objects.values(
 	# 	'representation_thumbnail_hash', 
@@ -1571,7 +1573,13 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		manifestation_dic["number"] = e['fk_support__fk_number_currentposition']
 		manifestation_dic["support_type"] = e['fk_support__fk_nature']
 		manifestation_dic["label_manifestation_repository"] = e['label_manifestation_repository']
-		manifestation_dic["imagestate_term"] = e['fk_imagestate']
+		
+		#Adding these values through logic seems to dramatically decrease the query run time as compared to DBS query
+		if e['fk_imagestate'] == 2:
+			manifestation_dic["imagestate_term"] = "Seal matrix"
+		else:	
+			manifestation_dic["imagestate_term"] = "Seal impression"
+
 		manifestation_dic["partvalue"] = e['fk_support__fk_part']
 		manifestation_dic["repository_startdate"] = e['fk_support__fk_part__fk_event__repository_startdate']
 		manifestation_dic["repository_enddate"] = e['fk_support__fk_part__fk_event__repository_startdate']
@@ -1580,6 +1588,8 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 
 		for r in representation_set:
 			if r['fk_manifestation'] == manifestation_dic["id_manifestation"]:
+				manifestation_dic["thumb"] = r['fk_connection__thumb']
+				manifestation_dic["medium"] = r['fk_connection__medium']
 				manifestation_dic["representation_thumbnail_hash"] = r['representation_thumbnail_hash']
 				manifestation_dic["representation_filename_hash"] = r['representation_filename_hash']
 				manifestation_dic["id_representation"] = r['id_representation']
@@ -1596,14 +1606,14 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 	sealdescription_set = Sealdescription.objects.filter(
 		fk_seal__in=listofseals).values(
 		'id_sealdescription',
-		'fk_collection',
+		'fk_collection__collection_shorttitle',
 		'sealdescription_identifier',
 		'fk_seal')
 
 	for s in sealdescription_set:
 		description = {}
 		description["sealdescription_id"] = s['id_sealdescription']
-		description["collection"] = s['fk_collection']
+		description["collection"] = s['fk_collection__collection_shorttitle']
 		description["identifier"] = s['sealdescription_identifier']
 		description["fk_seal"] = s['fk_seal']  
 		description_set[description["fk_seal"]][s['id_sealdescription']] = description
@@ -1697,13 +1707,13 @@ def sealsearchfilter(manifestation_object, form):
 			manifestation_object = manifestation_object.filter(
 				fk_support__fk_part__fk_event__locationreference__fk_locationname__fk_location__fk_region=qlocation)
 
-	# if qtimegroup.isdigit():
-	# 	if int(qtimegroup) > 0:
-	# 		temporalperiod_target = (TimegroupA.objects.get(pk_timegroup_a = qtimegroup))   
-	# 		yearstart = (temporalperiod_target.timegroup_a_startdate)
-	# 		manifestation_object = manifestation_object.filter(
-	# 			fk_support__fk_part__fk_event__repository_startdate__lt=datetime.strptime(str(yearstart), "%Y")).filter(
-	# 			fk_support__fk_part__fk_event__repository_enddate__gt=datetime.strptime(str(yearstart+50), "%Y"))
+	if qtimegroup.isdigit():
+		if int(qtimegroup) > 0:
+			temporalperiod_target = (TimegroupA.objects.get(pk_timegroup_a = qtimegroup))   
+			yearstart = (temporalperiod_target.timegroup_a_startdate)
+			manifestation_object = manifestation_object.filter(
+				fk_support__fk_part__fk_event__repository_startdate__lt=datetime.strptime(str(yearstart), "%Y")).filter(
+				fk_support__fk_part__fk_event__repository_enddate__gt=datetime.strptime(str(yearstart+50), "%Y"))
 
 	if qshape.isdigit():
 		if int(qshape) > 0:

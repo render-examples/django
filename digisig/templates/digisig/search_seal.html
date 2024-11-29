@@ -168,7 +168,7 @@
 				<td><a href="{% url 'seal_page' digisig_entity_number=m.id_seal %}">Seal details</a></td>
 			</tr>
 
-			{% for key, value in m.sealdescriptions.items %}
+			{% for key, value in m.sealdescription.items %}
 			<tr>
 				<th class="indent">
 					{% if forloop.first %} Described in {% endif %}
