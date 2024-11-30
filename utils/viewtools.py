@@ -2650,19 +2650,22 @@ def partobjectforitem_define(entity_number):
 		'fk_item__shelfmark',
 		'fk_item__fk_repository__repository_fulltitle',
 		'fk_event',
-		'fk_event',
 		'fk_event__repository_startdate',
 		'fk_event__repository_enddate',
 		'fk_event__startdate',
-		'fk_event__enddate')
+		'fk_event__enddate'
+		'fk_event__repository_location')
 
 	part_dic= {}
 	listofparts = []
+	listofitems = []
+	listofevents = []
 
 	for p in part_object:
 		part_temp_dic = {}
 		part_temp_dic['fk_item'] = p['fk_item']
 		part_temp_dic['id_part'] = p['id_part']
+		part_temp_dic['fk_event'] = p['fk_event']
 		part_temp_dic['pagetitle'] = p['fk_item__fk_repository__repository_fulltitle'] + " " + p['fk_item__shelfmark']
 		part_temp_dic['fk_repository'] = p['fk_item__fk_repository__repository_fulltitle']
 		part_temp_dic['shelfmark'] = p['fk_item__shelfmark']
@@ -2670,33 +2673,80 @@ def partobjectforitem_define(entity_number):
 		part_temp_dic['year2'] = p['fk_event__respository_enddate']
 		part_temp_dic['year3'] = p['fk_event__startdate']
 		part_temp_dic['year4'] = p['fk_event__enddate']
+		part_temp_dic["repository_location"] = p['fk_event__repository_location']
 
 		listofparts.append[p['id_part']]
+		listofitems.append[p['fk_item']]
+		listofitems.append[p['fk_event']]
 
 		part_dic[p['id_part']] = part_temp_dic
 
+	try:
+		representation_part = Representation.objects.filter(fk_digisig_in=listofparts).select_related('fk_connection')
 
+		for t in representation_part:
+			#for all images
+			connection = t.fk_connection
+			part_dic[t.fk_digisig]["connection"] = t.fk_connection
+			part_dic[t.fk_digisig]["connection_thumb"] = t.fk_connection.thumb
+			part_dic[t.fk_digisig]["connection_medium"] = t.fk_connection.medium
+			part_dic[t.fk_digisig]["representation_filename"] = t.representation_filename_hash
+			part_dic[t.fk_digisig]["representation_thumbnail"] = t.representation_thumbnail_hash
+			part_dic[t.fk_digisig]["id_representation"] = t.id_representation 
+	except:
+		print ('no image of PART available')
 
-	externallinkset = externallinkgenerator(digisig_entity_number)
+	# try:
+	# 	externallinkset = Externallink.objects.filter(internal_entity_in=listofitems)
 
+	# 	links_dic = {}
+	# 	for e in externallinkset:
+	# 		links_dic[e.internal_entity].update({e.id_external_link}:{external_link})
 
+	# 	for l in links_dic:
+	# 		part_dic[l.]
+	
+	location_object = Location.objects.filter(
+		locationname__locationreference__fk_event__in=listofevents, locationname__locationreference__location_reference_primary = False).first(
+		).values(
+		'locationname__locationreference__fk_event'
+		'location',
+		'id_location',
+		'longitude',
+		'latitude')
 
-	item_dic['repository_location']
-	item_dic['location']	
-	item_dic['connection_thumb']
-	item_dic['representation_thumbnail']
-	item_dic['id_representation']
-	item_dic['connection_medium']
-	item_dic['representation_filename']
-	item_dic['externallink_object'] = externallinkset
+	for l in location_object:
+		searchvalue = l['locationname__locationreference__fk_event']
 
+		for p in part_dic:
+			if p['fk_event']: searchvalue:
 
+				mapdic = {"type": "FeatureCollection"}
+				properties = {}
+				geometry = {}
+				location = {}
+				placelist = []
 
+				location= {"type": "Point", "coordinates":[ l['longitude'], l['latitude'] ]}
+				location_dict = {'location': l['location'], 'latitude': l['latitude'], 'longitude': l['longitude']} 
 
-	return(part_object)
+				properties = {"id_location": value1, "location": location}
+				geometry = {"type": "Point", "coordinates": [l['longitude'] , l['latitude']]}
+				location = {"type": "Feature", "properties": properties, "geometry": geometry}
+				placelist.append(location)
 
+				mapdic["features"] = placelist
 
+				p["location"] = location
+				p["location_name"] = l['location'] 
+				p["location_id"] = l['id_location'] 
+				p["location_latitude"] = l['longitude'] 
+				p["location_latitude"] = l['latitude']
+				p['location_dict'] = location_dict
+				p['mapdic'] = mapdic
 
+	return (part_dic)
+	
 
 #info for collections page
 def classdistribution(classset, facecount):
