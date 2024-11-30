@@ -2707,43 +2707,44 @@ def partobjectforitem_define(entity_number):
 	# 		part_dic[l.]
 
 	location_object = Location.objects.filter(
-		locationname__locationreference__fk_event__in=listofevents, locationname__locationreference__location_reference_primary = False).first(
-		).values(
+		locationname__locationreference__fk_event__in=listofevents, locationname__locationreference__location_reference_primary = False).values(
 		'locationname__locationreference__fk_event',
 		'location',
 		'id_location',
 		'longitude',
-		'latitude')
+		'latitude').first()
 
-	for l in location_object:
-		searchvalue = l['locationname__locationreference__fk_event']
+	searchvalue = int(location_object['locationname__locationreference__fk_event'])
 
-		for p in part_dic:
-			if p['fk_event'] == searchvalue:
+	for key, p in part_dic.items:
+		 
+		testvalue = int(p['fk_event'])
 
-				mapdic = {"type": "FeatureCollection"}
-				properties = {}
-				geometry = {}
-				location = {}
-				placelist = []
+		if searchvalue == testvalue:
 
-				location= {"type": "Point", "coordinates":[ l['longitude'], l['latitude'] ]}
-				location_dict = {'location': l['location'], 'latitude': l['latitude'], 'longitude': l['longitude']} 
+			mapdic = {"type": "FeatureCollection"}
+			properties = {}
+			geometry = {}
+			location = {}
+			placelist = []
 
-				properties = {"id_location": value1, "location": location}
-				geometry = {"type": "Point", "coordinates": [l['longitude'] , l['latitude']]}
-				location = {"type": "Feature", "properties": properties, "geometry": geometry}
-				placelist.append(location)
+			location= {"type": "Point", "coordinates":[ l['longitude'], l['latitude'] ]}
+			location_dict = {'location': l['location'], 'latitude': l['latitude'], 'longitude': l['longitude']} 
 
-				mapdic["features"] = placelist
+			properties = {"id_location": value1, "location": location}
+			geometry = {"type": "Point", "coordinates": [l['longitude'] , l['latitude']]}
+			location = {"type": "Feature", "properties": properties, "geometry": geometry}
+			placelist.append(location)
 
-				p["location"] = location
-				p["location_name"] = l['location'] 
-				p["location_id"] = l['id_location'] 
-				p["location_latitude"] = l['longitude'] 
-				p["location_latitude"] = l['latitude']
-				p['location_dict'] = location_dict
-				p['mapdic'] = mapdic
+			mapdic["features"] = placelist
+
+			p["location"] = location
+			p["location_name"] = l['location'] 
+			p["location_id"] = l['id_location'] 
+			p["location_latitude"] = l['longitude'] 
+			p["location_latitude"] = l['latitude']
+			p['location_dict'] = location_dict
+			p['mapdic'] = mapdic
 
 	return (part_dic)
 	
