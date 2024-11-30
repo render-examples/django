@@ -2641,6 +2641,19 @@ def externallinkgenerator(digisig_entity_number):
 	return (externallinkset)	
 
 
+@sync_to_async
+def partobjectforitem_define(entity_number):
+
+	part_object = Part.objects.filter(fk_item=entity_number).select_related(
+		'fk_item').select_related(
+		'fk_event').select_related(
+		'fk_item__fk_repository')
+
+	return(part_object)
+
+
+
+
 #info for collections page
 def classdistribution(classset, facecount):
 

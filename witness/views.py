@@ -347,8 +347,6 @@ def part_page(request, witness_entity_number):
 	except:
 		print ('no image of document available')
 
-	## prepare the data for each displayed seal manifestation
-
 	template = loader.get_template('witness/item.html')
 	context = {
 		'pagetitle': pagetitle,
@@ -369,8 +367,6 @@ def part_page(request, witness_entity_number):
 
 
 def item_page(request, witness_entity_number):
-
-	starttime = time()
 
 	try:
 		manifestation_object = sealsearch()
@@ -445,8 +441,6 @@ def item_page(request, witness_entity_number):
 	except:
 		totalrows = 0
 		totaldisplay = 0
-
-	print("Compute Time:", time()-starttime)
 
 	template = loader.get_template('witness/item.html')
 	context = {
