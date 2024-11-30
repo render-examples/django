@@ -2718,7 +2718,7 @@ def partobjectforitem_define(entity_number):
 
 	for key, p in part_dic.items:
 		 
-		testvalue = int(p['fk_event'])
+		testvalue = p.fk_event
 
 		if searchvalue == testvalue:
 
