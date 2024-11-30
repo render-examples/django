@@ -2653,7 +2653,7 @@ def partobjectforitem_define(entity_number):
 		'fk_event__repository_startdate',
 		'fk_event__repository_enddate',
 		'fk_event__startdate',
-		'fk_event__enddate'
+		'fk_event__enddate',
 		'fk_event__repository_location')
 
 	part_dic= {}
@@ -2669,15 +2669,15 @@ def partobjectforitem_define(entity_number):
 		part_temp_dic['pagetitle'] = p['fk_item__fk_repository__repository_fulltitle'] + " " + p['fk_item__shelfmark']
 		part_temp_dic['fk_repository'] = p['fk_item__fk_repository__repository_fulltitle']
 		part_temp_dic['shelfmark'] = p['fk_item__shelfmark']
-		part_temp_dic['year1'] = p['fk_event__respository_startdate']
-		part_temp_dic['year2'] = p['fk_event__respository_enddate']
+		part_temp_dic['year1'] = p['fk_event__repository_startdate']
+		part_temp_dic['year2'] = p['fk_event__repository_enddate']
 		part_temp_dic['year3'] = p['fk_event__startdate']
 		part_temp_dic['year4'] = p['fk_event__enddate']
 		part_temp_dic["repository_location"] = p['fk_event__repository_location']
 
-		listofparts.append[p['id_part']]
-		listofitems.append[p['fk_item']]
-		listofitems.append[p['fk_event']]
+		listofparts.append(p['id_part'])
+		listofitems.append(p['fk_item'])
+		listofevents.append(p['fk_event'])
 
 		part_dic[p['id_part']] = part_temp_dic
 
@@ -2705,11 +2705,11 @@ def partobjectforitem_define(entity_number):
 
 	# 	for l in links_dic:
 	# 		part_dic[l.]
-	
+
 	location_object = Location.objects.filter(
 		locationname__locationreference__fk_event__in=listofevents, locationname__locationreference__location_reference_primary = False).first(
 		).values(
-		'locationname__locationreference__fk_event'
+		'locationname__locationreference__fk_event',
 		'location',
 		'id_location',
 		'longitude',
@@ -2719,7 +2719,7 @@ def partobjectforitem_define(entity_number):
 		searchvalue = l['locationname__locationreference__fk_event']
 
 		for p in part_dic:
-			if p['fk_event']: searchvalue:
+			if p['fk_event'] == searchvalue:
 
 				mapdic = {"type": "FeatureCollection"}
 				properties = {}

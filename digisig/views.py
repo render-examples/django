@@ -1582,7 +1582,7 @@ def collection_page(request, digisig_entity_number):
 		# 'labels4': labels4,
 		# 'data4': data4,await 
 		'region_dict': region_dict,
-		'maplayer'await : maplaye, externallinksetr,
+		'maplayer': maplayer,
 		'labels5': labels5,
 		'data5': data5,
 		'form': form,
