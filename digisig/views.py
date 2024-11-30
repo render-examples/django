@@ -1580,9 +1580,9 @@ def collection_page(request, digisig_entity_number):
 		'labels3': labels3,
 		'data3': data3,
 		# 'labels4': labels4,
-		# 'data4': data4,
+		# 'data4': data4,await 
 		'region_dict': region_dict,
-		'maplayer': maplayer,
+		'maplayer'await : maplaye, externallinksetr,
 		'labels5': labels5,
 		'data5': data5,
 		'form': form,
@@ -1600,13 +1600,8 @@ def collection_page(request, digisig_entity_number):
 
 async def item_page(request, digisig_entity_number):
 
-	externallinkset = externallinkgenerator(digisig_entity_number)
+	item_dic = await partobjectforitem_define(digisig_entity_number)
 
-	part_object = partobjectforitem_define(digisig_entity_number)
-
-
-
-	pagetitle = part_object.fk_item.fk_repository.repository_fulltitle + " " + part_object.fk_item.shelfmark
 
 	event_dic = {}
 	event_object = part_object.fk_event

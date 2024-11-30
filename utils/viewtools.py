@@ -2636,18 +2636,62 @@ def referenceset_references5(witness_entity_number, ref_dic_locations):
 
 #externallinks for object
 @sync_to_async
-def externallinkgenerator(digisig_entity_number):
-	externallinkset = Externallink.objects.filter(internal_entity=digisig_entity_number).values('external_link')
+def externallinkgenerator(entity_number):
+	externallinkset = Externallink.objects.filter(internal_entity=entity_number).values('external_link')
 	return (externallinkset)	
-
 
 @sync_to_async
 def partobjectforitem_define(entity_number):
 
-	part_object = Part.objects.filter(fk_item=entity_number).select_related(
-		'fk_item').select_related(
-		'fk_event').select_related(
-		'fk_item__fk_repository')
+	part_object = Part.objects.filter(
+		fk_item=entity_number).values(
+		'id_part',
+		'fk_item',
+		'fk_item__shelfmark',
+		'fk_item__fk_repository__repository_fulltitle',
+		'fk_event',
+		'fk_event',
+		'fk_event__repository_startdate',
+		'fk_event__repository_enddate',
+		'fk_event__startdate',
+		'fk_event__enddate')
+
+	part_dic= {}
+	listofparts = []
+
+	for p in part_object:
+		part_temp_dic = {}
+		part_temp_dic['fk_item'] = p['fk_item']
+		part_temp_dic['id_part'] = p['id_part']
+		part_temp_dic['pagetitle'] = p['fk_item__fk_repository__repository_fulltitle'] + " " + p['fk_item__shelfmark']
+		part_temp_dic['fk_repository'] = p['fk_item__fk_repository__repository_fulltitle']
+		part_temp_dic['shelfmark'] = p['fk_item__shelfmark']
+		part_temp_dic['year1'] = p['fk_event__respository_startdate']
+		part_temp_dic['year2'] = p['fk_event__respository_enddate']
+		part_temp_dic['year3'] = p['fk_event__startdate']
+		part_temp_dic['year4'] = p['fk_event__enddate']
+
+		listofparts.append[p['id_part']]
+
+		part_dic[p['id_part']] = part_temp_dic
+
+
+
+	externallinkset = externallinkgenerator(digisig_entity_number)
+
+
+
+	item_dic['repository_location']
+	item_dic['location']	
+	item_dic['connection_thumb']
+	item_dic['representation_thumbnail']
+	item_dic['id_representation']
+	item_dic['connection_medium']
+	item_dic['representation_filename']
+	item_dic['externallink_object'] = externallinkset
+
+
+
 
 	return(part_object)
 
