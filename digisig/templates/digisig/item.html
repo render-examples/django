@@ -224,7 +224,7 @@
 				<td> {{part_object.part_description}}</td>
 			</tr>
 
-			{% for reference in event_dic.referenceset %}
+			{% for reference in part_object.referenceset %}
 
 			<tr> 
 				{% if authenticationstatus == "authenticated" %}
