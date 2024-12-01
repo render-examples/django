@@ -1602,6 +1602,41 @@ async def item_page(request, digisig_entity_number):
 
 	part_dic = await partobjectforitem_define(digisig_entity_number)
 
+	print("hello", len(part_dic))
+
+	if len(part_dic) == 1:
+
+		for key, part_info in part_dic.items():
+			template = loader.get_template('digisig/item.html')
+			context = {
+				'pagetitle': part_info['pagetitle'],
+				'item_object': part_info,
+				#'event_dic': event_dic,
+				'mapdic': part_info['mapdic'],
+				#'representationset': representationset,
+				# 'manifestationset': manifestation_set,
+				# 'totalrows': totalrows,
+				# 'totaldisplay': totaldisplay,
+				#'externallink_object': externallinkset,
+				#'location': location,
+				#'location_dict': location_dict,
+				}
+	else:
+		template = loader.get_template('digisig/item.html')
+		context = {
+			'pagetitle': pagetitle,
+			'item_object': item_object,
+			'event_dic': event_dic,
+			'mapdic': mapdic,
+			'representationset': representationset,
+			# 'manifestationset': manifestation_set,
+			# 'totalrows': totalrows,
+			# 'totaldisplay': totaldisplay,
+			#'externallink_object': externallinkset,
+			#'location': location,
+			#'location_dict': location_dict,
+			}
+
 	# event_dic = {}
 	# event_object = part_object.fk_event
 	# item_object = part_object.fk_item
@@ -1640,20 +1675,20 @@ async def item_page(request, digisig_entity_number):
 	# except:
 	# 	print ('no image of document available')
 
-	template = loader.get_template('digisig/item.html')
-	context = {
-		'pagetitle': pagetitle,
-		'item_object': item_object,
-		'event_dic': event_dic,
-		'mapdic': mapdic,
-		'representationset': representationset,
-		# 'manifestationset': manifestation_set,
-		# 'totalrows': totalrows,
-		# 'totaldisplay': totaldisplay,
-		'externallink_object': externallinkset,
-		#'location': location,
-		#'location_dict': location_dict,
-		}
+	# template = loader.get_template('digisig/item.html')
+	# context = {
+	# 	'pagetitle': pagetitle,
+	# 	'item_object': item_object,
+	# 	'event_dic': event_dic,
+	# 	'mapdic': mapdic,
+	# 	'representationset': representationset,
+	# 	# 'manifestationset': manifestation_set,
+	# 	# 'totalrows': totalrows,
+	# 	# 'totaldisplay': totaldisplay,
+	# 	#'externallink_object': externallinkset,
+	# 	#'location': location,
+	# 	#'location_dict': location_dict,
+	# 	}
 
 	return HttpResponse(template.render(context, request))
 
