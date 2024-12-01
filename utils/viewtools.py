@@ -2681,20 +2681,20 @@ def partobjectforitem_define(entity_number):
 
 		part_dic[p['id_part']] = part_temp_dic
 
-	try:
-		representation_part = Representation.objects.filter(fk_digisig_in=listofparts).select_related('fk_connection')
+	representation_part = Representation.objects.filter(fk_digisig__in=listofparts).select_related('fk_connection')
 
-		for t in representation_part:
-			#for all images
-			connection = t.fk_connection
-			part_dic[t.fk_digisig]["connection"] = t.fk_connection
-			part_dic[t.fk_digisig]["connection_thumb"] = t.fk_connection.thumb
-			part_dic[t.fk_digisig]["connection_medium"] = t.fk_connection.medium
-			part_dic[t.fk_digisig]["representation_filename"] = t.representation_filename_hash
-			part_dic[t.fk_digisig]["representation_thumbnail"] = t.representation_thumbnail_hash
-			part_dic[t.fk_digisig]["id_representation"] = t.id_representation 
-	except:
-		print ('no image of PART available')
+	for t in representation_part:
+		#for all images
+		connection = t.fk_connection
+		part_dic[t.fk_digisig]["connection"] = t.fk_connection
+		part_dic[t.fk_digisig]["connection_thumb"] = t.fk_connection.thumb
+		part_dic[t.fk_digisig]["connection_medium"] = t.fk_connection.medium
+		part_dic[t.fk_digisig]["representation_filename"] = t.representation_filename_hash
+		part_dic[t.fk_digisig]["representation_thumbnail"] = t.representation_thumbnail_hash
+		part_dic[t.fk_digisig]["id_representation"] = t.id_representation 
+
+	# except:
+	# 	print ('no image of PART available')
 
 	# try:
 	# 	externallinkset = Externallink.objects.filter(internal_entity_in=listofitems)

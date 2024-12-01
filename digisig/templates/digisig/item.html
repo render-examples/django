@@ -56,7 +56,7 @@
 			</tr>
 			<tr>
 				<th>Reference <a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
-				<td>{{item_object.shelfmark}}
+				<td>{{part_object.shelfmark}}
 			{% for linktext2 in externallink_object %}
 				 <a href="{{linktext2.external_link}}" target="_blank">External Link</a>
 			{% endfor %}
@@ -89,9 +89,9 @@
 			</tr>
 
 			<tr>
-				{% if part_object.location != null %}
+				{% if part_object.location_name != null %}
 				<th>Location (Digisig)</th>
-				<td><a href="{% url 'entity' part_object.location_id %}">{{part_object.location}}</td>
+				<td><a href="{% url 'entity' part_object.location_id %}">{{part_object.location_name}}</td>
 				{% endif %}
 			</tr>
 			
