@@ -2643,9 +2643,11 @@ def externallinkgenerator(entity_number):
 @sync_to_async
 def partobjectforitem_define(entity_number):
 
+	#### prepare parts
 	part_object = Part.objects.filter(
 		fk_item=entity_number).values(
 		'id_part',
+		'part_description',
 		'fk_item',
 		'fk_item__shelfmark',
 		'fk_item__fk_repository__repository_fulltitle',
@@ -2657,6 +2659,7 @@ def partobjectforitem_define(entity_number):
 		'fk_event__repository_location')
 
 	part_dic= {}
+	reference_dic= {}
 	listofparts = []
 	listofitems = []
 	listofevents = []
@@ -2665,6 +2668,7 @@ def partobjectforitem_define(entity_number):
 		part_temp_dic = {}
 		part_temp_dic['fk_item'] = p['fk_item']
 		part_temp_dic['id_part'] = p['id_part']
+		part_temp_dic['part_description'] = p['part_description']
 		part_temp_dic['fk_event'] = p['fk_event']
 		part_temp_dic['pagetitle'] = p['fk_item__fk_repository__repository_fulltitle'] + " " + p['fk_item__shelfmark']
 		part_temp_dic['fk_repository'] = p['fk_item__fk_repository__repository_fulltitle']
@@ -2681,20 +2685,43 @@ def partobjectforitem_define(entity_number):
 
 		part_dic[p['id_part']] = part_temp_dic
 
+		reference_dic.update({p['fk_event']: {}})
+
+	### prepare representations of part
 	representation_part = Representation.objects.filter(fk_digisig__in=listofparts).select_related('fk_connection')
 
-	for t in representation_part:
-		#for all images
-		connection = t.fk_connection
-		part_dic[t.fk_digisig]["connection"] = t.fk_connection
-		part_dic[t.fk_digisig]["connection_thumb"] = t.fk_connection.thumb
-		part_dic[t.fk_digisig]["connection_medium"] = t.fk_connection.medium
-		part_dic[t.fk_digisig]["representation_filename"] = t.representation_filename_hash
-		part_dic[t.fk_digisig]["representation_thumbnail"] = t.representation_thumbnail_hash
-		part_dic[t.fk_digisig]["id_representation"] = t.id_representation 
+	try:
+		for t in representation_part:
+			#for all images
+			connection = t.fk_connection
+			part_dic[t.fk_digisig]["connection"] = t.fk_connection
+			part_dic[t.fk_digisig]["connection_thumb"] = t.fk_connection.thumb
+			part_dic[t.fk_digisig]["connection_medium"] = t.fk_connection.medium
+			part_dic[t.fk_digisig]["representation_filename"] = t.representation_filename_hash
+			part_dic[t.fk_digisig]["representation_thumbnail"] = t.representation_thumbnail_hash
+			part_dic[t.fk_digisig]["id_representation"] = t.id_representation 
 
-	# except:
-	# 	print ('no image of PART available')
+	except:
+		print ('no image of PART available')
+
+	### prepare references
+	referenceset = Referenceindividual.objects.filter(
+		fk_event__in=listofevents).order_by(
+		"fk_referencerole__role_order", "pk_referenceindividual").values(
+		'pk_referenceindividual',
+		'fk_individual',
+		'referenceindividual',
+		'fk_referencerole',
+		'fk_individualoffice',
+		'fk_event',
+		)
+	
+	for referencecase in referenceset:
+		reference_dic[referencecase['fk_event']].update ({referencecase['pk_referenceindividual']: referencecase})
+
+	for partneedingreference in part_object:
+		partneedingreference['reference_set'] = reference_dic[partneedingreference['fk_event']]		
+
 
 	# try:
 	# 	externallinkset = Externallink.objects.filter(internal_entity_in=listofitems)

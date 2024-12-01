@@ -200,7 +200,6 @@
 	</div>
 
 
-
 	<div class="entity_event" id="entity_event">
 		<div class="div-caption">
 			Event and Participants <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
@@ -211,18 +210,18 @@
 
 			<tr> 
 				<th class="indent"> Part </th>
-				<td> {{event_dic.part_object.id_part}}</td>
+				<td> {{part_object.id_part}}</td>
 			</tr>
 
 			<tr> 
 				<th class="indent"> Event </th>
-				<td> {{event_dic.part_object.id_part}}</td>
+				<td> {{part_object.fk_event}}</td>
 			</tr>
 
 
 			<tr> 
 				<th class="indent"> Description (Repository)</th>
-				<td> {{event_dic.part_object.part_description}}</td>
+				<td> {{part_object.part_description}}</td>
 			</tr>
 
 			{% for reference in event_dic.referenceset %}
@@ -274,8 +273,8 @@ function onEachFeature(feature, layer) {
     }
 }
 
-	const longitude = '{{ event_dic.location_longitude|safe }}';
-	const latitude = '{{ event_dic.location_latitude|safe }}';
+	const longitude = '{{ part_object.location_longitude|safe }}';
+	const latitude = '{{ part_object.location_latitude|safe }}';
 
 	var geojsonFeature = JSON.parse(document.getElementById('mapdata', {scrollWheelZoom:false}).textContent);
 	var mymap = L.map('mapid').setView([latitude,longitude], 4);	
