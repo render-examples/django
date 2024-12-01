@@ -1602,15 +1602,13 @@ async def item_page(request, digisig_entity_number):
 
 	part_dic = await partobjectforitem_define(digisig_entity_number)
 
-	print("hello", len(part_dic))
-
 	if len(part_dic) == 1:
 
 		for key, part_info in part_dic.items():
 			template = loader.get_template('digisig/item.html')
 			context = {
 				'pagetitle': part_info['pagetitle'],
-				'item_object': part_info,
+				'part_object': part_info,
 				#'event_dic': event_dic,
 				'mapdic': part_info['mapdic'],
 				#'representationset': representationset,

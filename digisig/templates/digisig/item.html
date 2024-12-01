@@ -23,7 +23,7 @@
 		<h3>
 			Item details 
 			{% if authenticationstatus == "authenticated" %}
-			<button class="permalink"><a href="{% url 'edit_item' digisig_entity_number=item_object.id_item %}">Edit</a></button>
+			<button class="permalink"><a href="{% url 'edit_item' digisig_entity_number=part_object.id_item %}">Edit</a></button>
 			{% endif %} 
 			<button onclick="toggle('entity-permalink')" class="permalink entity">Permalink</button>
 		</h3>
@@ -31,30 +31,27 @@
 		<table>
 			<tr>
 				<th>Held by</th>
-				<td>{{item_object.fk_repository}}</td>	
+				<td>{{part_object.fk_repository}}</td>	
 
 				<td rowspan="6">
-				{% for rep in representationset.values %}
 					<figure>
-						<img class="modalimage" id="modalimagebaseitem{{forloop.counter}}" src="{{rep.connection_thumb}}{{rep.representation_thumbnail}}" alt="{{rep.id_representation}}" onclick="image2({{forloop.counter}}, 'item')">
+						<img class="modalimage" id="modalimagebaseitem{{forloop.counter}}" src="{{part_object.connection_thumb}}{{part_object.representation_thumbnail}}" alt="{{part_object.id_representation}}" onclick="image2({{forloop.counter}}, 'item')">
 					</figure>
 
  						<!-- The Modal -->
  						<div id="myModalitem{{forloop.counter}}" class="modal" style="display: none;">
 						  <span class="close" onclick="modalclose2({{forloop.counter}}, 'item')">&times;</span>
 				  			{% if authenticationstatus == "authenticated" %}
-						  <img class="modal-content" id="modalimgitem{{forloop.counter}}" src="{{rep.connection_medium}}{{rep.representation_filename}}" alt="{{rep.id_representation}}" loading="lazy">
+						  <img class="modal-content" id="modalimgitem{{forloop.counter}}" src="{{part_object.connection_medium}}{{part_object.representation_filename}}" alt="{{part_object.id_representation}}" loading="lazy">
 
 						   {% else %}
-						  <img class="modal-content" id="modalimgitem{{forloop.counter}}" src="{{rep.connection_thumb}}{{rep.representation_filename}}" alt="{{rep.id_representation}}" loading="lazy">
+						  <img class="modal-content" id="modalimgitem{{forloop.counter}}" src="{{part_object.connection_thumb}}{{part_object.representation_filename}}" alt="{{part_object.id_representation}}" loading="lazy">
 
 							{% endif %}  
 
-						  <div class="modal-caption" id="captionitem{{forloop.counter}}"><a href="{% url 'entity' rep.id_representation %}">Representation details</a>
+						  <div class="modal-caption" id="captionitem{{forloop.counter}}"><a href="{% url 'entity' part_object.id_representation %}">Representation details</a>
 						  </div>
 						</div>
-
-				{% endfor %}	
 				</td>
 			</tr>
 			<tr>
@@ -66,41 +63,41 @@
 				</td>
 			</tr>
 
-			{% if event_dic.year1 != null %}
+			{% if part_object.year1 != null %}
 			<tr>		
 				<th>Date (Repository)</th>
-				<td>{{event_dic.year1}}
-					{% if event_dic.year2 > event_dic.year1 %} - {{event_dic.year2}} {% endif %}
+				<td>{{part_object.year1}}
+					{% if part_object.year2 > part_object.year1 %} - {{part_object.year2}} {% endif %}
 				</td>
 			</tr>
 			{% endif %}
 
-			{% if event_dic.year3 != null %}
+			{% if part_object.year3 != null %}
 			<tr>
 				<th>Date (Digisig)</th>
-				<td>{{event_dic.year3}}
-					{% if event_dic.year4 > event_dic.year3 %} - {{event_dic.year4}} {% endif %}
+				<td>{{part_object.year3}}
+					{% if part_object.year4 > part_object.year3 %} - {{part_object.year4}} {% endif %}
 				</td>
 			</tr>
 			{% endif %}
 
 			<tr>		
-				{% if event_dic.repository_location != null %}
+				{% if part_object.repository_location != null %}
 				<th>Location (Repository)</th>
-				<td>{{event_dic.repository_location}}</td>
+				<td>{{part_object.repository_location}}</td>
 				{% endif %}
 			</tr>
 
 			<tr>
-				{% if event_dic.location != null %}
+				{% if part_object.location != null %}
 				<th>Location (Digisig)</th>
-				<td><a href="{% url 'entity' event_dic.location_id %}">{{event_dic.location}}</td>
+				<td><a href="{% url 'entity' part_object.location_id %}">{{part_object.location}}</td>
 				{% endif %}
 			</tr>
 			
 		</table>
 
-		{% if event_dic.location_id != 50015247 %} 
+		{% if part_object.location_id != 50015247 %} 
 		<div class="item_map">
 			<div id="mapid"> </div>
 		</div>
@@ -113,7 +110,7 @@
 		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
 		<form action="#">
 			<label>Copy this URL to link to this page:</label>
-			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{item_object.id_item}}" type="text" readonly>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{part_object.fk_item}}" type="text" readonly>
 		</form>
 		</div>
 	</div>
