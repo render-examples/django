@@ -224,35 +224,16 @@
 				<td> {{part_object.part_description}}</td>
 			</tr>
 
-			{% for reference in part_object.referenceset %}
-
+			{% for key, reference in part_object.reference_set.items %}
 			<tr> 
-				{% if authenticationstatus == "authenticated" %}
-					<th class="indent">Ref. {{reference.pk_referenceindividual}}</th>
-					<td> 
-						{% if reference.fk_individual.id_individual != 10000019 %}
-						<a href="{% url 'entity' digisig_entity_number=reference.fk_individual.id_individual %}">{{reference.fk_individual}}</a> 
+				{% if reference.fk_individual != 10000019 %}
+				<th class="indent"></th>
+				<td> 
+					<a href="{% url 'entity' digisig_entity_number=10000019 %}">{{reference.fk_individual}}</a> 
+				</td>
 
-						{% else %}
-						({{reference.referenceindividual}})
-
-						{% endif %}
-					</td>
-					<td> {{reference.fk_referencerole}}</td>
-					<td> {{reference.fk_referenceoffice}}</td>
-					
-
-					{% else %}
-					{% if reference.fk_individual.id_individual != 10000019 %}
-					<th class="indent"></th>
-					<td> 
-						<a href="{% url 'entity' digisig_entity_number=reference.fk_individual.id_individual %}">{{reference.fk_individual}}</a> 
-					</td>
-
-					<td> {{reference.fk_referencerole}}</td>
-					<td> {{reference.fk_referenceoffice}}</td>
-					{% endif %}
-
+				<td> {{reference.fk_referencerole}}</td>
+				<td> {{reference.fk_referenceoffice}}</td>
 				{% endif %}
 			</tr>
 		 	{% endfor %}

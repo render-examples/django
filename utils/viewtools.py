@@ -2719,9 +2719,10 @@ def partobjectforitem_define(entity_number):
 	for referencecase in referenceset:
 		reference_dic[referencecase['fk_event']].update ({referencecase['pk_referenceindividual']: referencecase})
 
-	for partneedingreference in part_object:
-		partneedingreference['reference_set'] = reference_dic[partneedingreference['fk_event']]		
+	for partneedingreference in part_dic.values():
 
+		searchvalue = partneedingreference['fk_event'] 
+		partneedingreference['reference_set'] = reference_dic[searchvalue]		
 
 	# try:
 	# 	externallinkset = Externallink.objects.filter(internal_entity_in=listofitems)

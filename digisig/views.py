@@ -772,8 +772,6 @@ async def search(request, searchtype):
 		pagecounternextnext = qpagination +2
 
 		manifestation_displayset = await manifestation_displaysetgenerate(manifestation_pageobject)
-
-		print (manifestation_displayset)
  
 		context = {
 			'pagetitle': pagetitle, 
