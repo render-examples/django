@@ -2714,13 +2714,13 @@ def partobjectforitem_define(entity_number):
 		'longitude',
 		'latitude').first()
 
+	l = location_object
+
 	searchvalue = int(location_object['locationname__locationreference__fk_event'])
 
-	for key, value in part_dic.values:
+	for key, part_info in part_dic.items():
 		 
-		testvalue = value.fk_event
-
-		if searchvalue == testvalue:
+		if searchvalue == part_info['fk_event']:
 
 			mapdic = {"type": "FeatureCollection"}
 			properties = {}
@@ -2728,23 +2728,23 @@ def partobjectforitem_define(entity_number):
 			location = {}
 			placelist = []
 
-			location= {"type": "Point", "coordinates":[ l['longitude'], l['latitude'] ]}
-			location_dict = {'location': l['location'], 'latitude': l['latitude'], 'longitude': l['longitude']} 
+			location= {"type": "Point", "coordinates":[ location_object['longitude'], location_object['latitude'] ]}
+			location_dict = {'location': location_object['location'], 'latitude': location_object['latitude'], 'longitude': location_object['longitude']} 
 
-			properties = {"id_location": value1, "location": location}
-			geometry = {"type": "Point", "coordinates": [l['longitude'] , l['latitude']]}
+			properties = {"id_location": location_object['id_location'], "location": location}
+			geometry = {"type": "Point", "coordinates": [location_object['longitude'] , location_object['latitude']]}
 			location = {"type": "Feature", "properties": properties, "geometry": geometry}
 			placelist.append(location)
 
 			mapdic["features"] = placelist
 
-			p["location"] = location
-			p["location_name"] = l['location'] 
-			p["location_id"] = l['id_location'] 
-			p["location_latitude"] = l['longitude'] 
-			p["location_latitude"] = l['latitude']
-			p['location_dict'] = location_dict
-			p['mapdic'] = mapdic
+			part_info["location"] = location
+			part_info["location_name"] = location_object['location'] 
+			part_info["location_id"] = location_object['id_location'] 
+			part_info["location_latitude"] = location_object['longitude'] 
+			part_info["location_latitude"] = location_object['latitude']
+			part_info['location_dict'] = location_dict
+			part_info['mapdic'] = mapdic
 
 	return (part_dic)
 	
