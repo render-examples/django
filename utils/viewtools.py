@@ -2716,9 +2716,9 @@ def partobjectforitem_define(entity_number):
 
 	searchvalue = int(location_object['locationname__locationreference__fk_event'])
 
-	for key, p in part_dic.items:
+	for key, value in part_dic.values:
 		 
-		testvalue = p.fk_event
+		testvalue = value.fk_event
 
 		if searchvalue == testvalue:
 
