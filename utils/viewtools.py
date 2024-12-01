@@ -2660,6 +2660,7 @@ def partobjectforitem_define(entity_number):
 
 	part_dic= {}
 	reference_dic= {}
+	manifestationpart = {}
 	listofparts = []
 	listofitems = []
 	listofevents = []
@@ -2685,7 +2686,8 @@ def partobjectforitem_define(entity_number):
 
 		part_dic[p['id_part']] = part_temp_dic
 
-		reference_dic.update({p['fk_event']: {}})
+		reference_dic.update({p['fk_event']: {} })
+		manifestationpart.update({p['id_part']: {} })
 
 	### prepare representations of part
 	representation_part = Representation.objects.filter(fk_digisig__in=listofparts).select_related('fk_connection')
@@ -2720,9 +2722,8 @@ def partobjectforitem_define(entity_number):
 		reference_dic[referencecase['fk_event']].update ({referencecase['pk_referenceindividual']: referencecase})
 
 	for partneedingreference in part_dic.values():
-
 		searchvalue = partneedingreference['fk_event'] 
-		partneedingreference['reference_set'] = reference_dic[searchvalue]		
+		partneedingreference['reference_set'] = reference_dic[searchvalue]
 
 	# try:
 	# 	externallinkset = Externallink.objects.filter(internal_entity_in=listofitems)
@@ -2773,6 +2774,20 @@ def partobjectforitem_define(entity_number):
 			part_info["location_latitude"] = location_object['latitude']
 			part_info['location_dict'] = location_dict
 			part_info['mapdic'] = mapdic
+
+
+	## find seals associated with the parts
+	manifestation_set = Manifestation.objects.filter(
+		fk_support__fk_part__in=listofparts).values(
+		'fk_support__fk_part',
+		'id_manifestation')
+
+	for manifestationcase in manifestation_set:
+		manifestationpart[manifestationcase['fk_support__fk_part']].update ({manifestationcase['id_manifestation']: manifestationcase})
+
+	for partneedingmanifestation in part_dic.values():
+		searchvalue = partneedingmanifestation['id_part'] 
+		partneedingmanifestation['manifestation_set'] = manifestationpart[searchvalue]
 
 	return (part_dic)
 	
