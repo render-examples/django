@@ -2780,10 +2780,28 @@ def partobjectforitem_define(entity_number):
 	manifestation_set = Manifestation.objects.filter(
 		fk_support__fk_part__in=listofparts).values(
 		'fk_support__fk_part',
-		'id_manifestation')
+		'id_manifestation',
+		'fk_face__fk_seal',
+		'fk_imagestate__imagestate_term',
+		'fk_support__fk_supportstatus__supportstatus',
+		'label_manifestation_repository',
+		'fk_support__fk_attachment'
+		'fk_support__fk_number_currentposition__number', 
+		'fk_support__fk_position',
+		)
 
 	for manifestationcase in manifestation_set:
-		manifestationpart[manifestationcase['fk_support__fk_part']].update ({manifestationcase['id_manifestation']: manifestationcase})
+		manifestation_dic = {}
+		manifestation_dic['fk_seal'] = manifestationcase['fk_face__fk_seal']
+		manifestation_dic['id_manifestation'] = manifestationcase['id_manifestation']
+		manifestation_dic['imagestate_term'] = manifestationcase['fk_imagestate__imagestate_term']
+		manifestation_dic['fk_supportstatus'] = manifestationcase['fk_support__fk_supportstatus__supportstatus']
+		manifestation_dic['label_manifestation_repository'] = manifestationcase['label_manifestation_repository']
+		manifestation_dic['fk_attachment'] = manifestationcase['fk_support__fk_attachment']
+		manifestation_dic['number'] = manifestationcase['fk_support__fk_number_currentposition__number']
+		manifestation_dic['fk_position'] = manifestationcase['fk_support__fk_position']
+
+		manifestationpart[manifestationcase['fk_support__fk_part']].update ({manifestationcase['id_manifestation']: manifestation_dic})
 
 	for partneedingmanifestation in part_dic.values():
 		searchvalue = partneedingmanifestation['id_part'] 
