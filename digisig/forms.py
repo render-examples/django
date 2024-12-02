@@ -90,12 +90,12 @@ class CollectionForm(forms.Form):
 
 #Form for quering seal descriptions
 
-collections_options = [('30000287', 'All Collections')]
+# collections_options = [('30000287', 'All Collections')]
 
-for e in Collection.objects.order_by('collection_shorttitle').annotate(numdescriptions=Count('sealdescription')):
+# for e in Collection.objects.order_by('collection_shorttitle').annotate(numdescriptions=Count('sealdescription')):
 
-	if (e.numdescriptions > 0):
-		collections_options.append((e.id_collection, e.collection_shorttitle))
+# 	if (e.numdescriptions > 0):
+# 		collections_options.append((e.id_collection, e.collection_shorttitle))
 
 class SealdescriptionForm(forms.Form):
 	pagination = forms.IntegerField(initial=1, widget=forms.HiddenInput)

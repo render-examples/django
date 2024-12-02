@@ -800,7 +800,7 @@ async def search(request, searchtype):
 
 		qpagination = 1
 
-		sealdescription_object = await sealdescriptionsearch()
+		sealdescription_object = await sealdescription_search()
 
 		if request.method == 'POST':
 
@@ -813,9 +813,11 @@ async def search(request, searchtype):
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2		
 
+		sealdescription_displayset = await sealdescription_displaysetgenerate(sealdescription_object)
+
 		context = {
 			'pagetitle': pagetitle,
-			'sealdescription_object': sealdescription_object,
+			'sealdescription_object': sealdescription_displayset,
 			'totalrows': totalrows,
 			'totaldisplay': totaldisplay,
 			'form': form,

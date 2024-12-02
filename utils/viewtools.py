@@ -1491,6 +1491,62 @@ def sealdescription_search():
 	return(sealdescription_objects)
 
 @sync_to_async
+def sealdescriptionsearchfilter(sealdescription_object, form):
+
+	qcollection = form.cleaned_data['collection']   
+	qcataloguecode = form.cleaned_data['cataloguecode']
+	qcataloguemotif = form.cleaned_data['cataloguemotif']
+	qcataloguename = form.cleaned_data['cataloguename']
+	qpagination = form.cleaned_data['pagination']
+
+	if qcollection.isdigit():
+		if int(qcollection) > 0:
+			if int(qcollection) == 30000287:
+				print("all collections")
+			else: sealdescription_object = sealdescription_object.filter(fk_collection=qcollection)
+			
+	if len(qcataloguecode) > 0:
+		sealdescription_object = sealdescription_object.filter(sealdescription_identifier__icontains=qcataloguecode)
+
+	if len(qcataloguemotif) > 0:
+		sealdescription_object = sealdescription_object.filter(
+			Q(motif_obverse__contains=qcataloguemotif) | Q(motif_reverse__icontains=qcataloguemotif)
+			)
+
+	if len(qcataloguename) > 0:
+		sealdescription_object = sealdescription_object.filter(sealdescription_title__icontains=qcataloguename)
+
+	if qpagination < 1: qapgination =1 
+
+	return(sealdescription_object, qpagination)
+
+@sync_to_async
+def sealdescription_displaysetgenerate(sealdescription_object):
+
+	sealdescription_displayset = {}
+	for sd in sealdescription_object:
+		sealdes_temp = {}
+		sealdes_temp['id_sealdescription'] = sd.id_sealdescription
+		sealdes_temp['fk_seal'] = sd.fk_seal
+		sealdes_temp['sealdescription_title'] = sd.sealdescription_title
+		sealdes_temp['collection_shorttitle'] = sd.fk_collection.collection_shorttitle
+		sealdes_temp['sealdescription_identifier'] = sd.sealdescription_identifier
+		sealdes_temp['catalogue_pagenumber'] = sd.catalogue_pagenumber
+		sealdes_temp['motif_reverse'] = sd.motif_reverse
+		sealdes_temp['motif_obverse'] = sd.motif_obverse
+		sealdes_temp['legend_obverse'] = sd.legend_obverse
+		sealdes_temp['legend_reverse'] = sd.legend_reverse
+		sealdes_temp['realizer'] = sd.realizer
+		#sealdes_temp['collection_thumbnail'] = sd.collection_thumbnail
+		#sealdes_temp['collection_fulltitle'] = sd.collection_fulltitle
+		sealdes_temp['fk_collection'] = sd.fk_collection
+
+		sealdescription_displayset[sd.id_sealdescription] = sealdes_temp
+
+	return (sealdescription_displayset)
+
+
+@sync_to_async
 def sealsearch():
 	manifestation_object = Manifestation.objects.all().select_related(
 	'fk_face__fk_seal').select_related(
@@ -1687,36 +1743,6 @@ def sealsearch_searchset(manifestation_object):
 
 	return (manifestation_set)
 
-@sync_to_async
-def sealdescriptionsearchfilter(sealdescription_object, form):
-
-	# challengeurl(request, searchtype, form)
-	qcollection = form.cleaned_data['collection']   
-	qcataloguecode = form.cleaned_data['cataloguecode']
-	qcataloguemotif = form.cleaned_data['cataloguemotif']
-	qcataloguename = form.cleaned_data['cataloguename']
-	qpagination = form.cleaned_data['pagination']
-
-	if qcollection.isdigit():
-		if int(qcollection) > 0:
-			if int(qcollection) == 30000287:
-				print("all collections")
-			else: sealdescription_object = sealdescription_object.filter(fk_collection=qcollection)
-			
-	if len(qcataloguecode) > 0:
-		sealdescription_object = sealdescription_object.filter(sealdescription_identifier__icontains=qcataloguecode)
-
-	if len(qcataloguemotif) > 0:
-		sealdescription_object = sealdescription_object.filter(
-			Q(motif_obverse__contains=qcataloguemotif) | Q(motif_reverse__icontains=qcataloguemotif)
-			)
-
-	if len(qcataloguename) > 0:
-		sealdescription_object = sealdescription_object.filter(sealdescription_title__icontains=qcataloguename)
-
-	if qpagination < 1: qapgination =1 
-
-	return(sealdescription, qpagination)
 
 
 
