@@ -113,11 +113,11 @@ Choices = [('0', 'None'), ('1', 'Individual'), ('2', 'Corporate')]
 personclass_options = []
 personorder_options = []
 
-for e in Groupclass.objects.order_by('groupclass'):
-	personclass_options.append((e.fk_group_class, e.groupclass))
+# for e in Groupclass.objects.order_by('groupclass'):
+# 	personclass_options.append((e.fk_group_class, e.groupclass))
 
-for e in Grouporder.objects.order_by('grouporder'):
-	personorder_options.append((e.fk_group_order, e.grouporder))
+# for e in Grouporder.objects.order_by('grouporder'):
+# 	personorder_options.append((e.fk_group_order, e.grouporder))
 
 class PeopleForm(forms.Form):
 	name = forms.CharField(label='id_name', max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Example: John'}))

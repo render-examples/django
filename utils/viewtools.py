@@ -90,6 +90,50 @@ def personsearch_people(qnamelen, qname, qpagination, londonevents):
 
 ## a function to apply this complex filter to actor searches
 
+
+@sync_to_async
+def peoplesearchfilter(individual_object, form):
+
+	qname = form.cleaned_data['name']   
+	qpagination = form.cleaned_data['pagination']
+	qgroup = form.cleaned_data['group']
+	qclass = form.cleaned_data['personclass']
+	qorder = form.cleaned_data['personorder']
+
+	if qgroup.isdigit():
+		qgroup = int(qgroup)
+		if int(qgroup) == 2: individual_object = individual_object.filter(corporateentity=True)
+		if int(qgroup) == 1: individual_object = individual_object.filter(corporateentity=False)
+
+	if qnamelen > 0:
+		individual_object = individual_object.filter(
+			Q(
+				fullname_modern__icontains=qname) | Q(
+				fullname_original__icontains=qname) | Q(
+				fk_descriptor_title__descriptor_original__icontains=qname)| Q(
+				fk_descriptor_name__descriptor_original__icontains=qname)| Q(
+				fk_descriptor_prefix1__prefix__icontains=qname)| Q(
+				fk_descriptor_descriptor1__descriptor_original__icontains=qname)| Q(
+				fk_descriptor_prefix2__prefix__icontains=qname)| Q(
+				fk_descriptor_descriptor2__descriptor_original__icontains=qname)| Q(
+				fk_descriptor_prefix3__prefix__icontains=qname)| Q(
+				fk_descriptor_descriptor3__descriptor_original__icontains=qname)) 
+
+	if qclass.isdigit():
+		if int(qclass) > 0:
+			qclass = int(qclass)
+			individual_object = individual_object.filter(fk_group_class=qclass)
+
+	if qorder.isdigit():
+		if int(qorder) > 0:
+			qorder = int(qorder)
+			individual_object = individual_object.filter(fk_group_order=qorder)
+
+	return (individual_object)
+
+
+
+
 @sync_to_async
 def parishvalue(witness_entity_number):
 	parish = Location.objects.get(id_location=witness_entity_number)
@@ -1249,24 +1293,27 @@ def collectiondata(collectionid, sealcount):
 
 	return(collectiondatapackage)
 
-## a function to apply this complex filter to actor searches
+
+@sync_to_async
 def individualsearch():
 
-	individual_object = Individual.objects.select_related(
-	'fk_group').select_related(
-	'fk_descriptor_title').select_related(
-	'fk_descriptor_name').select_related(
-	'fk_descriptor_prefix1').select_related(
-	'fk_descriptor_descriptor1').select_related(
-	'fk_separator_1').select_related(
-	'fk_descriptor_prefix2').select_related(
-	'fk_descriptor_descriptor2').select_related(
-	'fk_descriptor_prefix3').select_related(
-	'fk_descriptor_descriptor3').select_related(
-	'fk_group__fk_group_order').select_related(
-	'fk_group__fk_group_class')
+	individual_object = Individual.objects.exclude(
+		id_individual=10000019).select_related(
+		'fk_group').select_related(
+		'fk_descriptor_title').select_related(
+		'fk_descriptor_name').select_related(
+		'fk_descriptor_prefix1').select_related(
+		'fk_descriptor_descriptor1').select_related(
+		'fk_separator_1').select_related(
+		'fk_descriptor_prefix2').select_related(
+		'fk_descriptor_descriptor2').select_related(
+		'fk_descriptor_prefix3').select_related(
+		'fk_descriptor_descriptor3').select_related(
+		'fk_group__fk_group_order').select_related(
+		'fk_group__fk_group_class').order_by('fk_group__group_name', 'fk_descriptor_name')
 
 	return(individual_object)
+
 
 def referencecollectindividual(reference_set):
 	reference_set = reference_set.select_related(
@@ -1472,6 +1519,28 @@ def manifestationsform_options(form):
 	return (form)
 
 @sync_to_async
+def peopleform_options(form):
+
+	#Form for Actor search
+
+	Choices = [('0', 'None'), ('1', 'Individual'), ('2', 'Corporate')]
+	personclass_options = []
+	personorder_options = []
+
+	for e in Groupclass.objects.order_by('groupclass'):
+		personclass_options.append((e.fk_group_class, e.groupclass))
+
+	for e in Grouporder.objects.order_by('grouporder'):
+		personorder_options.append((e.fk_group_order, e.grouporder))
+
+	form.fields['group'].choices = Choices
+	form.fields['personclass'].choices = personclass_options
+	form.fields['personorder'].choices = personorder_options 
+
+	return(form)
+
+
+@sync_to_async
 def sealdescriptionform_options(form):
 
 	collections_options = [('30000287', 'All Collections')]
@@ -1486,7 +1555,10 @@ def sealdescriptionform_options(form):
 
 @sync_to_async
 def sealdescription_search():
-	sealdescription_objects = Sealdescription.objects.all().select_related('fk_collection').select_related('fk_seal').order_by('id_sealdescription')
+	sealdescription_objects = Sealdescription.objects.all().select_related(
+		'fk_collection').select_related('fk_seal__fk_individual_realizer').select_related(
+		'fk_seal').order_by(
+		'id_sealdescription')
 
 	return(sealdescription_objects)
 
@@ -1527,7 +1599,7 @@ def sealdescription_displaysetgenerate(sealdescription_object):
 	for sd in sealdescription_object:
 		sealdes_temp = {}
 		sealdes_temp['id_sealdescription'] = sd.id_sealdescription
-		sealdes_temp['fk_seal'] = sd.fk_seal
+		sealdes_temp['fk_seal'] = sd.fk_seal.id_seal
 		sealdes_temp['sealdescription_title'] = sd.sealdescription_title
 		sealdes_temp['collection_shorttitle'] = sd.fk_collection.collection_shorttitle
 		sealdes_temp['sealdescription_identifier'] = sd.sealdescription_identifier
@@ -1536,7 +1608,7 @@ def sealdescription_displaysetgenerate(sealdescription_object):
 		sealdes_temp['motif_obverse'] = sd.motif_obverse
 		sealdes_temp['legend_obverse'] = sd.legend_obverse
 		sealdes_temp['legend_reverse'] = sd.legend_reverse
-		sealdes_temp['realizer'] = sd.realizer
+		sealdes_temp['realizer'] = sd.fk_seal.fk_individual_realizer
 		#sealdes_temp['collection_thumbnail'] = sd.collection_thumbnail
 		#sealdes_temp['collection_fulltitle'] = sd.collection_fulltitle
 		sealdes_temp['fk_collection'] = sd.fk_collection
@@ -2140,6 +2212,21 @@ def sealinfo_classvalue (face_case):
 		print("level5 unassigned")			
 
 	return(classvalue)
+
+
+@sync_to_async
+def actornamegenerator(individual_object):
+
+	individual_set = {}
+
+	for i in individual_object:
+		individual_info = {}
+		individual_info['actor_name'] = namecompiler(i)
+		individual_info['id_individual'] = i.id_individual
+		individual_set[i.id_individual] = individual_info
+
+	return(individual_set)
+
 
 def namecompiler(individual_object):
 

@@ -545,62 +545,103 @@ async def search(request, searchtype):
 ### Actor Search
 
 	if searchtype == "actors":
-		pagetitle = 'title'
+		
+		pagetitle = 'Search Actors'
 
-		individual_object = individualsearch()
-		individual_object = individual_object.order_by('fk_group__group_name', 'fk_descriptor_name')
+		form = PeopleForm(request.POST or None)
+		form = await peopleform_options(form) 
 
-		if request.method == "POST":
-			form = PeopleForm(request.POST)
-			if form.is_valid():
-				# challengeurl(request, searchtype, form)
-				qname = form.cleaned_data['name']   
-				qpagination = form.cleaned_data['pagination']
-				qgroup = form.cleaned_data['group']
-				qclass = form.cleaned_data['personclass']
-				qorder = form.cleaned_data['personorder']
+		qpagination = 1
 
-				if qgroup.isdigit():
-					qgroup = int(qgroup)
-					if int(qgroup) == 2: individual_object = individual_object.filter(corporateentity=True)
-					if int(qgroup) == 1: individual_object = individual_object.filter(corporateentity=False)
+		individual_object = await individualsearch()
 
-				if len(qname) > 0:
-					individual_object = individual_object.filter(
-						Q(group_name__icontains=qname) | Q(descriptor_name__icontains=qname) | Q(descriptor1__icontains=qname) | Q(descriptor2__icontains=qname) | Q(descriptor3__icontains=qname)
-						)
+		if request.method == 'POST':
 
-				if qclass.isdigit():
-					if int(qclass) > 0:
-						qclass = int(qclass)
-						individual_object = individual_object.filter(fk_group_class=qclass)
+			if form.is_valid(): 
+				individual_object, qpagination = await peoplesearchfilter(individual_object, form)
 
-				if qorder.isdigit():
-					if int(qorder) > 0:
-						qorder = int(qorder)
-						individual_object = individual_object.filter(fk_group_order=qorder)
-
-				form = PeopleForm(request.POST)
-
-		else:
-			form = PeopleForm()
-			qpagination = 1
-
-		individual_object, totalrows, totaldisplay, qpagination = defaultpagination(individual_object, qpagination) 
+		individual_object, totalrows, totaldisplay, qpagination = await defaultpagination(individual_object, qpagination)
 
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
-		pagecounternextnext = qpagination +2		
+		pagecounternextnext = qpagination +2
+
+		individual_set = await actornamegenerator(individual_object)
+
+		context = {
+			'pagetitle': pagetitle,
+			'individual_set': individual_set,
+			#'sealindividual': sealindividual,
+			'totalrows': totalrows,
+			'totaldisplay': totaldisplay,
+			'form': form,
+			'pagecountercurrent': pagecountercurrent,
+			'pagecounternext': pagecounternext,
+			'pagecounternextnext': pagecounternextnext,
+			}
+
+		template = loader.get_template('digisig/search_actor.html')
+		return HttpResponse(template.render(context, request))
 
 
-		individual_set = {}
 
-		for i in individual_object:
-			individual_info = {}
-			individual_info['actor_name'] = namecompiler(i)
-			individual_info['id_individual'] = i.id_individual
+		# if request.method == "POST":
+		# 	form = PeopleForm(request.POST)
+		# 	if form.is_valid():
+		# 		# challengeurl(request, searchtype, form)
+		# 		qname = form.cleaned_data['name']   
+		# 		qpagination = form.cleaned_data['pagination']
+		# 		qgroup = form.cleaned_data['group']
+		# 		qclass = form.cleaned_data['personclass']
+		# 		qorder = form.cleaned_data['personorder']
 
-			individual_set[i.id_individual] = individual_info
+		# 		if qgroup.isdigit():
+		# 			qgroup = int(qgroup)
+		# 			if int(qgroup) == 2: individual_object = individual_object.filter(corporateentity=True)
+		# 			if int(qgroup) == 1: individual_object = individual_object.filter(corporateentity=False)
+
+		# 		if len(qname) > 0:
+		# 			individual_object = individual_object.filter(
+		# 				Q(group_name__icontains=qname) | Q(descriptor_name__icontains=qname) | Q(descriptor1__icontains=qname) | Q(descriptor2__icontains=qname) | Q(descriptor3__icontains=qname)
+		# 				)
+
+		# 		if qclass.isdigit():
+		# 			if int(qclass) > 0:
+		# 				qclass = int(qclass)
+		# 				individual_object = individual_object.filter(fk_group_class=qclass)
+
+		# 		if qorder.isdigit():
+		# 			if int(qorder) > 0:
+		# 				qorder = int(qorder)
+		# 				individual_object = individual_object.filter(fk_group_order=qorder)
+
+		# 		form = PeopleForm(request.POST)
+
+		# else:
+		# 	form = PeopleForm()
+		# 	qpagination = 1
+
+		# individual_object, totalrows, totaldisplay, qpagination = defaultpagination(individual_object, qpagination) 
+
+		# pagecountercurrent = qpagination
+		# pagecounternext = qpagination + 1
+		# pagecounternextnext = qpagination +2		
+
+
+		# individual_set = {}
+
+		# for i in individual_object:
+		# 	individual_info = {}
+		# 	individual_info['actor_name'] = namecompiler(i)
+		# 	individual_info['id_individual'] = i.id_individual
+
+		# 	individual_set[i.id_individual] = individual_info
+
+
+
+
+
+
 
 		# individual_object = individual_object.annotate(fullname=Concat('fk_group','fk_descriptor_title','fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1',
 		# 	,'fk_separator_1','fk_descriptor_prefix2','fk_descriptor_descriptor2','fk_descriptor_prefix3','fk_descriptor_descriptor3'))
@@ -621,20 +662,7 @@ async def search(request, searchtype):
 		# 		current_id_seal = f.id_seal
 		# 		sealindividual.append((testvalue, current_id_seal))
 
-		context = {
-			'pagetitle': pagetitle,
-			'individual_set': individual_set,
-			#'sealindividual': sealindividual,
-			'totalrows': totalrows,
-			'totaldisplay': totaldisplay,
-			'form': form,
-			'pagecountercurrent': pagecountercurrent,
-			'pagecounternext': pagecounternext,
-			'pagecounternextnext': pagecounternextnext,
-			}
 
-		template = loader.get_template('digisig/search_actor.html')
-		return HttpResponse(template.render(context, request))
 
 ### Search Item
 
