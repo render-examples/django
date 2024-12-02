@@ -793,43 +793,22 @@ async def search(request, searchtype):
 
 	if searchtype == "sealdescriptions":
 
-		sealdescription_object = Sealdescription.objects.all().select_related('fk_collection').select_related('fk_seal').order_by('id_sealdescription')
 		pagetitle = 'Seal Descriptions'
 
+		form = SealdescriptionForm(request.POST or None)
+		form = await sealdescriptionform_options(form)
+
+		qpagination = 1
+
+		sealdescription_object = await sealdescriptionsearch()
+
 		if request.method == 'POST':
-			form = SealdescriptionForm(request.POST)
-			if form.is_valid():
-				# challengeurl(request, searchtype, form)
-				qcollection = form.cleaned_data['collection']   
-				qcataloguecode = form.cleaned_data['cataloguecode']
-				qcataloguemotif = form.cleaned_data['cataloguemotif']
-				qcataloguename = form.cleaned_data['cataloguename']
-				qpagination = form.cleaned_data['pagination']
 
-				if qcollection.isdigit():
-					if int(qcollection) > 0:
-						if int(qcollection) == 30000287:
-							print("all collections")
-						else: sealdescription_object = sealdescription_object.filter(fk_collection=qcollection)
-						
-				if len(qcataloguecode) > 0:
-					sealdescription_object = sealdescription_object.filter(sealdescription_identifier__icontains=qcataloguecode)
+			if form.is_valid(): 
+				sealdescription_object, qpagination = await sealdescriptionsearchfilter(sealdescription_object, form)
 
-				if len(qcataloguemotif) > 0:
-					sealdescription_object = sealdescription_object.filter(
-						Q(motif_obverse__contains=qcataloguemotif) | Q(motif_reverse__icontains=qcataloguemotif)
-						)
+		sealdescription_object, totalrows, totaldisplay, qpagination = await defaultpagination(sealdescription_object, qpagination) 
 
-				if len(qcataloguename) > 0:
-					sealdescription_object = sealdescription_object.filter(sealdescription_title__icontains=qcataloguename)
-
-				form = SealdescriptionForm(request.POST)
-
-		else:
-			form = SealdescriptionForm()
-			qpagination = 1
-
-		sealdescription_object, totalrows, totaldisplay, qpagination = defaultpagination(sealdescription_object, qpagination) 
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2		
@@ -1607,184 +1586,19 @@ async def item_page(request, digisig_entity_number):
 			context = {
 				'pagetitle': part_info['pagetitle'],
 				'part_object': part_info,
-				#'event_dic': event_dic,
 				'mapdic': part_info['mapdic'],
-				#'representationset': representationset,
-				# 'manifestationset': manifestation_set,
-				# 'totalrows': totalrows,
-				# 'totaldisplay': totaldisplay,
-				#'externallink_object': externallinkset,
-				#'location': location,
-				#'location_dict': location_dict,
 				}
 	else:
 		template = loader.get_template('digisig/item.html')
-		context = {
-			'pagetitle': pagetitle,
-			'item_object': item_object,
-			'event_dic': event_dic,
-			'mapdic': mapdic,
-			'representationset': representationset,
-			# 'manifestationset': manifestation_set,
-			# 'totalrows': totalrows,
-			# 'totaldisplay': totaldisplay,
-			#'externallink_object': externallinkset,
-			#'location': location,
-			#'location_dict': location_dict,
-			}
-
-	# event_dic = {}
-	# event_object = part_object.fk_event
-	# item_object = part_object.fk_item
-	# event_dic["part_object"] = part_object
-	# event_dic = eventset_datedata(event_object, event_dic)
-	# event_dic = eventset_locationdata(event_object, event_dic)
-	# event_dic = eventset_references(event_object, event_dic)
-
-	# place_object = event_dic["location"]
-	# mapdic = mapgenerator(place_object, 0)
-
-	# #for part images (code to show images not implemented yet)
-	# representationset = {}
-
-	# try: 
-	# 	representation_part = Representation.objects.filter(fk_digisig=part_object.id_part).select_related('fk_connection')
-
-	# 	for t in representation_part:
-	# 		#Holder for representation info
-	# 		representation_dic = {}
-
-	# 		#for all images
-	# 		connection = t.fk_connection
-	# 		representation_dic["connection"] = t.fk_connection
-	# 		representation_dic["connection_thumb"] = t.fk_connection.thumb
-	# 		representation_dic["connection_medium"] = t.fk_connection.medium
-	# 		representation_dic["representation_filename"] = t.representation_filename_hash
-	# 		representation_dic["representation_thumbnail"] = t.representation_thumbnail_hash
-	# 		representation_dic["id_representation"] = t.id_representation 
-	# 		representation_dic["fk_digisig"] = t.fk_digisig
-	# 		representation_dic["repository_fulltitle"] = item_object.fk_repository.repository_fulltitle
-	# 		representation_dic["shelfmark"] = item_object.shelfmark
-	# 		representation_dic["fk_item"] = item_object.id_item
-	# 		representationset[t.id_representation] = representation_dic
-
-	# except:
-	# 	print ('no image of document available')
-
-	# template = loader.get_template('digisig/item.html')
-	# context = {
-	# 	'pagetitle': pagetitle,
-	# 	'item_object': item_object,
-	# 	'event_dic': event_dic,
-	# 	'mapdic': mapdic,
-	# 	'representationset': representationset,
-	# 	# 'manifestationset': manifestation_set,
-	# 	# 'totalrows': totalrows,
-	# 	# 'totaldisplay': totaldisplay,
-	# 	#'externallink_object': externallinkset,
-	# 	#'location': location,
-	# 	#'location_dict': location_dict,
-	# 	}
+		for key, part_info in part_dic.items():
+			template = loader.get_template('digisig/item.html')
+			context = {
+				'pagetitle': part_info['pagetitle'],
+				'part_object': part_info,
+				'mapdic': part_info['mapdic'],
+				}
 
 	return HttpResponse(template.render(context, request))
-
-
-
-
-
-	# try:
-	# 	manifestation_object = sealsearch()
-	# 	manifestation_object = manifestation_object.filter(
-	# 		fk_support__fk_part__fk_item=digisig_entity_number).order_by(
-	# 		"fk_support__fk_number_currentposition")
-
-	# 	firstmanifestation = manifestation_object.first()
-	# 	item_object = firstmanifestation.fk_support.fk_part.fk_item
-	# 	part_object = firstmanifestation.fk_support.fk_part
-	# 	event_object = firstmanifestation.fk_support.fk_part.fk_event
-
-	# except:
-	# 	part_object = Part.objects.filter(fk_item=digisig_entity_number).select_related(
-	# 		'fk_item__fk_repository').select_related(
-	# 		'fk_event').first()
-	# 	event_object = part_object.fk_event
-	# 	item_object = part_object.fk_item
-
-	# pagetitle = item_object.fk_repository.repository_fulltitle + " " + item_object.shelfmark
-
-	# event_dic = {}
-	# event_dic["part_object"] = part_object
-	# event_dic = eventset_datedata(event_object, event_dic)
-	# event_dic = eventset_locationdata(event_object, event_dic)
-	# event_dic = eventset_references(event_object, event_dic)
-
-	# place_object = event_dic["location"]
-	# mapdic = mapgenerator(place_object, 0)
-	# externallinkset = externallinkgenerator(digisig_entity_number)
-
-	# #for part images (code to show images not implemented yet)
-	# representationset = {}
-
-	# try: 
-	# 	representation_part = Representation.objects.filter(fk_digisig=part_object.id_part).select_related('fk_connection')
-
-	# 	for t in representation_part:
-	# 		#Holder for representation info
-	# 		representation_dic = {}
-
-	# 		#for all images
-	# 		connection = t.fk_connection
-	# 		representation_dic["connection"] = t.fk_connection
-	# 		representation_dic["connection_thumb"] = t.fk_connection.thumb
-	# 		representation_dic["connection_medium"] = t.fk_connection.medium
-	# 		representation_dic["representation_filename"] = t.representation_filename_hash
-	# 		representation_dic["representation_thumbnail"] = t.representation_thumbnail_hash
-	# 		representation_dic["id_representation"] = t.id_representation 
-	# 		representation_dic["fk_digisig"] = t.fk_digisig
-	# 		representation_dic["repository_fulltitle"] = item_object.fk_repository.repository_fulltitle
-	# 		representation_dic["shelfmark"] = item_object.shelfmark
-	# 		representation_dic["fk_item"] = item_object.id_item
-	# 		representationset[t.id_representation] = representation_dic
-
-	# except:
-	# 	print ('no image of document available')
-
-	# ## prepare the data for each displayed seal manifestation
-
-	# manifestation_set = {}
-
-	# try:
-	# 	for e in manifestation_object:
-	# 		manifestation_dic = {}
-	# 		manifestation_dic = manifestation_fetchrepresentations(e, manifestation_dic)
-	# 		manifestation_dic = manifestation_fetchsealdescriptions(e, manifestation_dic)
-	# 		manifestation_dic = manifestation_fetchstandardvalues (e, manifestation_dic)
-	# 		manifestation_set[e.id_manifestation] = manifestation_dic
-
-	# 	totalrows = manifestation_object.count
-	# 	totaldisplay = len(manifestation_set)
-
-	# except:
-	# 	totalrows = 0
-	# 	totaldisplay = 0
-
-	# template = loader.get_template('digisig/item.html')
-	# context = {
-	# 	'pagetitle': pagetitle,
-	# 	'item_object': item_object,
-	# 	'event_dic': event_dic,
-	# 	'mapdic': mapdic,
-	# 	'representationset': representationset,
-	# 	'manifestationset': manifestation_set,
-	# 	'totalrows': totalrows,
-	# 	'totaldisplay': totaldisplay,
-	# 	'externallink_object': externallinkset,
-	# 	#'location': location,
-	# 	#'location_dict': location_dict,
-	# 	}
-
-	# return HttpResponse(template.render(context, request))
-
 
 ############################ Manifestation #####################
 

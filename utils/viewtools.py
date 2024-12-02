@@ -1472,6 +1472,25 @@ def manifestationsform_options(form):
 	return (form)
 
 @sync_to_async
+def sealdescriptionform_options(form):
+
+	collections_options = [('30000287', 'All Collections')]
+
+	for e in Collection.objects.order_by('collection_shorttitle').annotate(numdescriptions=Count('sealdescription')):
+		if (e.numdescriptions > 0):
+			collections_options.append((e.id_collection, e.collection_shorttitle))
+
+	form.fields['collection'].choices = collections_options
+
+	return(form)
+
+@sync_to_async
+def sealdescription_search():
+	sealdescription_objects = Sealdescription.objects.all().select_related('fk_collection').select_related('fk_seal').order_by('id_sealdescription')
+
+	return(sealdescription_objects)
+
+@sync_to_async
 def sealsearch():
 	manifestation_object = Manifestation.objects.all().select_related(
 	'fk_face__fk_seal').select_related(
@@ -1667,6 +1686,39 @@ def sealsearch_searchset(manifestation_object):
 		manifestation_set[e.id_manifestation] = manifestation_dic
 
 	return (manifestation_set)
+
+@sync_to_async
+def sealdescriptionsearchfilter(sealdescription_object, form):
+
+	# challengeurl(request, searchtype, form)
+	qcollection = form.cleaned_data['collection']   
+	qcataloguecode = form.cleaned_data['cataloguecode']
+	qcataloguemotif = form.cleaned_data['cataloguemotif']
+	qcataloguename = form.cleaned_data['cataloguename']
+	qpagination = form.cleaned_data['pagination']
+
+	if qcollection.isdigit():
+		if int(qcollection) > 0:
+			if int(qcollection) == 30000287:
+				print("all collections")
+			else: sealdescription_object = sealdescription_object.filter(fk_collection=qcollection)
+			
+	if len(qcataloguecode) > 0:
+		sealdescription_object = sealdescription_object.filter(sealdescription_identifier__icontains=qcataloguecode)
+
+	if len(qcataloguemotif) > 0:
+		sealdescription_object = sealdescription_object.filter(
+			Q(motif_obverse__contains=qcataloguemotif) | Q(motif_reverse__icontains=qcataloguemotif)
+			)
+
+	if len(qcataloguename) > 0:
+		sealdescription_object = sealdescription_object.filter(sealdescription_title__icontains=qcataloguename)
+
+	if qpagination < 1: qapgination =1 
+
+	return(sealdescription, qpagination)
+
+
 
 @sync_to_async
 def sealsearchfilter(manifestation_object, form):
@@ -2712,14 +2764,26 @@ def partobjectforitem_define(entity_number):
 		"fk_referencerole__role_order", "pk_referenceindividual").values(
 		'pk_referenceindividual',
 		'fk_individual',
+		'fk_individual__fullname_original',
 		'referenceindividual',
-		'fk_referencerole',
+		'fk_referencerole__referencerole',
 		'fk_individualoffice',
 		'fk_event',
 		)
 	
 	for referencecase in referenceset:
-		reference_dic[referencecase['fk_event']].update ({referencecase['pk_referenceindividual']: referencecase})
+
+		reference_dic_temp = {}
+		reference_dic_temp['pk_referenceindividual']= referencecase['pk_referenceindividual']
+		reference_dic_temp['fk_individual']= referencecase['fk_individual']
+		reference_dic_temp['fullname_original']= referencecase['fk_individual__fullname_original']
+		reference_dic_temp['referenceindividual']= referencecase['referenceindividual']
+		reference_dic_temp['fk_referencerole']= referencecase['fk_referencerole__referencerole']
+		reference_dic_temp['fk_individualoffice']= referencecase['fk_individualoffice']
+		reference_dic_temp['fk_event'] = referencecase['fk_event']
+
+
+		reference_dic[referencecase['fk_event']].update ({referencecase['pk_referenceindividual']: reference_dic_temp})
 
 	for partneedingreference in part_dic.values():
 		searchvalue = partneedingreference['fk_event'] 
@@ -2779,15 +2843,15 @@ def partobjectforitem_define(entity_number):
 	## find seals associated with the parts
 	manifestation_set = Manifestation.objects.filter(
 		fk_support__fk_part__in=listofparts).values(
-		'fk_support__fk_part',
+		'label_manifestation_repository',
 		'id_manifestation',
+		'fk_position__position',
 		'fk_face__fk_seal',
 		'fk_imagestate__imagestate_term',
 		'fk_support__fk_supportstatus__supportstatus',
-		'label_manifestation_repository',
-		'fk_support__fk_attachment'
-		'fk_support__fk_number_currentposition__number', 
-		'fk_support__fk_position',
+		'fk_support__fk_part',
+		'fk_support__fk_attachment__attachment',
+		'fk_support__fk_number_currentposition__number',
 		)
 
 	for manifestationcase in manifestation_set:
@@ -2797,9 +2861,9 @@ def partobjectforitem_define(entity_number):
 		manifestation_dic['imagestate_term'] = manifestationcase['fk_imagestate__imagestate_term']
 		manifestation_dic['fk_supportstatus'] = manifestationcase['fk_support__fk_supportstatus__supportstatus']
 		manifestation_dic['label_manifestation_repository'] = manifestationcase['label_manifestation_repository']
-		manifestation_dic['fk_attachment'] = manifestationcase['fk_support__fk_attachment']
+		manifestation_dic['fk_attachment'] = manifestationcase['fk_support__fk_attachment__attachment']
 		manifestation_dic['number'] = manifestationcase['fk_support__fk_number_currentposition__number']
-		manifestation_dic['fk_position'] = manifestationcase['fk_support__fk_position']
+		manifestation_dic['fk_position'] = manifestationcase['fk_position__position']
 
 		manifestationpart[manifestationcase['fk_support__fk_part']].update ({manifestationcase['id_manifestation']: manifestation_dic})
 

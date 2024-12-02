@@ -173,18 +173,8 @@
 
 			{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
 				<th class="indent">Example of </th>
-				<td><a href="{% url 'entity' digisig_entity_number=m.id_seal %}">Seal details</a></td>
+				<td><a href="{% url 'entity' digisig_entity_number=m.fk_seal %}">Seal details</a></td>
 			</tr>
-
-			{% for key, value in m.sealdescriptions.items %}
-			{% if forloop.parentloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
-			<tr>
-				<th class="indent">
-					{% if forloop.first %} Described in {% endif %}
-				</th>
-				<td><a href="{% url 'sealdescription_page' digisig_entity_number=value.sealdescription_id %}">{{value.collection}} ({{value.identifier}})</a></td>
-			</tr>
-			{% endfor %}
 
  		{% endfor %}
 		</table>
@@ -221,11 +211,9 @@
 				{% if reference.fk_individual != 10000019 %}
 				<th class="indent"></th>
 				<td> 
-					<a href="{% url 'entity' digisig_entity_number=10000019 %}">{{reference.fk_individual}}</a> 
+					<a href="{% url 'entity' digisig_entity_number=10000019 %}">{{reference.fullname_original}}</a> 
 				</td>
-
 				<td> {{reference.fk_referencerole}}</td>
-				<td> {{reference.fk_referenceoffice}}</td>
 				{% endif %}
 			</tr>
 		 	{% endfor %}
