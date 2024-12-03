@@ -20,7 +20,71 @@ from asgiref.sync import sync_to_async
 from django.urls import reverse
 
 
+#### exhitions
+@sync_to_async
+def exhibitgenerate():
 
+	# create the set of RTIs
+	representation_set = {}
+
+	# select all representations that are RTIs....
+	rti_set = Representation.objects.filter(fk_representation_type=2).values('fk_digisig', 'id_representation')
+
+	rti_set_filter =rti_set.values('fk_digisig')
+
+	rti_set_targets = rti_set.values_list('fk_digisig', 'id_representation', named=True)
+
+	representation_objects = Representation.objects.filter(
+		fk_digisig__in=rti_set_filter, primacy=1).select_related(
+		'fk_connection').values('fk_connection__thumb', 'representation_thumbnail_hash', 'fk_connection__medium', 'representation_filename_hash', 'fk_digisig')
+
+	for r in representation_objects:
+		representation_dic = r
+
+		for l in rti_set_targets:
+			if l.fk_digisig == r['fk_digisig']:
+				r['id_num'] = l.id_representation
+				representation_set[l.id_representation] = representation_dic
+				break
+
+	return (representation_set)
+
+
+### discovery
+@sync_to_async
+def collectionform_options(form):
+	#Form for collections, map and time analysis
+
+	collections_options = [('30000287', 'All Collections')]
+	graphchoices = [('1', 'Seal Descriptions'), ('2', 'Seal Impressions, Matrices and Casts')]
+	mapchoices = [('1', 'Places'), ('2', 'Counties'), ('3', 'Regions')]
+	sealtype_options = [('', 'None')]
+	period_options = [('', 'None')]
+	timegroup_options2 = []
+
+	for e in Collection.objects.order_by('collection_shorttitle'):
+		collections_options.append((e.id_collection, e.collection_shorttitle))
+
+	for e in Sealtype.objects.order_by('sealtype_name'):
+		sealtype_options.append((e.id_sealtype, e.sealtype_name))
+
+	for e in TimegroupC.objects.order_by('pk_timegroup_c'):
+		timegroup_options2.append((e.pk_timegroup_c, e.timegroup_c_range))
+
+
+	form.fields['collection'].choices = collections_options
+	form.fields['mapchoice'].choices = mapchoices
+	form.fields['timechoice'].choices = timegroup_options2
+	form.fields['sealtypechoice'].choices = sealtype_options
+
+	# collection = forms.ChoiceField(choices=collections_options, required=False)
+	# #graphchoice = forms.ChoiceField(choices=graphchoices, required=False)
+	# mapchoice = forms.ChoiceField(choices=mapchoices, required=False)
+	# timechoice = forms.ChoiceField(choices=timegroup_options2, required=False)
+	# # classname = forms.ChoiceField(label='Digisig Class', choices=classname_options, required=False)
+	# sealtypechoice = forms.ChoiceField(choices=sealtype_options, required=False)
+
+	return(form)
 
 #####parish search
 
@@ -34,7 +98,6 @@ def londonparishes_options():
 		londonparishes_options.append((e.id_location, e.location))
 
 	return(londonparishes_options)
-
 
 #####person search
 
@@ -1109,8 +1172,9 @@ def mapgenerator(location_object, count_in):
 	return(mapdic)
 
 
-
+@sync_to_async
 def mapgenerator2(location_object):
+
 	center_lat = []
 	center_long = []
 
@@ -1464,6 +1528,162 @@ def representationmetadata_sealdescription(representation_case, representation_d
 		representation_dic["main_title"] = "Seal Description"
 
 	return(representation_dic)
+
+
+@sync_to_async
+def itemform_options(form):
+
+	series_all_options = [('', 'None')]
+	repositories_all_options = [('', 'None')]
+
+	for e in Series.objects.exclude(series_name__istartswith="z").order_by('fk_repository'):
+		repository = e.fk_repository
+		appendvalue = repository.repository + " : " + e.series_name
+		series_all_options.append((e.pk_series, appendvalue))
+
+	for e in Repository.objects.order_by('repository_fulltitle'):
+		repositories_all_options.append((e.fk_repository, e.repository_fulltitle))
+
+	form.fields['series'].choices = series_all_options
+	form.fields['repository'].choices = repositories_all_options
+
+	return (form)
+
+@sync_to_async
+def itemsearch():
+
+	item_object = Item.objects.all().order_by(
+	"fk_repository", "fk_series", "classmark_number3", "classmark_number2", "classmark_number1").select_related(
+	'fk_repository')
+
+	return (item_object)
+
+@sync_to_async
+def itemsearchfilter(item_object, form):
+
+	qrepository = int(form.cleaned_data['repository'])
+	qseries = int(form.cleaned_data['series'])
+	qshelfmark = form.cleaned_data['shelfmark']
+	qsearchphrase = form.cleaned_data['searchphrase']
+	qpagination = int(form.cleaned_data['pagination'])
+
+	if series > 0:
+		item_object = item_object.filter(fk_series=series)
+
+	elif repository > 0:
+		item_object = item_object.filter(fk_repository=repository)
+
+	else:
+		print ("No repository or series specified")
+
+	if len(shelfmark) > 0:
+		item_object = item_object.filter(shelfmark__icontains=shelfmark)
+
+	# if len(searchphrase) > 0:
+	# 	item_object = item_object.filter(part_description__icontains=searchphrase)
+
+	return (item_object, qpagination)
+
+
+@sync_to_async
+def item_displaysetgenerate(item_pageobject):
+
+	## not implemented yet
+
+	# listofitems = []
+
+	# for i in item_pageobject:
+	# 	listofitems.append(i.id_item)
+
+	# part_object = Part.objects.filter(fk_item__in=listofitems)
+
+	# partset = []
+
+	# for p in part_object.object_list:
+	# 	partset.append(p.id_part)
+
+	# representation_part = Representation.objects.filter(fk_digisig__in=partset).select_related('fk_connection')
+
+	# for i in part_object:
+	# 	part_dic = {}
+	# 	part_dic["id_item"] = i.fk_item.id_item
+	# 	part_dic["shelfmark"] = i.fk_item.shelfmark
+	# 	part_dic["repository"] = i.fk_item.fk_repository.repository_fulltitle
+	# 	itemset[i.id_part] = part_dic
+
+	# for r in representation_part:
+	# 	connection = r.fk_connection
+	# 	itemset[r.fk_digisig]["connection"] = connection.thumb
+	# 	itemset[r.fk_digisig]["medium"] = r.representation_filename
+	# 	itemset[r.fk_digisig]["thumb"] = r.representation_thumbnail_hash
+	# 	itemset[r.fk_digisig]["id_representation"] = r.id_representation 
+
+	return(item_pageobject)
+
+@sync_to_async
+def placeform_options(form):
+
+	county_options = [('0', 'None')]
+	region_options = [('0', 'None')]
+
+	for e in Region.objects.filter(location__isnull=False).filter(fk_locationtype=4).order_by('region_label').distinct('region_label'):
+		county_options.append((e.pk_region, e.region_label))
+
+	for e in Regiondisplay.objects.filter(region__location__isnull=False).order_by('regiondisplay_label').distinct('regiondisplay_label'):
+		region_options.append((e.id_regiondisplay, e.regiondisplay_label))
+
+	form.fields['county'].choices = county_options
+	form.fields['region'].choices = region_options
+
+	return(form)
+
+@sync_to_async
+def place_search():
+
+	place_object = Location.objects.filter(
+		locationname__locationreference__fk_locationstatus=1, longitude__isnull=False, latitude__isnull=False).order_by(
+		'location').annotate(count=Count('locationname__locationreference'))
+
+	return (place_object)
+
+@sync_to_async
+def placesearchfilter(placeset):
+
+	qregion = form.cleaned_data['region']
+	qcounty = form.cleaned_data['county']   
+	qpagination = form.cleaned_data['pagination']
+	qlocation_name = form.cleaned_data['location_name']
+
+	if qregion.isdigit():
+		if int(qregion) > 0:
+			placeset = placeset.filter(fk_region__fk_regiondisplay=qregion)
+			regionselect = True
+
+	if regionselect == False:
+		if qcounty.isdigit():
+			if int(qcounty) > 0:
+				placeset = placeset.filter(fk_region=qcounty)
+
+	if len(qlocation_name) > 0:
+		placeset = placeset.filter(location__icontains=qlocation_name)
+
+	if qpagination < 1: qapgination =1 
+
+	return (placeset, qpagination)
+
+@sync_to_async
+def placeobjectannotate(place_object):
+
+	place_object.annotate(count=Count('locationname__locationreference'))
+
+	totalcount = 1
+	for p in place_object:
+		if totalcount < 10:
+			print (p, p.count)
+			totalcount = totalcount + 1 
+
+	return (place_object)
+
 
 @sync_to_async
 def manifestationsform_options(form):

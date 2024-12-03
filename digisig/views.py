@@ -69,31 +69,11 @@ def about(request):
 
 #### Exhibit 
 
-def exhibit(request):
+ 
+async def exhibit(request):
 	pagetitle = 'title'
 
-	# create the set of RTIs
-	representation_set = {}
-
-	# select all representations that are RTIs....
-	rti_set = Representation.objects.filter(fk_representation_type=2).values('fk_digisig', 'id_representation')
-
-	rti_set_filter =rti_set.values('fk_digisig')
-
-	rti_set_targets = rti_set.values_list('fk_digisig', 'id_representation', named=True)
-
-	representation_objects = Representation.objects.filter(
-		fk_digisig__in=rti_set_filter, primacy=1).select_related(
-		'fk_connection').values('fk_connection__thumb', 'representation_thumbnail_hash', 'fk_connection__medium', 'representation_filename_hash', 'fk_digisig')
-
-	for r in representation_objects:
-		representation_dic = r
-
-		for l in rti_set_targets:
-			if l.fk_digisig == r['fk_digisig']:
-				r['id_num'] = l.id_representation
-				representation_set[l.id_representation] = representation_dic
-				break
+	representation_set = await exhibitgenerate()
 
 	context = {
 	'pagetitle': pagetitle,
@@ -107,11 +87,26 @@ def exhibit(request):
 
 ########################### Discover ############################
 
-def discover(request, discovertype):
+async def discover(request, discovertype):
 
 	if discovertype == "map":
 
 		pagetitle = 'Map'
+
+		form = CollectionForm(request.POST or None)
+		form = await collectionform_options(form)
+
+
+		if request.method == 'POST':
+
+			if form.is_valid(): 
+				manifestation_object, qpagination = await sealsearchfilter(manifestation_object, form)
+
+
+
+
+
+
 
 		#default
 		qcollection= 30000287
@@ -121,6 +116,8 @@ def discover(request, discovertype):
 		region_dict = []
 		mapcounties = []
 		location_dict = []
+
+
 
 		#adjust values if form submitted
 		if request.method == 'POST':
@@ -538,9 +535,9 @@ def analyze(request, analysistype):
 #################### Search #########################
 async def search(request, searchtype):
 
-	if searchtype == "parish":
-		targetphrase = "parish"
-		return redirect(targetphrase)
+	# if searchtype == "parish":
+	# 	targetphrase = "parish"
+	# 	return redirect(targetphrase)
 
 ### Actor Search
 
@@ -639,10 +636,6 @@ async def search(request, searchtype):
 
 
 
-
-
-
-
 		# individual_object = individual_object.annotate(fullname=Concat('fk_group','fk_descriptor_title','fk_descriptor_name','fk_descriptor_prefix1','fk_descriptor_descriptor1',
 		# 	,'fk_separator_1','fk_descriptor_prefix2','fk_descriptor_descriptor2','fk_descriptor_prefix3','fk_descriptor_descriptor3'))
 
@@ -668,94 +661,34 @@ async def search(request, searchtype):
 
 	if searchtype == "items":
 
-		pagetitle = 'title'
+		pagetitle = 'Search Items'
 
-		#default values in case there is nothing specific in form or in else clause
-		repository = 0
-		series = 0
-		shelfmark = ""
-		searchphrase = ""
-		qpagination = 1
-
-		if request.method == "POST":
-			form = ItemForm(request.POST)
-
-			if form.is_valid():
-				# challengeurl(request, searchtype, form)
-				if form.cleaned_data['repository'].isdigit(): repository = int(form.cleaned_data['repository']) 
-				if form.cleaned_data['series'].isdigit(): series = int(form.cleaned_data['series'])
-				if len(form.cleaned_data['shelfmark']) > 0: shelfmark = form.cleaned_data['shelfmark']
-				if len(form.cleaned_data['searchphrase']) > 0: searchphrase = form.cleaned_data['searchphrase']
-				qpagination = int(form.cleaned_data['pagination'])
-
-		else:
-			form = ItemForm()
-			repository = 26
-			series = 347
-			form.initial["repository"] = 26
-			form.initial["series"] = 347
+		form = ItemForm(request.POST or None)
+		form = await itemform_options(form)
 
 		# code prepares the array of series and repositories to pass to the frontend
-		series_object= seriesset()
+		series_object= await seriesset()
 
-		# itemset, Repositorycases, Seriescases, Shelfmarkcases, Phrasecases, pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows \
-		# = itemsearch(repository, series, shelfmark, searchphrase, pagination)
+		qpagination = 1
 
-		itemset = {}
-		Repositorycases = 0
-		Seriescases = 0
-		Shelfmarkcases = 0
-		Phrasecases = 0
+		item_object = await itemsearch()
 
-		part_object = Part.objects.all().order_by(
-			"fk_item__fk_repository", "fk_item__fk_series", "fk_item__classmark_number3", "fk_item__classmark_number2", "fk_item__classmark_number1").select_related(
-			'fk_item__fk_repository')
+		if request.method == 'POST':
 
-		# take the series in preference to the repository
+			if form.is_valid(): 
+				item_object, qpagination = await itemsearchfilter(item_object, form)
 
-		if series > 0:
-			part_object = part_object.filter(fk_item__fk_series=series)
+		item_pageobject, totalrows, totaldisplay, qpagination = await defaultpagination(item_object, qpagination)
 
-		elif repository > 0:
-			part_object = part_object.filter(fk_item__fk_repository=repository)
-
-		else:
-			print ("No repository or series specified")
-
-		if len(shelfmark) > 0:
-			part_object = part_object.filter(fk_item__shelfmark__icontains=shelfmark)
-
-		if len(searchphrase) > 0:
-			part_object = part_object.filter(part_description__icontains=searchphrase)
-
-		part_object, totalrows, totaldisplay, qpagination = defaultpagination(part_object, qpagination)
 		pagecountercurrent = qpagination 
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2
 
-		partset = []
-		for p in part_object.object_list:
-			partset.append(p.id_part)
-
-		representation_part = Representation.objects.filter(fk_digisig__in=partset).select_related('fk_connection')
-
-		for i in part_object:
-			part_dic = {}
-			part_dic["id_item"] = i.fk_item.id_item
-			part_dic["shelfmark"] = i.fk_item.shelfmark
-			part_dic["repository"] = i.fk_item.fk_repository.repository_fulltitle
-			itemset[i.id_part] = part_dic
-
-		for r in representation_part:
-			connection = r.fk_connection
-			itemset[r.fk_digisig]["connection"] = connection.thumb
-			itemset[r.fk_digisig]["medium"] = r.representation_filename
-			itemset[r.fk_digisig]["thumb"] = r.representation_thumbnail_hash
-			itemset[r.fk_digisig]["id_representation"] = r.id_representation 
-
+		item_displayset = await item_displaysetgenerate(item_pageobject)
+ 
 		context = {
 			'pagetitle': pagetitle,
-			'itemset': itemset,
+			'itemset': item_displayset,
 			'totalrows': totalrows,
 			'totaldisplay': totaldisplay,
 			'form': form,
@@ -771,6 +704,113 @@ async def search(request, searchtype):
 
 		template = loader.get_template('digisig/search_item.html')
 		return HttpResponse(template.render(context, request))
+
+
+
+
+
+
+		# #default values in case there is nothing specific in form or in else clause
+		# repository = 0
+		# series = 0
+		# shelfmark = ""
+		# searchphrase = ""
+		# qpagination = 1
+
+		# if request.method == "POST":
+		# 	form = ItemForm(request.POST)
+
+		# 	if form.is_valid():
+		# 		# challengeurl(request, searchtype, form)
+		# 		if form.cleaned_data['repository'].isdigit(): repository = int(form.cleaned_data['repository']) 
+		# 		if form.cleaned_data['series'].isdigit(): series = int(form.cleaned_data['series'])
+		# 		if len(form.cleaned_data['shelfmark']) > 0: shelfmark = form.cleaned_data['shelfmark']
+		# 		if len(form.cleaned_data['searchphrase']) > 0: searchphrase = form.cleaned_data['searchphrase']
+		# 		qpagination = int(form.cleaned_data['pagination'])
+
+		# else:
+		# 	form = ItemForm()
+		# 	repository = 26
+		# 	series = 347
+		# 	form.initial["repository"] = 26
+		# 	form.initial["series"] = 347
+
+		# # code prepares the array of series and repositories to pass to the frontend
+		# series_object= seriesset()
+
+		# # itemset, Repositorycases, Seriescases, Shelfmarkcases, Phrasecases, pagecountercurrent, pagecounternext, pagecounternextnext, totaldisplay, totalrows \
+		# # = itemsearch(repository, series, shelfmark, searchphrase, pagination)
+
+		# itemset = {}
+		# Repositorycases = 0
+		# Seriescases = 0
+		# Shelfmarkcases = 0
+		# Phrasecases = 0
+
+		# part_object = Part.objects.all().order_by(
+		# 	"fk_item__fk_repository", "fk_item__fk_series", "fk_item__classmark_number3", "fk_item__classmark_number2", "fk_item__classmark_number1").select_related(
+		# 	'fk_item__fk_repository')
+
+		# # take the series in preference to the repository
+
+		# if series > 0:
+		# 	part_object = part_object.filter(fk_item__fk_series=series)
+
+		# elif repository > 0:
+		# 	part_object = part_object.filter(fk_item__fk_repository=repository)
+
+		# else:
+		# 	print ("No repository or series specified")
+
+		# if len(shelfmark) > 0:
+		# 	part_object = part_object.filter(fk_item__shelfmark__icontains=shelfmark)
+
+		# if len(searchphrase) > 0:
+		# 	part_object = part_object.filter(part_description__icontains=searchphrase)
+
+		# part_object, totalrows, totaldisplay, qpagination = defaultpagination(part_object, qpagination)
+		# pagecountercurrent = qpagination 
+		# pagecounternext = qpagination + 1
+		# pagecounternextnext = qpagination +2
+
+		# partset = []
+		# for p in part_object.object_list:
+		# 	partset.append(p.id_part)
+
+		# representation_part = Representation.objects.filter(fk_digisig__in=partset).select_related('fk_connection')
+
+		# for i in part_object:
+		# 	part_dic = {}
+		# 	part_dic["id_item"] = i.fk_item.id_item
+		# 	part_dic["shelfmark"] = i.fk_item.shelfmark
+		# 	part_dic["repository"] = i.fk_item.fk_repository.repository_fulltitle
+		# 	itemset[i.id_part] = part_dic
+
+		# for r in representation_part:
+		# 	connection = r.fk_connection
+		# 	itemset[r.fk_digisig]["connection"] = connection.thumb
+		# 	itemset[r.fk_digisig]["medium"] = r.representation_filename
+		# 	itemset[r.fk_digisig]["thumb"] = r.representation_thumbnail_hash
+		# 	itemset[r.fk_digisig]["id_representation"] = r.id_representation 
+
+		# context = {
+		# 	'pagetitle': pagetitle,
+		# 	'itemset': itemset,
+		# 	'totalrows': totalrows,
+		# 	'totaldisplay': totaldisplay,
+		# 	'form': form,
+		# 	# 'Repositorycases': Repositorycases,
+		# 	# 'Seriescases': Seriescases,
+		# 	# 'Shelfmarkcases': Shelfmarkcases,
+		# 	'series_object': series_object,
+		# 	# 'Phrasecases': Phrasecases,
+		# 	'pagecountercurrent': pagecountercurrent,
+		# 	'pagecounternext': pagecounternext,
+		# 	'pagecounternextnext': pagecounternextnext,
+		# 	}
+
+		# template = loader.get_template('digisig/search_item.html')
+		# return HttpResponse(template.render(context, request))
 
 ### Search Seals
 
@@ -862,56 +902,37 @@ async def search(request, searchtype):
 	
 	if searchtype == "places":
 
-		placeset = Location.objects.filter(locationname__locationreference__fk_locationstatus=1, longitude__isnull=False, latitude__isnull=False).order_by('location')
+		pagetitle = 'Search Places'
 
-		pagetitle = 'Places'
-		regionselect = False
+		form = PlaceForm(request.POST or None)
+		form = await placeform_options(form)
+
 		qpagination = 1
-		place_dict = []
-		center_long = 0
-		center_lat = 55
+
+		place_object = await place_search()
 
 		if request.method == 'POST':
 
-			form = PlaceForm(request.POST)
-			if form.is_valid():
-				qregion = form.cleaned_data['region']
-				qcounty = form.cleaned_data['county']   
-				qpagination = form.cleaned_data['pagination']
-				qlocation_name = form.cleaned_data['location_name']
+			if form.is_valid(): 
+				place_object, qpagination = await placesearchfilter(place_object, form)
 
-				if qregion.isdigit():
-					if int(qregion) > 0:
-						placeset = placeset.filter(fk_region__fk_regiondisplay=qregion)
-						regionselect = True
+		place_object = await placeobjectannotate(place_object)
 
-				if regionselect == False:
-					if qcounty.isdigit():
-						if int(qcounty) > 0:
-							placeset = placeset.filter(fk_region=qcounty)
+		placepage_object, totalrows, totaldisplay, qpagination = await defaultpagination(place_object, qpagination) 
 
-				if len(qlocation_name) > 0:
-					placeset = placeset.filter(location__icontains=qlocation_name)                  
-
-				form = PlaceForm(request.POST)
-
-		else:
-			form = PlaceForm()
-			qpagination = 1
-
-		placeset = placeset.annotate(count=Count('locationname__locationreference'))
-
-		placeset, totalrows, totaldisplay, qpagination = defaultpagination(placeset, qpagination) 
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2		
 
-		if len(placeset) > 0:
-			place_dict, center_long, center_lat = mapgenerator2(placeset)
+		# place_dict = []
+		# center_long = 0
+		# center_lat = 55
+
+		place_dict, center_long, center_lat = await mapgenerator2(placepage_object)
 
 		context = {
 			'pagetitle': pagetitle,
-			'placeset': placeset,
+			'placeset': placepage_object,
 			'place_dict': place_dict,
 			'center_long': center_long,
 			'center_lat': center_lat,
@@ -925,6 +946,72 @@ async def search(request, searchtype):
 
 		template = loader.get_template('digisig/search_place.html')
 		return HttpResponse(template.render(context, request))
+
+
+
+		# placeset = Location.objects.filter(locationname__locationreference__fk_locationstatus=1, longitude__isnull=False, latitude__isnull=False).order_by('location')
+
+		# pagetitle = 'Places'
+		# regionselect = False
+		# qpagination = 1
+		# place_dict = []
+		# center_long = 0
+		# center_lat = 55
+
+		# if request.method == 'POST':
+
+		# 	form = PlaceForm(request.POST)
+		# 	if form.is_valid():
+		# 		qregion = form.cleaned_data['region']
+		# 		qcounty = form.cleaned_data['county']   
+		# 		qpagination = form.cleaned_data['pagination']
+		# 		qlocation_name = form.cleaned_data['location_name']
+
+		# 		if qregion.isdigit():
+		# 			if int(qregion) > 0:
+		# 				placeset = placeset.filter(fk_region__fk_regiondisplay=qregion)
+		# 				regionselect = True
+
+		# 		if regionselect == False:
+		# 			if qcounty.isdigit():
+		# 				if int(qcounty) > 0:
+		# 					placeset = placeset.filter(fk_region=qcounty)
+
+		# 		if len(qlocation_name) > 0:
+		# 			placeset = placeset.filter(location__icontains=qlocation_name)                  
+
+		# 		form = PlaceForm(request.POST)
+
+		# else:
+		# 	form = PlaceForm()
+		# 	qpagination = 1
+
+		# placeset = placeset.annotate(count=Count('locationname__locationreference'))
+
+		# placeset, totalrows, totaldisplay, qpagination = defaultpagination(placeset, qpagination) 
+		# pagecountercurrent = qpagination
+		# pagecounternext = qpagination + 1
+		# pagecounternextnext = qpagination +2		
+
+		# if len(placeset) > 0:
+		# 	place_dict, center_long, center_lat = mapgenerator2(placeset)
+
+		# context = {
+		# 	'pagetitle': pagetitle,
+		# 	'placeset': placeset,
+		# 	'place_dict': place_dict,
+		# 	'center_long': center_long,
+		# 	'center_lat': center_lat,
+		# 	'totalrows': totalrows,
+		# 	'totaldisplay': totaldisplay,
+		# 	'form': form,
+		# 	'pagecountercurrent': pagecountercurrent,
+		# 	'pagecounternext': pagecounternext,
+		# 	'pagecounternextnext': pagecounternextnext,
+		# 	}
+
+		# template = loader.get_template('digisig/search_place.html')
+		# return HttpResponse(template.render(context, request))
 
 
 ######################### information ################################
