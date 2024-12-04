@@ -839,8 +839,16 @@ async def search(request, searchtype):
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2
 
-		manifestation_displayset = await manifestation_displaysetgenerate(manifestation_pageobject)
- 
+		representation_set = await representationsetgenerate(manifestation_pageobject)
+		manifestation_set = await manifestation_searchsetgenerate(manifestation_pageobject)
+
+		manifestation_display_dic, description_set, listofseals, listofevents = await manifestation_displaysetgenerate(manifestation_set, representation_set)
+		description_set = await sealdescription_displaysetgenerate2(listofseals, description_set)
+		location_set = await location_displaysetgenerate(listofevents)
+		manifestation_displayset = await finalassembly_displaysetgenerate(manifestation_display_dic, location_set, description_set)
+
+
+
 		context = {
 			'pagetitle': pagetitle, 
 			'manifestation_set': manifestation_displayset,
@@ -1915,14 +1923,32 @@ def representation_page(request, digisig_entity_number):
 ############################## Seal #############################
 
 
-def seal_page(request, digisig_entity_number):
+async def seal_page(request, digisig_entity_number):
 	pagetitle = 'title'
 	template = loader.get_template('digisig/seal.html')
 
-	seal_info, face_set, face_obverse = sealmetadata(digisig_entity_number)
+	manifestation_object = await sealsearch3(digisig_entity_number)
+	representation_set = await representationsetgenerate(manifestation_pageobject)
+	manifestation_display_dic, description_set, listofseals, listofevents = await manifestation_displaysetgenerate(manifestation_pageobject, representation_set)
+	description_set = await sealdescription_displaysetgenerate2(listofseals, description_set)
+	# location_set = await location_displaysetgenerate(listofevents)
+
+	seal_set = await seal_displaysetgenerate(manifestation_display_dic, description_set)
+
+	#manifestation_displayset = await finalassembly_displaysetgenerate(manifestation_display_dic, location_set, description_set)
+
+
+
+
+
+
+
+
+
+	seal_info, face_set, face_obverse = await sealmetadata(digisig_entity_number)
 
 	seal_info["actor_label"] = namecompiler(face_obverse.fk_seal.fk_individual_realizer)
-	seal_info["obverse"] = sealinfo_classvalue(face_obverse)
+	seal_info["obverse"] = await sealinfo_classvalue(face_obverse)
 
 	try: 
 		face_reverse = face_set.get(fk_faceterm=2)
@@ -1931,7 +1957,7 @@ def seal_page(request, digisig_entity_number):
 	except:
 		print ("no reverse")
 
-	manifestation_object = sealsearch()
+	manifestation_object = await sealsearch()
 
 	seal_info["manifestation_set"] = sealsearchmanifestationmetadata(manifestation_object.filter(fk_face__fk_seal=digisig_entity_number))
 

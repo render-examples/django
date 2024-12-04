@@ -1862,9 +1862,73 @@ def sealsearch2():
 	return(manifestation_object)
 
 @sync_to_async
-def manifestation_displaysetgenerate(manifestation_pageobject):
+def sealsearch3(sealentity):
+	manifestation_object = Manifestation.objects.filter(fk_face__fk_seal=sealentity).values('id_manifestation').order_by('id_manifestation')
 
-## gather the representations
+	return(manifestation_object)
+
+@sync_to_async
+def seal_searchsetgenerate(manifestation_pageobject):
+### maindata for manifestations
+
+	manifestation_set = Manifestation.objects.filter(
+		id_manifestation__in=manifestation_pageobject.object_list).select_related(
+		'fk_face__fk_seal').select_related(
+		'fk_face__fk_seal__fk_individual_realizer').select_related(
+		'fk_support__fk_part__fk_item__fk_repository').select_related(
+		'fk_support__fk_number_currentposition').select_related(
+		'fk_support__fk_attachment').select_related(
+		'fk_support__fk_supportstatus').select_related(
+		'fk_support__fk_nature').select_related(
+		'fk_imagestate').select_related(
+		'fk_position').select_related(
+		'fk_support__fk_part__fk_event').order_by(
+		'id_manifestation').values(
+		'id_manifestation',
+		'fk_position',
+		'fk_face', 
+		'fk_face__fk_seal',
+		'fk_face__fk_seal__fk_individual_realizer',
+		'fk_face__fk_seal__date_origin',
+		'fk_face__fk_class',
+		'fk_support__fk_part__fk_item', 
+		'fk_support__fk_part__fk_item__fk_repository__repository_fulltitle',
+		'fk_support__fk_part__fk_item__shelfmark',
+		'fk_support__fk_supportstatus',
+		'fk_support__fk_attachment',
+		'fk_support__fk_number_currentposition',
+		'fk_support__fk_nature',
+		'label_manifestation_repository',
+		'fk_imagestate',
+		'fk_support__fk_part',
+		'fk_support__fk_part__fk_event',
+		'fk_support__fk_part__fk_event__repository_startdate',
+		'fk_support__fk_part__fk_event__repository_enddate',
+		'fk_support__fk_part__fk_event__startdate',
+		'fk_support__fk_part__fk_event__enddate')
+
+	return(manifestation_set)
+
+
+
+@sync_to_async
+def seal_displaysetgenerate(manifestation_display_dic, description_set):
+
+	for key, m in manifestation_display_dic.items():
+		m["sealdescription"] = description_set[m["id_seal"]]
+		# m["locationname"] = location_set[m['fk_event']]["locationname"]
+		# m["location"] = location_set[m['fk_event']]['location']
+		# m["repository_location"] = location_set[m['fk_event']]['repository_location']
+		# m["id_location"] = location_set[m['fk_event']]['id_location']
+	
+	return (manifestation_display_dic)
+
+
+
+
+@sync_to_async
+def representationsetgenerate(manifestation_pageobject):
+
 	representation_set = Representation.objects.filter(
 		fk_manifestation__in=manifestation_pageobject.object_list).filter(
 		primacy=1).values('representation_thumbnail_hash', 
@@ -1886,9 +1950,12 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 	# representation_dic_spare["representation_filename_hash"] = representation_missing['representation_filename_hash']
 	# representation_dic_spare["id_representation"] = representation_missing['id_representation']
 
-### maindata for manifestations
+	return(representation_set)
 
-	manifestation_display_dic = {}
+
+@sync_to_async
+def manifestation_searchsetgenerate(manifestation_pageobject):
+### maindata for manifestations
 
 	manifestation_set = Manifestation.objects.filter(
 		id_manifestation__in=manifestation_pageobject.object_list).select_related(
@@ -1921,6 +1988,13 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		'fk_support__fk_part__fk_event__startdate',
 		'fk_support__fk_part__fk_event__enddate')
 
+	return(manifestation_set)
+
+@sync_to_async
+def manifestation_displaysetgenerate(manifestation_set, representation_set):
+### maindata for manifestations
+
+	manifestation_display_dic = {}
 	listofseals = []
 	listofevents = []
 	description_set = {}
@@ -1963,11 +2037,15 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 				pass
 
 		manifestation_display_dic[e['id_manifestation']] = manifestation_dic
-
 		description_set[e['fk_face__fk_seal']] = {}
-
 		listofseals.append(e['fk_face__fk_seal'])
 		listofevents.append(e['fk_support__fk_part__fk_event'])
+
+	return(manifestation_display_dic, description_set, listofseals, listofevents)
+
+
+@sync_to_async
+def sealdescription_displaysetgenerate2(listofseals, description_set):
 
 ## gather the sealdescription references
 	sealdescription_set = Sealdescription.objects.filter(
@@ -1984,6 +2062,11 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		description["identifier"] = s['sealdescription_identifier']
 		description["fk_seal"] = s['fk_seal']  
 		description_set[description["fk_seal"]][s['id_sealdescription']] = description
+
+	return(description_set)
+
+@sync_to_async
+def location_displaysetgenerate(listofevents):
 
 ##gather the location references
 	locationreference_set = Locationreference.objects.filter(
@@ -2005,6 +2088,10 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 
 		location_set[l['fk_event']] = location
 
+	return(location_set)
+
+@sync_to_async
+def finalassembly_displaysetgenerate(manifestation_display_dic, location_set, description_set):
 ### final assembly
 
 	for key, m in manifestation_display_dic.items():
@@ -2015,7 +2102,6 @@ def manifestation_displaysetgenerate(manifestation_pageobject):
 		m["id_location"] = location_set[m['fk_event']]['id_location']
 	
 	return(manifestation_display_dic)
-
 
 @sync_to_async
 def sealsearch_searchset(manifestation_object):
@@ -2394,6 +2480,7 @@ def sealmetadata(digisig_entity_number):
 	return (seal_info, face_set, face_obverse)
 
 #information for class value
+@sync_to_async
 def sealinfo_classvalue (face_case):
 	
 	classvalue = {}
