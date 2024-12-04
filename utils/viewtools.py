@@ -1867,12 +1867,32 @@ def sealsearch3(sealentity):
 
 	return(manifestation_object)
 
+
+### this is works without running through paginator
 @sync_to_async
-def seal_searchsetgenerate(manifestation_pageobject):
+def representationsetgenerate2(manifestation_object):
+
+	listofmanifestations = []
+	for m in manifestation_object:
+		listofmanifestations.append(m['id_manifestation'])
+
+	representation_set = Representation.objects.filter(
+		fk_manifestation__in=listofmanifestations).filter(
+		primacy=1).values('representation_thumbnail_hash', 
+		'representation_filename_hash', 
+		'id_representation',
+		'fk_manifestation',
+		'fk_connection__thumb',
+		'fk_connection__medium') 
+
+	return(representation_set)
+
+@sync_to_async
+def seal_searchsetgenerate(digisig_entity_number):
 ### maindata for manifestations
 
 	manifestation_set = Manifestation.objects.filter(
-		id_manifestation__in=manifestation_pageobject.object_list).select_related(
+		fk_face__fk_seal=digisig_entity_number).select_related(
 		'fk_support__fk_part__fk_item__fk_repository').select_related(
 		'fk_support__fk_number_currentposition').select_related(
 		'fk_support__fk_attachment').select_related(
@@ -1881,39 +1901,12 @@ def seal_searchsetgenerate(manifestation_pageobject):
 		'fk_imagestate').select_related(
 		'fk_position').select_related(
 		'fk_support__fk_part__fk_event').select_related(
-		'fk_face__fk_faceterm__faceterm').select_related(
-		'fk_face__fk_seal').select_related(
-		'fk_face__fk_seal__fk_individual_realizer').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_group').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_title').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_name').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix1').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor1').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_separator_1').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix2').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor2').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix3').select_related(
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor3').select_related(
-		'fk_face__fk_class').order_by(
+		'fk_face__fk_seal').order_by(
 		'id_manifestation').values(
 		'id_manifestation',
 		'fk_position',
-		'fk_face', 
-		'fk_face__fk_faceterm__faceterm',
+		'fk_face',
 		'fk_face__fk_seal',
-		'fk_face__fk_seal__fk_individual_realizer',
-		'fk_face__fk_seal__fk_individual_realizer__fk_group',
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_title',
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_name',
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix1',
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor1',
-		'fk_face__fk_seal__fk_individual_realizer__fk_separator_1',
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix2',
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor2',
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix3',
-		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor3',
-		'fk_face__fk_seal__date_origin',
-		'fk_face__fk_class',
 		'fk_support__fk_part__fk_item', 
 		'fk_support__fk_part__fk_item__fk_repository__repository_fulltitle',
 		'fk_support__fk_part__fk_item__shelfmark',
@@ -1932,20 +1925,92 @@ def seal_searchsetgenerate(manifestation_pageobject):
 
 	return(manifestation_set)
 
-
 @sync_to_async
-def seal_displaysetgenerate(manifestation_display_dic, description_set):
+def seal_displaysetgenerate(manifestation_display_dic, description_set, digisig_entity_number):
 
-	for key, m in manifestation_display_dic.items():
-		m["sealdescription"] = description_set[m["id_seal"]]
+	face_set = Face.objects.filter(
+		fk_seal=digisig_entity_number).select_related(
+		'fk_seal__fk_individual_realizer').select_related(
+		'fk_seal__fk_individual_realizer__fk_group').select_related(
+		'fk_seal__fk_individual_realizer__fk_descriptor_title').select_related(
+		'fk_seal__fk_individual_realizer__fk_descriptor_name').select_related(
+		'fk_seal__fk_individual_realizer__fk_descriptor_prefix1').select_related(
+		'fk_seal__fk_individual_realizer__fk_descriptor_descriptor1').select_related(
+		'fk_seal__fk_individual_realizer__fk_descriptor_prefix2').select_related(
+		'fk_seal__fk_individual_realizer__fk_descriptor_descriptor2').select_related(
+		'fk_seal__fk_individual_realizer__fk_descriptor_prefix3').select_related(
+		'fk_seal__fk_individual_realizer__fk_descriptor_descriptor3').select_related(
+		'fk_class').values(
+		'fk_seal__date_origin',
+		'fk_faceterm__faceterm',
+		'fk_seal__fk_individual_realizer',
+		'fk_seal__fk_individual_realizer__fk_group__group_name',
+		'fk_seal__fk_individual_realizer__fk_descriptor_title__descriptor_modern',
+		'fk_seal__fk_individual_realizer__fk_descriptor_name__descriptor_modern',
+		'fk_seal__fk_individual_realizer__fk_descriptor_prefix1__prefix_english',
+		'fk_seal__fk_individual_realizer__fk_descriptor_descriptor1__descriptor_modern',
+		'fk_seal__fk_individual_realizer__fk_descriptor_prefix2__prefix_english',
+		'fk_seal__fk_individual_realizer__fk_descriptor_descriptor2__descriptor_modern',
+		'fk_seal__fk_individual_realizer__fk_descriptor_prefix3__prefix_english',
+		'fk_seal__fk_individual_realizer__fk_descriptor_descriptor3__descriptor_modern',
+		'fk_seal__date_origin',
+		'fk_class')
+
+	seal_info = {}
+	obverse = {}
+	reverse = {}
+
+
+	for f in face_set:
+		if f['fk_faceterm__faceterm'] == "Obverse":			
+			obverse['faceterm'] = f['fk_faceterm__faceterm']
+			obverse['fk_class'] = f['fk_class']
+		if f['fk_faceterm__faceterm'] == "Reverse":			
+			reverse['faceterm'] = f['fk_faceterm__faceterm']
+			reverse['fk_class'] = f['fk_class']
+
+		seal_info['date_origin'] = f['fk_seal__date_origin']
+		seal_info['id_individual'] = f['fk_seal__fk_individual_realizer']
+
+		n1= f['fk_seal__fk_individual_realizer__fk_group__group_name'] 
+		n2= f['fk_seal__fk_individual_realizer__fk_descriptor_title__descriptor_modern']
+		n3= f['fk_seal__fk_individual_realizer__fk_descriptor_name__descriptor_modern']
+		n4= f['fk_seal__fk_individual_realizer__fk_descriptor_prefix1__prefix_english']
+		n5= f['fk_seal__fk_individual_realizer__fk_descriptor_descriptor1__descriptor_modern']
+		n6= f['fk_seal__fk_individual_realizer__fk_descriptor_prefix2__prefix_english']
+		n7= f['fk_seal__fk_individual_realizer__fk_descriptor_descriptor2__descriptor_modern']
+		n8= f['fk_seal__fk_individual_realizer__fk_descriptor_prefix3__prefix_english']
+		n9= f['fk_seal__fk_individual_realizer__fk_descriptor_descriptor3__descriptor_modern']
+
+		namevariable= ""
+		try: 
+			if (n1 != None): namevariable = n1
+			if (n2 != None): namevariable = namevariable + " " + n2
+			if (n3 != None): namevariable = namevariable + " " + n3
+			if (n4 != None): namevariable = namevariable + " " + n4
+			if (n5 != None): namevariable = namevariable + " " + n5
+			if (n6 != None): namevariable = namevariable + " " + n6
+			if (n7 != None): namevariable = namevariable + " " + n7
+			if (n8 != None): namevariable = namevariable + " " + n8
+			if (n9 != None): namevariable = namevariable + " " + n9
+		except:
+			print ("problem with name")
+
+		seal_info['actor_label'] = namevariable.strip()
+
+	seal_info['manifestation_set'] = manifestation_display_dic
+	seal_info['obverse'] = obverse
+	seal_info['reverse'] = reverse
+	seal_info['sealdescription'] = description_set
+
+	# for key, m in manifestation_display_dic.items():
+	# 	m["sealdescription"] = description_set[m["id_seal"]]
 		# m["locationname"] = location_set[m['fk_event']]["locationname"]
 		# m["location"] = location_set[m['fk_event']]['location']
 		# m["repository_location"] = location_set[m['fk_event']]['repository_location']
 		# m["id_location"] = location_set[m['fk_event']]['id_location']
 	
-	return (manifestation_display_dic)
-
-
+	return (seal_info)
 
 
 @sync_to_async

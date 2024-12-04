@@ -21,15 +21,15 @@
 			<tr>
 				<th>Date <a class="help" href="{% url 'entity' digisig_entity_number=10001357 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
 				<td>
-					{% if seal_info.seal.date_origin < 1 %} Not Available						
-					{% else %} c.{{seal_info.seal.date_origin}}
+					{% if seal_info.date_origin < 1 %} Not Available						
+					{% else %} c.{{seal_info.date_origin}}
 					{% endif %}</td>
 			</tr>
 			<tr>
 				<th>Actor</th>
 				<td>
-					{% if seal_info.seal.fk_individual_realizer != 10000019 %}
-						<a href="{% url 'entity' digisig_entity_number=seal_info.seal.fk_individual_realizer.id_individual %}">{{seal_info.actor_label}}</a>
+					{% if seal_info.fk_individual_realizer != 10000019 %}
+						<a href="{% url 'entity' digisig_entity_number=seal_info.id_individual %}">{{seal_info.actor_label}}</a>
 					{% endif %}
 				</td>
 			</tr>

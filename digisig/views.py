@@ -208,7 +208,7 @@ async def discover(request, discovertype):
 
 ############################ Analyze #############################
 
-def analyze(request, analysistype):
+async def analyze(request, analysistype):
 
 	print (analysistype)
 
@@ -1927,42 +1927,42 @@ async def seal_page(request, digisig_entity_number):
 	pagetitle = 'title'
 	template = loader.get_template('digisig/seal.html')
 
-	manifestation_object = await sealsearch3(digisig_entity_number)
-	representation_set = await representationsetgenerate(manifestation_object)
-	manifestation_set = await seal_searchsetgenerate(manifestation_object)
+	manifestation_set = await seal_searchsetgenerate(digisig_entity_number)
+	representation_set = await representationsetgenerate2(manifestation_set)
 	manifestation_display_dic, description_set, listofseals, listofevents = await manifestation_displaysetgenerate(manifestation_set, representation_set)
 	description_set = await sealdescription_displaysetgenerate2(listofseals, description_set)
 	# location_set = await location_displaysetgenerate(listofevents)
 
-	seal_set = await seal_displaysetgenerate(manifestation_display_dic, description_set)
+	seal_info = await seal_displaysetgenerate(manifestation_display_dic, description_set, digisig_entity_number)
 
 	#manifestation_displayset = await finalassembly_displaysetgenerate(manifestation_display_dic, location_set, description_set)
 
 
 
+	#manifestation_object = await sealsearch3(digisig_entity_number)
 
 
 
 
 
 
-	seal_info, face_set, face_obverse = await sealmetadata(digisig_entity_number)
+	# seal_info, face_set, face_obverse = await sealmetadata(digisig_entity_number)
 
-	seal_info["actor_label"] = namecompiler(face_obverse.fk_seal.fk_individual_realizer)
-	seal_info["obverse"] = await sealinfo_classvalue(face_obverse)
+	# seal_info["actor_label"] = namecompiler(face_obverse.fk_seal.fk_individual_realizer)
+	# seal_info["obverse"] = await sealinfo_classvalue(face_obverse)
 
-	try: 
-		face_reverse = face_set.get(fk_faceterm=2)
-		seal_info["reverse"] = sealinfo_classvalue(face_reverse)
+	# try: 
+	# 	face_reverse = face_set.get(fk_faceterm=2)
+	# 	seal_info["reverse"] = sealinfo_classvalue(face_reverse)
 
-	except:
-		print ("no reverse")
+	# except:
+	# 	print ("no reverse")
 
-	manifestation_object = await sealsearch()
+	# manifestation_object = await sealsearch()
 
-	seal_info["manifestation_set"] = sealsearchmanifestationmetadata(manifestation_object.filter(fk_face__fk_seal=digisig_entity_number))
+	# seal_info["manifestation_set"] = sealsearchmanifestationmetadata(manifestation_object.filter(fk_face__fk_seal=digisig_entity_number))
 
-	seal_info["totalrows"] = len(seal_info["manifestation_set"])
+	# seal_info["totalrows"] = len(seal_info["manifestation_set"])
 
 	context = {
 		'pagetitle': pagetitle,
