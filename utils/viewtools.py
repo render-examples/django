@@ -1873,8 +1873,6 @@ def seal_searchsetgenerate(manifestation_pageobject):
 
 	manifestation_set = Manifestation.objects.filter(
 		id_manifestation__in=manifestation_pageobject.object_list).select_related(
-		'fk_face__fk_seal').select_related(
-		'fk_face__fk_seal__fk_individual_realizer').select_related(
 		'fk_support__fk_part__fk_item__fk_repository').select_related(
 		'fk_support__fk_number_currentposition').select_related(
 		'fk_support__fk_attachment').select_related(
@@ -1882,13 +1880,38 @@ def seal_searchsetgenerate(manifestation_pageobject):
 		'fk_support__fk_nature').select_related(
 		'fk_imagestate').select_related(
 		'fk_position').select_related(
-		'fk_support__fk_part__fk_event').order_by(
+		'fk_support__fk_part__fk_event').select_related(
+		'fk_face__fk_faceterm__faceterm').select_related(
+		'fk_face__fk_seal').select_related(
+		'fk_face__fk_seal__fk_individual_realizer').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_group').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_title').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_name').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix1').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor1').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_separator_1').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix2').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor2').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix3').select_related(
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor3').select_related(
+		'fk_face__fk_class').order_by(
 		'id_manifestation').values(
 		'id_manifestation',
 		'fk_position',
 		'fk_face', 
+		'fk_face__fk_faceterm__faceterm',
 		'fk_face__fk_seal',
 		'fk_face__fk_seal__fk_individual_realizer',
+		'fk_face__fk_seal__fk_individual_realizer__fk_group',
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_title',
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_name',
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix1',
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor1',
+		'fk_face__fk_seal__fk_individual_realizer__fk_separator_1',
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix2',
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor2',
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_prefix3',
+		'fk_face__fk_seal__fk_individual_realizer__fk_descriptor_descriptor3',
 		'fk_face__fk_seal__date_origin',
 		'fk_face__fk_class',
 		'fk_support__fk_part__fk_item', 
@@ -1908,7 +1931,6 @@ def seal_searchsetgenerate(manifestation_pageobject):
 		'fk_support__fk_part__fk_event__enddate')
 
 	return(manifestation_set)
-
 
 
 @sync_to_async

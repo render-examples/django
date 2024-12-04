@@ -1928,8 +1928,9 @@ async def seal_page(request, digisig_entity_number):
 	template = loader.get_template('digisig/seal.html')
 
 	manifestation_object = await sealsearch3(digisig_entity_number)
-	representation_set = await representationsetgenerate(manifestation_pageobject)
-	manifestation_display_dic, description_set, listofseals, listofevents = await manifestation_displaysetgenerate(manifestation_pageobject, representation_set)
+	representation_set = await representationsetgenerate(manifestation_object)
+	manifestation_set = await seal_searchsetgenerate(manifestation_object)
+	manifestation_display_dic, description_set, listofseals, listofevents = await manifestation_displaysetgenerate(manifestation_set, representation_set)
 	description_set = await sealdescription_displaysetgenerate2(listofseals, description_set)
 	# location_set = await location_displaysetgenerate(listofevents)
 
