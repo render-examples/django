@@ -392,8 +392,12 @@ async def analyze(request, analysistype):
 ###### Dates ##########
 	if analysistype == "dates":
 
+		pagetitle = 'Dates'
+
+		form = DateForm(request.POST or None)
+		form = await dateform_options(form)
+
 		#default values
-		pagetitle = 'dates'
 		resulttext = ''
 		resultrange= ''
 		decisiontreetext = ''
@@ -404,109 +408,33 @@ async def analyze(request, analysistype):
 		representationset = []
 		manifestation_set = []
 
-		if request.method == "POST":
-			form = DateForm(request.POST)
-			if form.is_valid():
-				qclass = form.cleaned_data['classname']
-				qshape = form.cleaned_data['shape']	
-				qvertical = form.cleaned_data['face_vertical']
-				qhorizontal = form.cleaned_data['face_horizontal']
-				# qpagination = form.cleaned_data['pagination']
+		if request.method == 'POST':
 
-				if qclass.isdigit():
-					if int(qclass) > 0:
-						qclass = int(qclass)
-						class_object = get_object_or_404(Classification, id_class=qclass)
-
-				if qshape.isdigit():
-					qshape = int(qshape)
-					if int(qshape) > 0:
-						qshape = int(qshape)
-						shape_object = get_object_or_404(Shape, pk_shape=qshape)
-
-				if qvertical > 0:
-					if qhorizontal > 0:
-						resultarea = faceupdater(qshape, qvertical, qhorizontal)
+			if form.is_valid(): 
+				shape_object, class_object, resultarea = await datesearchfilter(form)
 
 				try:
 					# fetch the current model
-
 					url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
 
-
-					with open(url, 'rb') as file:	
-						mlmodel = pickle.load(file)
-
 				except:
-					print ("exception occurred")
 					# fetch the current model
 					url = os.path.join(settings.BASE_DIR, 'staticfiles/ml/ml_tree')
 
-					with open(url, 'rb') as file:	
-						mlmodel = pickle.load(file)
+				with open(url, 'rb') as file:	
+					mlmodel = pickle.load(file)
 
 				# pass model and features of seal to function that predicts the date
-				result, result1, resulttext, finalnodevalue, df = mlpredictcase(class_object, shape_object, resultarea, mlmodel)
+				result, result1, resulttext, finalnodevalue, df = await mlpredictcase(class_object, shape_object, resultarea, mlmodel)
 
 				# get information about decision path
-				decisionpathout, decisiontreedic = mlshowpath(mlmodel, df)
+				decisionpathout, decisiontreedic = await mlshowpath(mlmodel, df)
 
-				#find other seals assigned to this decision tree group
-				timegroupcases = Seal.objects.filter(
-					date_prediction_node=finalnodevalue).order_by(
-					"date_origin").select_related(
-					'fk_timegroupc').values(
-					'date_origin', 'id_seal', 'fk_timegroupc', 'fk_timegroupc__timegroup_c_range', 'fk_seal_face__fk_shape', 'fk_seal_face__fk_class')
+				seal_set, resultrange, resultset, labels, data1 = await finalnodevalue_set(finalnodevalue, shape_object, class_object)
 
-				resultrange, resultset = getquantiles(timegroupcases)
-				labels, data1 = temporaldistribution(timegroupcases)
-				sealtargets = timegroupcases.values_list('id_seal', flat='True')
+				seal_set, totalrows, totaldisplay, qpagination = await defaultpagination(seal_set, 1)
 
-				# #identify a subset of seal to display as suggestions
-				seal_set = Representation.objects.filter(
-					primacy=1).filter(
-					fk_manifestation__fk_face__fk_seal__in=sealtargets).filter(
-					fk_manifestation__fk_face__fk_shape=shape_object).filter(
-					fk_manifestation__fk_face__fk_class=class_object).select_related(
-					'fk_connection').select_related(
-					'fk_manifestation__fk_face__fk_seal').select_related(
-					'fk_manifestation__fk_support__fk_part__fk_item__fk_repository').select_related(
-					'fk_manifestation__fk_support__fk_number_currentposition').select_related(
-					'fk_manifestation__fk_support__fk_attachment').select_related(
-					'fk_manifestation__fk_support__fk_supportstatus').select_related(
-					'fk_manifestation__fk_support__fk_nature').select_related(
-					'fk_manifestation__fk_imagestate').select_related(
-					'fk_manifestation__fk_position').select_related(
-					'fk_manifestation__fk_support__fk_part__fk_event').order_by(
-					'fk_manifestation')
-
-				seal_set, totalrows, totaldisplay, qpagination = defaultpagination(seal_set, 1)
-
-				manifestation_set = {}
-				
-				for s in seal_set:
-					manifestation_dic = {}
-					connection = s.fk_connection
-					manifestation_dic["thumb"] = connection.thumb
-					manifestation_dic["medium"] = connection.medium
-					manifestation_dic["representation_thumbnail_hash"] = s.representation_thumbnail_hash
-					manifestation_dic["representation_filename_hash"] = s.representation_filename_hash 
-					manifestation_dic["id_representation"] = s.id_representation	
-					manifestation_dic["id_item"] = s.fk_manifestation.fk_support.fk_part.fk_item.id_item
-					manifestation_dic["id_manifestation"] = s.fk_manifestation.id_manifestation
-					manifestation_dic["id_seal"] = s.fk_manifestation.fk_face.fk_seal.id_seal
-					manifestation_dic["repository_fulltitle"] = s.fk_manifestation.fk_support.fk_part.fk_item.fk_repository.repository_fulltitle
-					manifestation_dic["number"] = s.fk_manifestation.fk_support.fk_number_currentposition.number
-					manifestation_dic["imagestate_term"] = s.fk_manifestation.fk_imagestate
-					manifestation_dic["shelfmark"] = s.fk_manifestation.fk_support.fk_part.fk_item.shelfmark
-					manifestation_dic["label_manifestation_repository"] = s.fk_manifestation.label_manifestation_repository
-
-					manifestation_set[s.fk_manifestation.id_manifestation] = manifestation_dic
-
-				form = DateForm(request.POST)
-
-		else:
-			form = DateForm()
+				manifestation_set = await mlmanifestation_set(seal_set)
 
 		# print (decisiontreetext)
 		# print (type(decisiontreetext))
@@ -530,6 +458,148 @@ async def analyze(request, analysistype):
 
 		template = loader.get_template('digisig/analysis_date.html')
 		return HttpResponse(template.render(context, request))
+
+
+
+
+		# #default values
+		# pagetitle = 'dates'
+		# resulttext = ''
+		# resultrange= ''
+		# decisiontreetext = ''
+		# decisiontreedic = ''
+		# finalnodevalue = ''
+		# labels = []
+		# data1 = []
+		# representationset = []
+		# manifestation_set = []
+
+		# if request.method == "POST":
+		# 	form = DateForm(request.POST)
+		# 	if form.is_valid():
+		# 		qclass = form.cleaned_data['classname']
+		# 		qshape = form.cleaned_data['shape']	
+		# 		qvertical = form.cleaned_data['face_vertical']
+		# 		qhorizontal = form.cleaned_data['face_horizontal']
+		# 		# qpagination = form.cleaned_data['pagination']
+
+		# 		if qclass.isdigit():
+		# 			if int(qclass) > 0:
+		# 				qclass = int(qclass)
+		# 				class_object = get_object_or_404(Classification, id_class=qclass)
+
+		# 		if qshape.isdigit():
+		# 			qshape = int(qshape)
+		# 			if int(qshape) > 0:
+		# 				qshape = int(qshape)
+		# 				shape_object = get_object_or_404(Shape, pk_shape=qshape)
+
+		# 		if qvertical > 0:
+		# 			if qhorizontal > 0:
+		# 				resultarea = faceupdater(qshape, qvertical, qhorizontal)
+
+		# 		try:
+		# 			# fetch the current model
+
+		# 			url = os.path.join(settings., 'digisig\\static\\ml\\ml_tree')
+
+
+		# 			with open(url, 'rb') as file:	
+		# 				mlmodel = pickle.load(file)
+
+		# 		except:
+		# 			print ("exception occurred")
+		# 			# fetch the current model
+		# 			url = os.path.join(settings.BASE_DIR, 'staticfiles/ml/ml_tree')
+
+		# 			with open(url, 'rb') as file:	
+		# 				mlmodel = pickle.load(file)
+
+		# 		# pass model and features of seal to function that predicts the date
+		# 		result, result1, resulttext, finalnodevalue, df = mlpredictcase(class_object, shape_object, resultarea, mlmodel)
+
+		# 		# get information about decision path
+		# 		decisionpathout, decisiontreedic = mlshowpath(mlmodel, df)
+
+		# 		#find other seals assigned to this decision tree group
+		# 		timegroupcases = Seal.objects.filter(
+		# 			date_prediction_node=finalnodevalue).order_by(
+		# 			"date_origin").select_related(
+		# 			'fk_timegroupc').values(
+		# 			'date_origin', 'id_seal', 'fk_timegroupc', 'fk_timegroupc__timegroup_c_range', 'fk_seal_face__fk_shape', 'fk_seal_face__fk_class')
+
+		# 		resultrange, resultset = getquantiles(timegroupcases)
+		# 		labels, data1 = temporaldistribution(timegroupcases)
+		# 		sealtargets = timegroupcases.values_list('id_seal', flat='True')
+
+		# 		# #identify a subset of seal to display as suggestions
+		# 		seal_set = Representation.objects.filter(
+		# 			primacy=1).filter(
+		# 			fk_manifestation__fk_face__fk_seal__in=sealtargets).filter(
+		# 			fk_manifestation__fk_face__fk_shape=shape_object).filter(
+		# 			fk_manifestation__fk_face__fk_class=class_object).select_related(
+		# 			'fk_connection').select_related(
+		# 			'fk_manifestation__fk_face__fk_seal').select_related(
+		# 			'fk_manifestation__fk_support__fk_part__fk_item__fk_repository').select_related(
+		# 			'fk_manifestation__fk_support__fk_number_currentposition').select_related(
+		# 			'fk_manifestation__fk_support__fk_attachment').select_related(
+		# 			'fk_manifestation__fk_support__fk_supportstatus').select_related(
+		# 			'fk_manifestation__fk_support__fk_nature').select_related(
+		# 			'fk_manifestation__fk_imagestate').select_related(
+		# 			'fk_manifestation__fk_position').select_related(
+		# 			'fk_manifestation__fk_support__fk_part__fk_event').order_by(
+		# 			'fk_manifestation')
+
+		# 		seal_set, totalrows, totaldisplay, qpagination = defaultpagination(seal_set, 1)
+
+		# 		manifestation_set = {}
+				
+		# 		for s in seal_set:
+		# 			manifestation_dic = {}
+		# 			connection = s.fk_connection
+		# 			manifestation_dic["thumb"] = connection.thumb
+		# 			manifestation_dic["medium"] = connection.medium
+		# 			manifestation_dic["representation_thumbnail_hash"] = s.representation_thumbnail_hash
+		# 			manifestation_dic["representation_filename_hash"] = s.representation_filename_hash 
+		# 			manifestation_dic["id_representation"] = s.id_representation	
+		# 			manifestation_dic["id_item"] = s.fk_manifestation.fk_support.fk_part.fk_item.id_item
+		# 			manifestation_dic["id_manifestation"] = s.fk_manifestation.id_manifestation
+		# 			manifestation_dic["id_seal"] = s.fk_manifestation.fk_face.fk_seal.id_seal
+		# 			manifestation_dic["repository_fulltitle"] = s.fk_manifestation.fk_support.fk_part.fk_item.fk_repository.repository_fulltitle
+		# 			manifestation_dic["number"] = s.fk_manifestation.fk_support.fk_number_currentposition.number
+		# 			manifestation_dic["imagestate_term"] = s.fk_manifestation.fk_imagestate
+		# 			manifestation_dic["shelfmark"] = s.fk_manifestation.fk_support.fk_part.fk_item.shelfmark
+		# 			manifestation_dic["label_manifestation_repository"] = s.fk_manifestation.label_manifestation_repository
+
+		# 			manifestation_set[s.fk_manifestation.id_manifestation] = manifestation_dic
+
+		# 		form = DateForm(request.POST)
+
+		# else:
+		# 	form = DateForm()
+
+		# # print (decisiontreetext)
+		# # print (type(decisiontreetext))
+		# # print (decisiontreetext[1])
+
+		# # print (manifestation_set)
+		# #print (labels, data1)
+
+		# context = {
+		# 	'pagetitle': pagetitle,
+		# 	'form': form,
+		# 	'resulttext': resulttext,
+		# 	'resultrange': resultrange,
+		# 	'labels': labels,
+		# 	'data1': data1,
+		# 	# 'representationset': representationset,
+		# 	'manifestation_set': manifestation_set,
+		# 	'decisiontreedic': decisiontreedic,
+		# 	'finalnodevalue': finalnodevalue,
+		# 	}
+
+		# template = loader.get_template('digisig/analysis_date.html')
+		# return HttpResponse(template.render(context, request))
 
 
 #################### Search #########################

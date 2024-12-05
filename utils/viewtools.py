@@ -812,6 +812,7 @@ def getquantiles(timegroupcases):
 	return (resultrange, timelist)
 
 
+@sync_to_async
 def mlpredictcase (class_object, shape_object, case_area, mlmodel):
 
 	data = mldatacase(class_object, shape_object, case_area)
@@ -962,7 +963,66 @@ def mldatacase(class_object, shape_object, resultarea):
 
 # 	return(mlmodel)
 
+@sync_to_async
+def finalnodevalue_set(finalnodevalue, shape_object, class_object):
+	#find other seals assigned to this decision tree group
+	timegroupcases = Seal.objects.filter(
+		date_prediction_node=finalnodevalue).order_by(
+		"date_origin").select_related(
+		'fk_timegroupc').values(
+		'date_origin', 'id_seal', 'fk_timegroupc', 'fk_timegroupc__timegroup_c_range', 'fk_seal_face__fk_shape', 'fk_seal_face__fk_class')
 
+	resultrange, resultset = getquantiles(timegroupcases)
+	labels, data1 = temporaldistribution(timegroupcases)
+	sealtargets = timegroupcases.values_list('id_seal', flat='True')
+
+	# #identify a subset of seal to display as suggestions
+	seal_set = Representation.objects.filter(
+		primacy=1).filter(
+		fk_manifestation__fk_face__fk_seal__in=sealtargets).filter(
+		fk_manifestation__fk_face__fk_shape=shape_object).filter(
+		fk_manifestation__fk_face__fk_class=class_object).select_related(
+		'fk_connection').select_related(
+		'fk_manifestation__fk_face__fk_seal').select_related(
+		'fk_manifestation__fk_support__fk_part__fk_item__fk_repository').select_related(
+		'fk_manifestation__fk_support__fk_number_currentposition').select_related(
+		'fk_manifestation__fk_support__fk_attachment').select_related(
+		'fk_manifestation__fk_support__fk_supportstatus').select_related(
+		'fk_manifestation__fk_support__fk_nature').select_related(
+		'fk_manifestation__fk_imagestate').select_related(
+		'fk_manifestation__fk_position').select_related(
+		'fk_manifestation__fk_support__fk_part__fk_event').order_by(
+		'fk_manifestation')
+
+	return(seal_set, resultrange, resultset, labels, data1)
+
+@sync_to_async
+def mlmanifestation_set(seal_set):
+	manifestation_set = {}
+	
+	for s in seal_set:
+		manifestation_dic = {}
+		connection = s.fk_connection
+		manifestation_dic["thumb"] = connection.thumb
+		manifestation_dic["medium"] = connection.medium
+		manifestation_dic["representation_thumbnail_hash"] = s.representation_thumbnail_hash
+		manifestation_dic["representation_filename_hash"] = s.representation_filename_hash 
+		manifestation_dic["id_representation"] = s.id_representation	
+		manifestation_dic["id_item"] = s.fk_manifestation.fk_support.fk_part.fk_item.id_item
+		manifestation_dic["id_manifestation"] = s.fk_manifestation.id_manifestation
+		manifestation_dic["id_seal"] = s.fk_manifestation.fk_face.fk_seal.id_seal
+		manifestation_dic["repository_fulltitle"] = s.fk_manifestation.fk_support.fk_part.fk_item.fk_repository.repository_fulltitle
+		manifestation_dic["number"] = s.fk_manifestation.fk_support.fk_number_currentposition.number
+		manifestation_dic["imagestate_term"] = s.fk_manifestation.fk_imagestate
+		manifestation_dic["shelfmark"] = s.fk_manifestation.fk_support.fk_part.fk_item.shelfmark
+		manifestation_dic["label_manifestation_repository"] = s.fk_manifestation.label_manifestation_repository
+
+		manifestation_set[s.fk_manifestation.id_manifestation] = manifestation_dic
+
+	return(manifestation_set)
+
+
+@sync_to_async
 def mlshowpath (mlmodel, df):
 	node_indicator = mlmodel.decision_path(df)
 	leaf_id = mlmodel.apply(df)
@@ -1683,6 +1743,48 @@ def placeobjectannotate(place_object):
 			totalcount = totalcount + 1 
 
 	return (place_object)
+
+@sync_to_async
+def dateform_options(form):
+
+	shape_options = [('', 'None')]
+	classname_options = [('', 'None')]
+
+	for e in Shape.objects.order_by('shape').distinct('shape'):
+			shape_options.append((e.pk_shape, e.shape))
+
+	for e in Terminology.objects.filter(term_type=1).order_by('term_name').distinct('term_name'):
+		classname_options.append((e.id_term, e.term_name))
+
+	form.fields['shape'].choices = shape_options
+	form.fields['classname'].choices = classname_options
+
+	return (form)
+
+@sync_to_async
+def datesearchfilter(form):
+
+	qclass = form.cleaned_data['classname']
+	qshape = form.cleaned_data['shape']	
+	qvertical = form.cleaned_data['face_vertical']
+	qhorizontal = form.cleaned_data['face_horizontal']
+
+	if qclass.isdigit():
+		if int(qclass) > 0:
+			qclass = int(qclass)
+			class_object = get_object_or_404(Classification, id_class=qclass)
+
+	if qshape.isdigit():
+		qshape = int(qshape)
+		if int(qshape) > 0:
+			qshape = int(qshape)
+			shape_object = get_object_or_404(Shape, pk_shape=qshape)
+
+	if qvertical > 0:
+		if qhorizontal > 0:
+			resultarea = faceupdater(qshape, qvertical, qhorizontal)
+
+	return(shape_object, class_object, resultarea)
 
 
 @sync_to_async
