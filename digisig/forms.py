@@ -70,14 +70,14 @@ period_options = [('', 'None')]
 timegroup_options2 = []
 
 
-for e in Collection.objects.order_by('collection_shorttitle'):
-	collections_options.append((e.id_collection, e.collection_shorttitle))
+# for e in Collection.objects.order_by('collection_shorttitle'):
+# 	collections_options.append((e.id_collection, e.collection_shorttitle))
 
-for e in Sealtype.objects.order_by('sealtype_name'):
-	sealtype_options.append((e.id_sealtype, e.sealtype_name))
+# for e in Sealtype.objects.order_by('sealtype_name'):
+# 	sealtype_options.append((e.id_sealtype, e.sealtype_name))
 
-for e in TimegroupC.objects.order_by('pk_timegroup_c'):
-	timegroup_options2.append((e.pk_timegroup_c, e.timegroup_c_range))
+# for e in TimegroupC.objects.order_by('pk_timegroup_c'):
+# 	timegroup_options2.append((e.pk_timegroup_c, e.timegroup_c_range))
 
 class CollectionForm(forms.Form):
 	collection = forms.ChoiceField(choices=collections_options, required=False)
@@ -152,11 +152,11 @@ class ItemForm(forms.Form):
 county_options = [('0', 'None')]
 regionoptions = [('0', 'None')]
 
-for e in Region.objects.filter(location__isnull=False).filter(fk_locationtype=4).order_by('region_label').distinct('region_label'):
-	county_options.append((e.pk_region, e.region_label))
+# for e in Region.objects.filter(location__isnull=False).filter(fk_locationtype=4).order_by('region_label').distinct('region_label'):
+# 	county_options.append((e.pk_region, e.region_label))
 
-for e in Regiondisplay.objects.filter(region__location__isnull=False).order_by('regiondisplay_label').distinct('regiondisplay_label'):
-	regionoptions.append((e.id_regiondisplay, e.regiondisplay_label))
+# for e in Regiondisplay.objects.filter(region__location__isnull=False).order_by('regiondisplay_label').distinct('regiondisplay_label'):
+# 	regionoptions.append((e.id_regiondisplay, e.regiondisplay_label))
 
 class PlaceForm(forms.Form):
 	county = forms.ChoiceField(choices=county_options, required=False)

@@ -65,12 +65,11 @@ def collectionform_options(form):
 	for e in Collection.objects.order_by('collection_shorttitle'):
 		collections_options.append((e.id_collection, e.collection_shorttitle))
 
-	for e in Sealtype.objects.order_by('sealtype_name'):
-		sealtype_options.append((e.id_sealtype, e.sealtype_name))
+	# for e in Sealtype.objects.order_by('sealtype_name'):
+	# 	sealtype_options.append((e.id_sealtype, e.sealtype_name))
 
-	for e in TimegroupC.objects.order_by('pk_timegroup_c'):
-		timegroup_options2.append((e.pk_timegroup_c, e.timegroup_c_range))
-
+	# for e in TimegroupC.objects.order_by('pk_timegroup_c'):
+	# 	timegroup_options2.append((e.pk_timegroup_c, e.timegroup_c_range))
 
 	form.fields['collection'].choices = collections_options
 	form.fields['mapchoice'].choices = mapchoices
@@ -1195,6 +1194,77 @@ def roundedoval(height, width):
 	return(returnarea)
 
 
+@sync_to_async
+def map_locationset(qcollection):
+	if (qcollection == 30000287):
+		locationset = Location.objects.filter(
+			Q(locationname__locationreference__fk_locationstatus=1)).annotate(
+			count=Count('locationname__locationreference__fk_event__part__fk_part__fk_support'))
+
+	else:
+		#data for location map
+		locationset = Location.objects.filter(
+			Q(locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection)).annotate(
+			count=Count('locationname__locationreference__fk_event__part__fk_part__fk_support'))
+
+		# manifestation_set = Manifestation.objects.filter(fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection).values('fk_support__fk_part__fk_event')
+
+		# locationset = Location.objects.filter(
+		# 	Q(locationname__locationreference__fk_event__in=manifestation_set)).annotate(
+		# 	count=Count('locationname__locationreference__fk_event__part__fk_part__fk_support')).values('count')
+
+	return(locationset)
+
+@sync_to_async
+def map_placeset(qcollection):
+	if (qcollection == 30000287):
+		#data for map counties
+		placeset = Region.objects.filter(fk_locationtype=4, 
+			location__locationname__locationreference__fk_locationstatus=1
+			).annotate(numplaces=Count('location__locationname__locationreference__fk_event__part__fk_part__fk_support')).values(
+			'numplaces', 
+			'fk_his_countylist') 
+	else:
+		#data for map counties
+		placeset = Region.objects.filter(fk_locationtype=4, 
+			location__locationname__locationreference__fk_locationstatus=1, 
+			location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__fk_sealsealdescription__fk_collection=qcollection
+			).annotate(numplaces=Count('location__locationname__locationreference')).values(
+			'numplaces', 
+			'fk_his_countylist')
+
+	#print(placeset)
+
+	## data for colorpeth map
+	mapcounties1 = get_object_or_404(Jsonstorage, id_jsonfile=1)
+	mapcounties = json.loads(mapcounties1.jsonfiletxt)
+
+	for i in mapcounties:
+		if i == "features":
+			for b in mapcounties[i]:
+				j = b["properties"]
+				countyvalue = j["HCS_NUMBER"]
+				countyname = j["NAME"]
+				numberofcases = placeset.filter(fk_his_countylist=countyvalue)
+				for i in numberofcases:
+					j["cases"] = i.numplaces
+
+	return(mapcounties)
+
+@sync_to_async
+def map_regionset(qcollection):
+	if (qcollection == 30000287):
+		regiondisplayset = Regiondisplay.objects.filter(region__location__locationname__locationreference__fk_locationstatus=1
+			).annotate(numregions=Count('region__location__locationname__locationreference__fk_event__part__fk_part__fk_support')) 
+
+	else:
+		#data for region map 
+		regiondisplayset = Regiondisplay.objects.filter( 
+			region__location__locationname__locationreference__fk_locationstatus=1, 
+			region__location__locationname__locationreference__fk_event__part__fk_part__fk_support__fk_face__fk_seal__sealdescription__fk_collection=qcollection
+			).annotate(numregions=Count('region__location__locationname__locationreference'))
+
+	return(regiondisplayset)
 
 
 def mapgenerator(location_object, count_in):
