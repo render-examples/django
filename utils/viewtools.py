@@ -116,12 +116,10 @@ def personsearch_events():
 def personsearch_people(qnamelen, qname, qpagination, londonevents):
 	individual_object = individualsearch()
 
-	individual_set1 = individual_object.exclude(
-		id_individual=10000019).filter(
+	individual_set1 = individual_object.filter(
 		fk_individual_event__in=londonevents)
 
-	individual_object = individual_object.exclude(
-		id_individual=10000019).filter(
+	individual_object = individual_object.filter(
 		fk_individual_event__in=londonevents).distinct('id_individual').order_by('id_individual')
 
 	if qnamelen > 0:

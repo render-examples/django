@@ -140,6 +140,8 @@ async def search(request, searchtype):
 			qname = ""
 			qpagination = 1
 
+		
+
 		individual_set, totalrows, totaldisplay, qpagination = await personsearch_people(qnamelen, qname, qpagination, londonevents) 
 
 		pagecountercurrent = qpagination
