@@ -225,8 +225,7 @@ def parish_map(witness_entity_number, parish):
 
 
 @sync_to_async
-def parish_fetch(witness_entity_number):
-	individual_object = individualsearch()
+def parish_fetch(individual_object, witness_entity_number):
 
 	individual_object = individual_object.filter(
 		fk_individual_event__fk_event__fk_event_locationreference__fk_locationname__fk_location=witness_entity_number).annotate(

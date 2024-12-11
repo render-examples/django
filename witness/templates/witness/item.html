@@ -60,9 +60,7 @@
 			<tr>
 				<th>Reference <a class="help" href="{% url 'entity' witness_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
 				<td>{{item_object.shelfmark}}
-			{% for linktext2 in externallink_object %}
-				 <a href="{{linktext2.external_link}}" target="_blank">External Link</a>
-			{% endfor %}
+
 				</td>
 			</tr>
 
