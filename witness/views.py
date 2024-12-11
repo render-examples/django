@@ -140,13 +140,17 @@ async def search(request, searchtype):
 			qname = ""
 			qpagination = 1
 
-		
+		individual_object = await individualsearch()
 
-		individual_set, totalrows, totaldisplay, qpagination = await personsearch_people(qnamelen, qname, qpagination, londonevents) 
+		individual_object = await personsearch_people(qnamelen, qname, qpagination, londonevents, individual_object) 
+
+		individual_object, totalrows, totaldisplay = await defaultpagination(individual_object, qpagination) 
 
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
 		pagecounternextnext = qpagination +2  
+
+		individual_set = await personsearch_prepareset(individual_object)
 
 		context = {
 			'pagetitle': pagetitle,

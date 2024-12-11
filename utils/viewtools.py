@@ -113,11 +113,10 @@ def personsearch_events():
 	return (londonevents)
 
 @sync_to_async
-def personsearch_people(qnamelen, qname, qpagination, londonevents):
-	individual_object = individualsearch()
-
-	individual_set1 = individual_object.filter(
-		fk_individual_event__in=londonevents)
+def personsearch_people(qnamelen, qname, qpagination, londonevents, individual_object):
+	
+	# individual_set1 = individual_object.filter(
+	# 	fk_individual_event__in=londonevents)
 
 	individual_object = individual_object.filter(
 		fk_individual_event__in=londonevents).distinct('id_individual').order_by('id_individual')
@@ -136,7 +135,10 @@ def personsearch_people(qnamelen, qname, qpagination, londonevents):
 				fk_descriptor_prefix3__prefix__icontains=qname)| Q(
 				fk_descriptor_descriptor3__descriptor_original__icontains=qname)) 
 
-	individual_object, totalrows, totaldisplay, qpagination = defaultpagination(individual_object, qpagination) 
+	return (individual_object)
+
+@sync_to_async
+def personsearch_prepareset(individual_object):
 
 	individual_set = {}
 
@@ -146,7 +148,7 @@ def personsearch_people(qnamelen, qname, qpagination, londonevents):
 		individual_info['id_individual'] = i.id_individual
 		individual_set[i.id_individual] = individual_info
 
-	return(individual_set, totalrows, totaldisplay, qpagination)
+	return(individual_set)
 
 ## a function to apply this complex filter to actor searches
 
@@ -2483,7 +2485,7 @@ def defaultpagination(pagination_object, qpagination):
 	totalrows = pagination_object.paginator.count
 	totaldisplay = str(pagination_object.start_index()) + "-" + str(pagination_object.end_index())
 
-	return(pagination_object, totalrows, totaldisplay, qpagination)
+	return(pagination_object, totalrows, totaldisplay)
 
 # information for presenting a seal manifestation {{should be defunct?}}
 def sealsearchmanifestationmetadata(manifestation_object):

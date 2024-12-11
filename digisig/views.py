@@ -471,7 +471,7 @@ async def analyze(request, analysistype):
 
 				seal_set, resultrange, resultset, labels, data1 = await finalnodevalue_set(finalnodevalue, shape_object, class_object)
 
-				seal_set, totalrows, totaldisplay, qpagination = await defaultpagination(seal_set, 1)
+				seal_set, totalrows, totaldisplay = await defaultpagination(seal_set, 1)
 
 				manifestation_set = await mlmanifestation_set(seal_set)
 
@@ -666,7 +666,7 @@ async def search(request, searchtype):
 			if form.is_valid(): 
 				individual_object, qpagination = await peoplesearchfilter(individual_object, form)
 
-		individual_object, totalrows, totaldisplay, qpagination = await defaultpagination(individual_object, qpagination)
+		individual_object, totalrows, totaldisplay = await defaultpagination(individual_object, qpagination)
 
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
@@ -787,7 +787,7 @@ async def search(request, searchtype):
 			if form.is_valid(): 
 				item_object, qpagination = await itemsearchfilter(item_object, form)
 
-		item_pageobject, totalrows, totaldisplay, qpagination = await defaultpagination(item_object, qpagination)
+		item_pageobject, totalrows, totaldisplay = await defaultpagination(item_object, qpagination)
 
 		pagecountercurrent = qpagination 
 		pagecounternext = qpagination + 1
@@ -942,7 +942,7 @@ async def search(request, searchtype):
 			if form.is_valid(): 
 				manifestation_object, qpagination = await sealsearchfilter(manifestation_object, form)
 
-		manifestation_pageobject, totalrows, totaldisplay, qpagination = await defaultpagination(manifestation_object, qpagination)
+		manifestation_pageobject, totalrows, totaldisplay = await defaultpagination(manifestation_object, qpagination)
 
 		pagecountercurrent = qpagination 
 		pagecounternext = qpagination + 1
@@ -992,7 +992,7 @@ async def search(request, searchtype):
 			if form.is_valid(): 
 				sealdescription_object, qpagination = await sealdescriptionsearchfilter(sealdescription_object, form)
 
-		sealdescription_object, totalrows, totaldisplay, qpagination = await defaultpagination(sealdescription_object, qpagination) 
+		sealdescription_object, totalrows, totaldisplay = await defaultpagination(sealdescription_object, qpagination) 
 
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
@@ -1035,7 +1035,7 @@ async def search(request, searchtype):
 
 		place_object = await placeobjectannotate(place_object)
 
-		placepage_object, totalrows, totaldisplay, qpagination = await defaultpagination(place_object, qpagination) 
+		placepage_object, totalrows, totaldisplay = await defaultpagination(place_object, qpagination) 
 
 		pagecountercurrent = qpagination
 		pagecounternext = qpagination + 1
@@ -1575,7 +1575,7 @@ def actor_page(request, digisig_entity_number):
 
 	#hack to deal with cases where there are too many seals for the form to handle
 	qpagination = 1
-	manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
+	manifestation_object, totalrows, totaldisplay = defaultpagination(manifestation_object, qpagination)
 
 	manifestation_set={}
 
@@ -1934,7 +1934,7 @@ def place_page(request, digisig_entity_number):
 		form = PageCycleForm()
 
 	## these pagecounters are going to break on pages that are small lists
-	manifestation_object, totalrows, totaldisplay, qpagination = defaultpagination(manifestation_object, qpagination)
+	manifestation_object, totalrows, totaldisplay = defaultpagination(manifestation_object, qpagination)
 	pagecountercurrent = qpagination 
 	pagecounternext = qpagination + 1
 	pagecounternextnext = qpagination +2
