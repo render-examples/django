@@ -33,7 +33,10 @@
 				<th>Held by</th>
 				<td>{{part_object.fk_repository}}</td>	
 
+
+				{% if part_object.id_representation != Null %}
 				<td rowspan="6">
+
 					<figure>
 						<img class="modalimage" id="modalimagebaseitem{{forloop.counter}}" src="{{part_object.connection_thumb}}{{part_object.representation_thumbnail}}" alt="{{part_object.id_representation}}" onclick="image2({{forloop.counter}}, 'item')">
 					</figure>
@@ -53,6 +56,7 @@
 						  </div>
 						</div>
 				</td>
+				{% endif %}
 			</tr>
 			<tr>
 				<th>Reference <a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
