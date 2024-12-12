@@ -454,14 +454,33 @@ async def analyze(request, analysistype):
 
 				try:
 					# fetch the current model
-					url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
+					url = os.path.join(settings.BASE_DIR, 'staticfiles/ml/ml_tree')
+					print ("try")
+
+					with open(url, 'rb') as file:	
+						mlmodel = pickle.load(file)
 
 				except:
 					# fetch the current model
-					url = os.path.join(settings.BASE_DIR, 'staticfiles/ml/ml_tree')
+					url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
+					print ("except")
 
-				with open(url, 'rb') as file:	
-					mlmodel = pickle.load(file)
+					with open(url, 'rb') as file:	
+						mlmodel = pickle.load(file)
+
+				# try:
+				# 	# fetch the current model
+				# 	url = os.path.join(settings.BASE_DIR, 'digisig\\static\\ml\\ml_tree')
+				# 	print ("try")
+
+				# except:
+				# 	# fetch the current model
+				# 	url = os.path.join(settings.BASE_DIR, 'staticfiles/ml/ml_tree')
+				# 	print ("except")
+
+
+				# with open(url, 'rb') as file:	
+				# 	mlmodel = pickle.load(file)
 
 				# pass model and features of seal to function that predicts the date
 				result, result1, resulttext, finalnodevalue, df = await mlpredictcase(class_object, shape_object, resultarea, mlmodel)
