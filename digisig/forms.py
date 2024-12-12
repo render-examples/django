@@ -132,13 +132,13 @@ class PeopleForm(forms.Form):
 series_all_options = [('', 'None')]
 repositories_all_options = [('', 'None')]
 
-for e in Series.objects.exclude(series_name__istartswith="z").order_by('fk_repository'):
-	repository = e.fk_repository
-	appendvalue = repository.repository + " : " + e.series_name
-	series_all_options.append((e.pk_series, appendvalue))
+# for e in Series.objects.exclude(series_name__istartswith="z").order_by('fk_repository'):
+# 	repository = e.fk_repository
+# 	appendvalue = repository.repository + " : " + e.series_name
+# 	series_all_options.append((e.pk_series, appendvalue))
 
-for e in Repository.objects.order_by('repository_fulltitle'):
-	repositories_options.append((e.fk_repository, e.repository_fulltitle))
+# for e in Repository.objects.order_by('repository_fulltitle'):
+# 	repositories_options.append((e.fk_repository, e.repository_fulltitle))
 
 class ItemForm(forms.Form):
 	series = forms.ChoiceField(label='series', choices=series_all_options, required=False, initial={'': 'None'})
@@ -180,13 +180,13 @@ classification_options = []
 collection2_options = []
 
 ## this is a very bad way of selecting the classifications in use -- 2023_9_23
-for e in Classification.objects.exclude(class_name__startswith="z").exclude(class_name__startswith="Z").order_by('class_sortorder'):
-	classification_options.append((e.id_class, e.class_name))
+# for e in Classification.objects.exclude(class_name__startswith="z").exclude(class_name__startswith="Z").order_by('class_sortorder'):
+# 	classification_options.append((e.id_class, e.class_name))
 
-for e in Collection.objects.filter(id_collection=30000047).order_by('id_collection'):
-	collection2_options.append((e.id_collection, e.collection_title))
-	#### forcing addition of Linenthal --- 2023_9_26
-	collection2_options.append((30000337, 'Linenthal, Schoyen Collection'))
+# for e in Collection.objects.filter(id_collection=30000047).order_by('id_collection'):
+# 	collection2_options.append((e.id_collection, e.collection_title))
+# 	#### forcing addition of Linenthal --- 2023_9_26
+# 	collection2_options.append((30000337, 'Linenthal, Schoyen Collection'))
 
 class MLpredictionForm(forms.Form):
 	classification = forms.ChoiceField(choices=classification_options, required=False)
