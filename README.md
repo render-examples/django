@@ -14,3 +14,7 @@ Fork the repo and use the button below to deploy this app with one click.
 </a>
 
 To deploy manually, see the guide at https://docs.render.com/deploy-django.
+
+## My note
+### change service name
+Normally your website is mysite-xyz.onrender.com. If you want to change mysite-xyz.onrender.com, you can change services->name in render.yaml
