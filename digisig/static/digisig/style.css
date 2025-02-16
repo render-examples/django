@@ -1,0 +1,1324 @@
+/*Digisig version 2*/
+
+/*CSS for all pages*/
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+	font-family: Carrois Gothic, Tahoma, sans-serif;
+	background-color: black;
+	line-height: 1.75;
+	font-size: 16px;
+	overflow: scroll;
+}
+
+h1, h2, h3, h4, th, .div-caption {
+	font-family: Cormorant, Palatino, serif;
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+	margin-top: 0;
+	margin-bottom: .5rem;
+	font-weight: 500;
+	line-height: 1.2;
+}
+
+h1 {
+	font-size: 2.5rem;
+}
+
+h2 {
+	font-size: 2rem;
+}
+
+h3 {
+	font-size: 1.5rem;
+}
+
+h4 {
+	font-size:1.2rem;
+}
+
+li {
+	display: block;
+	float: none;
+}
+
+table {
+/*	border-top: 1px solid #ddd;*/
+	border-collapse: collapse;
+	width: 100%;
+	background-color: white;
+}
+
+caption {
+	text-align: left;
+	padding: 10px 10px 10px 30px;
+	border-left: 5px solid #f44336;
+	background-color: #cedae3;
+}
+
+td, th, tr {
+	padding: 10px 5px 5px 10px;
+	text-align: left;
+	line-height: 1em;
+	vertical-align: top;
+}
+
+th {
+	width: 140px;
+	font-weight: bold;
+	line-height: 1em;
+}
+
+th.finalrow {
+	padding-bottom: 30px;
+}
+
+td.totalrows {
+	text-align: right;
+}
+
+th.indent {
+		padding: 10px 0px 5px 15px;
+}
+
+/* links */
+a {
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	text-decoration-color: #c20a0a;
+	text-decoration-thickness: 1px;
+	color: black;
+}
+a:hover, a.headingbtn:hover {
+	text-decoration: underline;
+	text-decoration-color: #c20a0a;
+}
+a:active {
+	color:red;
+}
+a.help:link  {
+	color: #98a8b3;
+	color: #7b909d;
+}
+a.help:visited {
+	color: #cedae3;
+}
+a.headingbtn {
+text-decoration: none;
+border-left: 5px solid #c20a0a;
+padding: 5px;
+background-color: #e5ebef;
+
+}
+
+/*img {
+	pointer-events: none;
+}*/
+
+.heading {
+	margin-top: 40px;
+}
+
+/*Map size -- for leaflet display */
+.item_map {
+	padding: 40px 0px 20px 0px;
+}
+
+#mapid { 
+	height: 250px;
+	z-index: 0;
+	padding:  20px;
+}
+
+#mapid1, 
+#mapid2, 
+#mapid3 { 
+	height: 400px; 
+	z-index: 0;
+	padding:  20px;
+}
+
+
+<!-- 	This CSS makes the legend box appear--> 
+#map,
+#map1,
+#map2,
+#map3 { 
+	width: 800px; 
+	height: 500px; 
+}
+
+.info,
+.info1,
+.info2,
+.info3 { 
+	padding: 6px 8px; 
+	font: 14px/16px Arial, Helvetica, sans-serif; 
+	background: white; 
+	background: rgba(255,255,255,0.8); 
+	box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+	border-radius: 5px; 
+} 
+
+.info h4 { margin: 0 0 5px; color: #777; }
+
+.legend,
+.legend1,
+.legend2,
+.legend3 { 
+	text-align: left; 
+	line-height: 18px; 
+	color: #555; 
+} 
+.legend i { 
+	width: 18px; 
+	height: 18px; 
+	float: left; 
+	margin-right: 8px; 
+	opacity: 0.7; 
+}
+
+
+/* generic page structure */
+.grid {
+	display: grid;
+	grid-template-columns: 1fr repeat(9, minmax(auto, 8em)) 1fr;
+	grid-template-rows: minmax(1em, auto);
+}
+
+/* sidepanels */
+.sidepanel-left,
+.sidepanel-right {
+	grid-row: 5/14;
+	background-color:#b6c1c9;
+}
+
+.sidepanel-left {
+	grid-column: 1;
+}
+
+.sidepanel-right {
+	grid-column: 11;
+}
+
+/* header for top of all pages */
+
+.colophon {
+	grid-column: 1/12;
+	grid-row: 1;
+	background-color: #314757;
+	background-position: left;
+	background-repeat: no-repeat;
+	background-size: contain;
+	text-align: right;
+	height: 50px;
+	z-index: 5;
+}
+
+/* Navbar attempt 3 -- code borrowed from https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_subnav*/
+
+.global-nav {
+	grid-column: 2/11;
+	grid-row: 2;
+	grid-auto-columns: 50px;
+	position: -webkit-sticky;
+	position: sticky;
+	top:0;
+	background: black;
+	z-index: 2;
+	line-height: 1;
+}
+
+.navbar {
+  overflow: hidden;
+}
+
+.navbar a {
+  float: left;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.subnav {
+  float: left;
+  overflow: hidden;
+}
+
+.subnav .subnavbtn {
+  font-size: 16px;  
+  border: none;
+  outline: none;
+  color: white;
+  padding: 14px 16px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
+}
+
+.navbar a:hover, .subnav:hover .subnavbtn {
+  background-color: #c20a0a;
+}
+
+.subnav-content {
+  display: none;
+  position: absolute;
+  left: 0;
+  background-color: #c20a0a;
+  width: 100%;
+  z-index: 1;
+}
+
+.subnav-content a {
+  float: left;
+  color: white;
+  text-decoration: none;
+}
+
+.subnav-content a:hover {
+  background-color: #b6c1c9;
+  color: black;
+}
+
+.subnav:hover .subnav-content {
+  display: block;
+}
+
+/* Banners on various pages */
+
+.search-banner,
+.search-catalogue-banner,
+.search-advanced-banner,
+.item-banner,
+.seal-banner,
+.exhibit-banner,
+.search-people-banner {
+	grid-column: 1/12;
+	grid-row: 1/5;
+	background-position: right top;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: auto, 100%;
+	z-index: -1;
+}
+
+/* for the text inside of banners */
+.bannertext {
+	grid-column: 3/7;
+	grid-row: 3;
+	color: white;
+	height: 200px;
+	z-index: 1;
+	padding: 80px 0;
+	text-align: center;
+	white-space: nowrap;
+	/*overflow: hidden; */	
+}
+
+
+/* Pages with text */
+.mainpage,
+.sidebarleft_edit,
+.sidebarright_edit,
+.item_results,
+.sidebar_item,
+.items,
+.entity_detail,
+.entity_seals,
+.entity_exhibit,
+.entity_event,
+.entity_representation,
+.entity_main,
+.entity_relationship,
+.entity_sealdescription,
+.entity_manifestations,
+.entity_item,
+.entity_event,
+.entity_seals,
+.entity_rdf,
+.results4,  
+.entity_chart,
+.entity_chart2,
+.entity_chartfilter,
+.entity_chartfilter2,
+.entity_classification {
+	background-color:#eff3f6;
+	padding: 20px;
+}
+
+.main-title {
+	grid-column:1/12;
+	grid-row: 4;
+	background-color:#eff3f6;
+	color: black;
+	padding: 10px;
+	text-align: center;
+	opacity: 90%;
+	height: 75px;	
+	white-space: nowrap;
+	overflow: hidden;	
+}
+
+
+.mainpage2,
+.results,
+.results3,
+.sidebar,
+.guidance {
+	padding: 20px;
+	background-color:white;
+}
+
+.sidebar {
+	grid-column: 2/5;
+	grid-row: 5/9;
+}
+
+.sidebarleft_edit {
+	grid-column: 1/2;
+	grid-row: 5/14;
+}
+
+.sidebarright_edit {
+	grid-column: 11/12;
+	grid-row: 5/14;
+}
+
+.midbar {
+	grid-column: 6/11;
+	grid-row:  5;
+}
+
+.sidebar_item {
+	grid-column:2/5;
+	grid-row: 5;
+	display: grid;
+	grid-template-columns:1fr;
+	grid-gap: 5px;	
+	grid-template-rows: max-content;
+}
+
+.mainpage {
+	grid-column:2/11;
+	grid-row: 5/15;	
+}
+
+.guidance,
+.results,
+.guidance-bar,
+.results-bar,
+.results-bar2,
+.results3 {
+	grid-column: 3/10;
+}
+
+
+.guidance-bar {
+	grid-row: 5;
+}
+
+.guidance {
+	grid-row: 6;
+}
+
+.results-bar {
+	grid-row: 7;
+}
+
+.results-bar2 {
+	grid-row: 9;
+}
+
+
+.results,
+.results3 {
+	display: grid;
+	grid-template-rows: max-content;
+	grid-gap: 5px;
+}
+
+.results {
+	grid-template-columns:2fr 5fr;
+	grid-row: 8;
+}
+
+.results3 {
+	grid-template-columns:2fr 3fr;
+	grid-row: 10;
+}
+
+.results4 {
+	grid-row: 6;
+	grid-column: 9/11;
+}
+
+
+.searchfilter {
+	grid-column: 1;
+	grid-row: 1/10;
+}
+
+.searchresults {
+	grid-column: 2;
+	display:  grid;
+	grid-template-columns: 3fr 1fr;
+	grid-template-rows: max-content;
+	grid-gap: 5px;
+	margin: 10px;
+}
+
+.searchresultsb {
+	grid-column: 2;
+	display:  grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: max-content;
+	grid-gap: 5px;
+}
+
+.results2 {
+	grid-column:5/10;
+	grid-row: 5;
+}
+
+.results2 table {
+	background-color: #eff3f6;
+}
+
+
+.entity_detail,
+.entity_seals,
+.entity_event,
+.entity_representation,
+.entity_main,
+.entity_relationship,
+.entity_sealdescription,
+.entity_manifestations,
+.entity_item,
+.entity_rdf,
+.guidance-bar,
+.results-bar,
+.results-bar2,
+.entity_classification {
+	grid-column:3/10;
+	margin-top: 30px;
+}
+
+.entity_detail {
+	grid-row: 5;
+	width:100%; 
+	border: 1px solid black; 
+	margin-top: 20px;
+	background-color: white;
+}
+
+.entity_chart,
+.entity_chart2,
+.entity_chartfilter,
+.entity_chartfilter2,
+.results4 {
+	grid-row: 6;
+	margin-top: 30px;
+}
+
+.entity_chart {
+	grid-column:5/10;
+}
+
+.entity_chart2 {
+	grid-column:4/9;
+}
+
+
+.entity_chartfilter {
+	grid-column:3/5;
+}
+
+.entity_chartfilter2 {
+	grid-column:2/4;
+}
+
+.entity_main {
+	grid-row: 6;
+}
+
+.entity_seals,
+.entity_exhibit,
+.entity_classification {
+	grid-row: 7;
+}
+
+.entity_exhibit {
+	grid-column: 3/10;
+}
+
+.exhibit_item {
+	float: left;
+	min-width: ;
+	padding: 20px;
+}
+
+
+.classification {
+	display: grid;
+	grid-template-columns: repeat(9, 35px) auto repeat(3, 120px);
+	grid-template-rows: max-content;
+	grid-gap: 5px;
+	margin:  5px;
+	border: 2px solid #eff3f6;
+}
+
+.classification:hover {
+  border: 2px solid #969696;
+}
+
+.classification img {
+border-radius: 15px;
+	display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+	padding:5px
+}
+
+
+.entity_item {
+	grid-row: 8;
+}
+
+.entity_event {
+	grid-row: 8;
+}
+
+.entity_representation {
+	grid-row: 9;
+}
+
+.entity_manifestations {
+	grid-row: 10;
+}
+
+.entity_relationship {
+	grid-row: 11;
+}
+
+.entity_sealdescription {
+	grid-row: 12;
+}
+
+.entity_rdf {
+	padding-bottom: 40px;
+	grid-row: 13;
+}
+
+.help {
+	font-size: .75rem;
+}
+
+/* entity output styling */
+
+.entity {
+	cursor: pointer;
+}
+
+
+.div-caption {
+	text-align: left;
+	padding: 10px 10px 10px 30px;
+	border-left: 5px solid #c20a0a;
+	background-color: #cedae3;
+}
+
+.div-caption button {
+  background-color: #c20a0a;
+  border-radius: 5px;
+  color: white;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  float: right;
+}
+
+.div-caption button:hover {
+  background-color: #f20d0d;
+ 	cursor: pointer;
+}
+
+.div-level button {
+	background-color: #c20a0a;
+  border-radius: 5px;
+  color: white;
+  width: 25px;
+  height: 25px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.div-level button:hover, button:active {
+  background-color: #f20d0d;
+	cursor: pointer;
+}
+
+.div-level1 {
+	grid-column: 2/11;
+}
+
+.div-level2 {
+	grid-column: 4/11;
+}
+
+.div-level3 {
+	grid-column: 6/11;
+}
+
+.div-level4 {
+	grid-column: 8/11;
+}
+
+.div-level5 {
+	grid-column: 9/11;
+}
+
+.leftarrow {
+	width: 30px;
+	height: 30px;
+}
+
+.leftarrow-2 {
+	grid-column: 2;
+}
+
+.leftarrow-3 {
+	grid-column: 4;
+}
+
+.leftarrow-4 {
+	grid-column: 6;
+}
+
+.leftarrow-5 {
+	grid-column: 8;	
+}
+
+
+button.RDF-download  {
+	width: auto;
+}
+
+button.RDF-download a {
+	text-decoration: none;
+	color: white;
+}
+
+button.RDF-download a:hover {
+	background-color: transparent;
+}
+
+
+.even {
+	background-color: #eff8ff;
+}
+
+.odd {
+	background-color: white;
+}
+
+.info {
+	background-color: #d3e4f1;
+}
+
+
+/* Input fields */
+input[type=text] {
+	outline: none;
+}
+
+input[type=text]:focus {
+	border: 2px solid #4CAF50;
+}
+
+input[type=image] {
+	display: block;
+	width: 90%;
+	padding: 0px;
+	border: 0px;
+	border-radius: 0px;
+	padding-top: 2px;
+}
+
+.filter button {
+  /* remove default behavior */
+  appearance:none;
+  -webkit-appearance:none;
+
+  /* usual styles */
+  padding:10px;
+  border:none;
+  background-color:#b6c1c9;
+  border-radius:5px;
+  width:100%;
+}
+
+.filter button:hover {
+	background-color: #c20a0a;
+	color: white;
+	cursor: pointer;
+}
+
+.filter label {
+	font-weight: bold;
+	display: block;
+	float: left;
+	line-height: 1;
+	font-size: 12px;
+	margin-bottom: .5rem;
+	font-variant: small-caps;
+}
+
+/* side bar may be deprecated...? */
+.sidebar button {
+  /* remove default behavior */
+  appearance:none;
+  -webkit-appearance:none;
+
+  /* usual styles */
+  padding:10px;
+  border:none;
+  background-color:#b6c1c9;
+  border-radius:5px;
+  width:100%;
+}
+
+.sidebar button:hover {
+	background-color: #c20a0a;
+	color: white;
+	cursor: pointer;
+}
+
+.sidebar label {
+	font-weight: bold;
+	display: block;
+	float: left;
+	line-height: 1;
+	font-size: 12px;
+	margin-bottom: .5rem;
+	font-variant: small-caps;
+}
+
+/* this CSS is the same as sidebar */
+.entity_chartfilter button {
+  /* remove default behavior */
+  appearance:none;
+  -webkit-appearance:none;
+
+  /* usual styles */
+  padding:10px;
+  border:none;
+  background-color:#b6c1c9;
+  border-radius:5px;
+  width:100%;
+}
+
+.entity_chartfilter button:hover {
+	background-color: #c20a0a;
+	color:  white;
+	cursor: pointer;
+}
+
+.entity_chartfilter label {
+	font-weight: bold;
+	display: block;
+	float: left;
+	line-height: 1;
+	font-size: 12px;
+	margin-bottom: .5rem;
+	font-variant: small-caps;
+}
+
+
+
+.fieldWrapper {
+	margin-bottom: 1rem;
+}
+
+.fieldWrapper select, input {
+	display: block;
+	width: 100%;
+	padding: .375rem .75rem;
+	border: 1px solid #ced4da;
+	border-radius: .25rem;
+}
+
+.fieldwrapper option {
+	line-height: 1.5;
+	font-size: 1rem;
+	font-weight: 400;
+}
+
+.submit {
+	background-color: #b6c1c9; 
+}
+
+.submit:hover {
+	background-color: #c20a0a;
+	color:  white;
+	cursor: pointer;
+}
+
+
+/* Permalink */
+.permalink {
+	float: right;
+  background-color: #c20a0a;
+  border-radius: 5px;
+  color: white;
+  height: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+.permalink:hover {
+	background-color: 	#f20d0d;
+	cursor: pointer;
+}
+
+
+.entity_detail button:hover, button:active {
+  background-color: #f20d0d;
+}
+
+
+.entity-permalink {
+	grid-column: 8/10;
+	grid-row: 5;
+	width:100%; 
+	margin-top: 20px;
+	z-index: 1;
+	display: none;
+	font-size: .75rem;
+}
+
+.entity-permalink button {
+	float: right;
+}
+
+.permalinkinfo {
+	background-color: #dbe9f0;
+	border: 5px solid black;
+	padding-left: 10px;
+	padding-right:  10px;
+	background-color: black;
+	color: white;
+}
+
+.permalinkinfo input {
+	font-size: .75rem;
+	padding: 0px;
+}
+
+/* Donate button */
+
+.donatelink {
+	grid-column: 10;
+	grid-row: 2;
+	display:  grid;
+	justify-content: center;
+	align-content: center;
+	z-index: 10;
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 0;
+}
+
+.donateinput {
+	display:  inline-block;
+}
+
+/* INDEX PAGE */
+
+/* the special banner on top of the index page */
+
+.home-banner {
+	grid-column: 2/12;
+	grid-row: 1/4;
+	background-position: right top;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: auto, 100%;
+	z-index: -1;
+}
+
+
+/* the selection of search appproaches on main page */
+.searchoptions a:link, .searchoptions a:visited {
+  background-color: #c20a0a;
+  border-radius: 20px;
+  color: white;
+  padding: 14px 25px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.searchoptions a:hover, .searchoptions a:active {
+  background-color: red;
+}
+
+#search1,
+#search2,
+#search3 {
+	border: solid;
+	border-width: 30px;
+	border-color: #f0f3f4;
+	background-color: black;
+	background-repeat: no-repeat;
+	background-attachment: scroll;
+	background-size: 200%;
+	background-position: right;
+	height: 365px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	grid-row: 5;
+}
+
+#search1 {
+	grid-column: 2/5;
+
+}
+
+#search2 {
+	grid-column: 5/8;
+}
+
+#search3 {
+	grid-column: 8/11;
+}
+
+/* main text sections on main page */
+
+
+
+#digisigstats {
+	grid-column: 2/11;
+	padding: 40px 20px;
+	grid-row: 6;
+	text-align: center;
+	background-color: #dbe9f0;
+}
+
+#digisigstatsbox {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr 1fr;
+	grid-gap: 15px;
+	text-align: center;	
+}
+
+#statistic {
+	font-size: 24;
+	padding: 40px 40px;
+}
+
+#digisigblock1,
+#digisigblock2,
+#digisigblock3,
+#digisigblock4,
+#digisigblock5,
+#digisigblock6 {
+	line-height: 2;
+	padding: 20px;	
+	color: black;
+	background-color: white;
+	grid-column: 2/11;
+}
+
+#digisigblock1 {
+	grid-row: 7;
+}
+#digisigblock2 {
+	grid-row: 7;
+}
+#digisigblock3 {
+	grid-row: 8;
+}
+#digisigblock4 {
+	grid-row: 9;
+}
+#digisigblock5 {
+	grid-row: 10;
+}
+#digisigblock6 {
+	grid-row: 11;
+}
+
+#digisigtextblock1,
+#digisigtextblock2,
+#digisigtextblock3,
+#digisigtextblock4,
+#digisigtextblock5,
+#digisigtextblock6 {
+		padding: 20px;
+}
+
+#digisigtextblock1 {
+	grid-row: 7;
+	grid-column: 3/7;
+	color: black;
+	background-color: white;
+}
+
+#digisigtextblock2 {
+	padding: 50px;
+	grid-row: 7;
+	grid-column: 7/10;
+	background-color: white;
+}
+
+#digisigtextblock3 {
+	grid-row: 8;
+	grid-column: 3/10;
+}
+
+#digisigtextblock4 {
+	grid-row: 9;
+	grid-column: 7/10;
+}
+
+#digisigtextblock5 {
+	grid-row: 10;
+	grid-column: 3/10;
+}
+
+#digisigtextblock6 {
+	grid-row: 11;
+	grid-column: 3/10;
+}
+
+
+/*Images in General */
+
+
+.sealdescription-img {
+	width: 100%;
+	max-width:  200px;
+	max-height:  200px;
+}
+
+.sealdescription-img_edit {
+	height: 100%;
+	max-width:  300px;
+	max-height:  300px;
+}
+
+
+.figure {
+	text-align: center;
+}
+
+/* modal image --> copied directly from https://www.w3schools.com/howto/howto_css_modal_images.asp*/
+
+.modalimage {
+	cursor: zoom-in;
+  border-radius: 5px;
+  transition: 0.3s;
+	max-height: 100px;
+}
+
+.modalimage:hover {
+	opacity: 0.7;
+}
+
+
+ /* Style the Image Used to Trigger the Modal */
+#modalimagebase, #thumbnail {
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#thumbnail {
+	max-height: 100px;
+}
+
+#modalimagebase {
+	max-width: 500px;
+}
+
+#modalimagebase:hover {opacity: 0.7;}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 10; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+/* Modal Content (Image) */
+.modal-content {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+}
+
+/* Caption of Modal Image (Image Text) - Same Width as the Image */
+.modal-caption {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+  text-align: center;
+  color: #ccc;
+  padding: 10px 0;
+  height: 150px;
+}
+
+.modal-caption a {
+	color:white;
+	background: transparent;
+	text-decoration: none;
+}
+
+.modal-caption a:hover,
+.modal-caption a:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+/* Add Animation - Zoom in the Modal */
+.modal-content, .modal-caption {
+  animation-name: zoom;
+  animation-duration: 0.6s;
+}
+
+@keyframes zoom {
+  from {transform:scale(0)}
+  to {transform:scale(1)}
+}
+
+/* The Close Button */
+.close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 100% Image Width on Smaller Screens */
+@media only screen and (max-width: 700px){
+  .modal-content {
+    width: 100%;
+  }
+} 
+
+.youtube-container {
+    position: relative;
+    overflow: hidden;
+    padding-top: 56.25%;
+}
+
+.youtube-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Generic footer*/
+
+.main-footer {
+	grid-column: span 12;
+	grid-row: 15;	
+	background-color: black;
+	text-align: center;
+	color: white;	
+}
+
+.main-footer a, .main-footer a:visited  {
+	text-decoration: none;
+	color:  white;
+	font-style: italic;
+}
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext { 
+  visibility: hidden;
+  background-color: #cedae3;
+  color: black;
+  text-align: left;
+  padding:  5px;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.tooltip .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  bottom: 100%;  /* At the top of the tooltip */
+  left: 5%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #cedae3 transparent;
+}
+
+
+
+/*Open Lime*/
+
+#openlime {
+	position:relative;
+	height: 100%
+	grid-column: 3/7;
+}
+
+#openlime>canvas {
+	width: 100%;
+	height: 100%;
+	/* this is important, it would cause firefox flickering! */
+	overflow: hidden;
+}

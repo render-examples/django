@@ -1,0 +1,467 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1"></script>
+
+<!-- Leaflet stuff -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+
+	<div class="home-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>{{pagetitle}}</h1>
+	</div>
+
+	<div class="mainpage" id="mainpage"></div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{collection_dic.id_collection}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+
+	<div class="entity_detail" id="entity_detail">
+		<h3>Collection details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
+		<table>
+			<tr>
+				<th>Title</th>
+				<td>{{collection_dic.collection_title}}</td>
+				{% if collection_dic.collection_thumbnail != null %}
+				<td rowspan="4">
+					<div>
+						<figure>
+							<img class="modalimage" id="modalimagebase1" src="{% static 'digisig/images/collections_cover/'%}{{collection_dic.collection_thumbnail}}" alt="catalogue cover photograph" onclick="image(1)">
+						</figure>
+
+						<!-- The Modal -->
+	 					<div id="myModal1" class="modal" style="display: none;">
+						  <span class="close" onclick="modalclose(1)">&times;</span>
+						  <img class="modal-content" id="modalimg1" src="{% static 'sealquery/images/collections_cover/'%}{{collection_dic.collection_thumbnail}}" alt="catalogue cover photograph">
+						  <div class="modal-caption" id="caption1">{{collection_dic.collection_fulltitle}}</div>
+						</div>
+					</div>
+				</td>
+				{% endif %}
+			</tr>
+
+			{% for key, value in collection_dic.contributors.items %}
+			<tr>
+				<th>{% cycle 'Credit' '' '' '' '' '' '' '' '' %}</th>
+				<td>
+					{{value.contribution}} {{value.name}}
+				{% if value.uricontributor %}
+				<a href="{{value.uricontributor}}" target="_blank">External Link</a>
+				{% endif %}
+				</td> 
+			</tr>
+			{% endfor %}
+			{% resetcycle %}
+
+			<tr>
+				<th>Publication details</th>
+				<td>{{collection_dic.collection_publicationdata}}</td>
+			</tr>
+			<tr>
+				<th>Total Entries</th>
+				<td>{{collection_dic.totalsealdescriptions}}</td>
+			<tr>
+			<tr>
+				<th>Total Seals</th>
+				<td>{{collection_dic.totalseals}}</td>
+			</tr>
+			<tr>
+				<th>Notes</th>
+				<td>{{collection_dic.notes}}</td>
+			</tr>
+
+
+		</table>
+	</div>
+
+	<div class="entity_chartfilter" id="entity_chartfilter">
+		<div>
+			<h2>Select</h2>		
+			<form id="form" action="/information/collections" method="post">
+		    	{% csrf_token %}
+		    	{{ form.non_field_errors }}
+		    	<div class="fieldWrapper">
+				    {{ form.collection.errors }}
+				    <label for="{{ form.collection.id_for_label }}">Collection <a class="help" href="{% url 'entity' digisig_entity_number=10001607 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+				    {{ form.collection }}
+				</div>
+				<div class="fieldWrapper">
+		    		<input class="submit" type="submit" value="Submit">
+		    	</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="entity_chart" id="entity_chart">
+		<canvas id="Chart1"></canvas>
+	</div>
+
+	<div class="entity_seals" id="entity_seals">
+		<div class="div-caption">
+			Classification <button id="entitybutton1" onclick="tbtoggle('Chart2', 'entitybutton1')" class="entity">+</button>
+		</div>
+		<div>
+			<canvas id="Chart2" style="display:none;"></canvas>
+		</div>
+	</div>
+
+
+	<div class="entity_event" id="entity_event">
+		<div class="div-caption">
+			Temporal Distribution <button id="entitybutton2" onclick="tbtoggle('Chart3', 'entitybutton2')" class="entity">+</button>
+		</div>
+		<div>
+			<canvas id="Chart3" style="display:none;"></canvas>
+		</div>
+	</div>
+
+
+	<div class="entity_manifestations" id="entity_manifestations">
+		<div class="div-caption">
+			Spatial Distribution <button id="entitybutton3" onclick="maptoggle('mapid2', 'entitybutton3')" class="entity">+</button>
+		</div>
+		<div id="mapid2" style="display:none;"></div>
+	</div>
+
+
+	<div class="entity_relationship" id="entity_relationship">
+		<div class="div-caption">
+			Actors <button id="entitybutton4" onclick="tbtoggle('Chart5', 'entitybutton4')" class="entity">+</button>
+		</div>
+		<div>
+			<canvas id="Chart5" style="display:none;"></canvas>
+		</div>
+	</div>
+
+	{{ region_dict|json_script:"mapdata" }}
+
+<!-- 	{{ maplayer|json_script:"mapboundaries" }} -->
+
+<script>
+
+var ctx1 = document.getElementById('Chart1').getContext('2d');
+var chart1 = new Chart(ctx1, {
+    // The type of chart we want to create
+    type: 'bar',
+    // The data for our dataset
+    data: {
+        labels: [ {% for i in labels1 %} '{{i}}', {% endfor %} ],
+        datasets: [{
+        	axis: 'y',
+            backgroundColor: "#8e5ea2",
+            borderColor: "#8e5ea2",
+            data: [ {% for i in data1 %} {{i}}, {% endfor %} ]
+        		}]
+        },
+    options: {
+    	indexAxis: 'y',
+    	plugins: {
+    		legend: {
+    			display:false,
+	    		},
+	    	title: {
+	    	display: true,
+	    		text: 'Percentage of complete entries in Digisig, by field, for the selected collection',
+	    	}
+			},
+    	}
+});
+
+
+var ctx2 = document.getElementById('Chart2').getContext('2d');
+var chart2 = new Chart(ctx2, {
+    // The type of chart we want to create
+    type: 'bar',
+    // The data for our dataset
+    data: {
+        labels: [ {% for i in labels2 %} '{{i}}', {% endfor %} ],
+        datasets: [{
+        	axis: 'y',
+            backgroundColor: "#8e5ea2",
+            borderColor: "#8e5ea2",
+            data: [ {% for i in data2 %} {{i}}, {% endfor %} ]
+        		}]
+        },
+    options: {
+    	indexAxis: 'y',
+    	scales: {
+		    y: {
+		      ticks: {
+		        autoSkip: false,
+		      }
+		  }
+		},
+    	plugins: {
+    		legend: {
+    			display:false,
+	    		},
+	    	title: {
+	    	display: true,
+	    		text: 'Percentage of seals by class (minimum 1% of total)',
+	    	}
+			},
+    	}
+});
+
+
+var ctx3 = document.getElementById('Chart3').getContext('2d');
+var chart3 = new Chart(ctx3, {
+    // The type of chart we want to create
+    type: 'bar',
+    // The data for our dataset
+    data: {
+        labels: [ {% for i in labels3 %} '{{i}}', {% endfor %} ],
+        // ticks: {
+        // 	autoSkip: false,
+        // 	maxTicksLimit: 40
+        // },
+        datasets: [{
+        	axis: 'y',
+            backgroundColor: "#8e5ea2",
+            borderColor: "#8e5ea2",
+            data: [ {% for i in data3 %} {{i}}, {% endfor %} ]
+        		}]
+        },
+    options: {
+    	indexAxis: 'y',
+    	plugins: {
+    		legend: {
+    			display:false,
+	    		},
+	    	title: {
+	    	display: true,
+	    		text: 'Number of seals by century',
+	    	}
+			},
+    	}
+});
+
+
+// var ctx4 = document.getElementById('Chart4').getContext('2d');
+// var chart4 = new Chart(ctx4, {
+//     // The type of chart we want to create
+//     type: 'bar',
+//     // The data for our dataset
+//     data: {
+//         labels: [ {% for i in labels4 %} '{{i}}', {% endfor %} ],
+//         datasets: [{
+//         	axis: 'y',
+//             backgroundColor: "#8e5ea2",
+//             borderColor: "#8e5ea2",
+//             data: [ {% for i in data4 %} {{i}}, {% endfor %} ]
+//         		}]
+//         },
+//     options: {
+//     	indexAxis: 'y',
+//     	plugins: {
+//     		legend: {
+//     			display:false,
+// 	    		},
+// 	    	title: {
+// 	    	display: true,
+// 	    		text: 'Portion of cases with per region',
+// 	    	}
+// 			},
+//     	}
+// });
+
+
+var ctx5 = document.getElementById('Chart5').getContext('2d');
+var chart5 = new Chart(ctx5, {
+    // The type of chart we want to create
+    type: 'bar',
+    // The data for our dataset
+    data: {
+        labels: [ {% for i in labels5 %} '{{i}}', {% endfor %} ],
+        datasets: [{
+        	axis: 'y',
+            backgroundColor: "#8e5ea2",
+            borderColor: "#8e5ea2",
+            data: [ {% for i in data5 %} {{i}}, {% endfor %} ]
+        		}]
+        },
+    options: {
+    	indexAxis: 'y',
+    	plugins: {
+    		legend: {
+    			display:false,
+	    		},
+	    	title: {
+	    	display: true,
+	    		text: 'Percentage of seals identified with corporate actors, by class of corporate actor',
+	    	}
+			},
+    	}
+});
+
+
+// clear all user inputs from the select boxes in the form 
+	function myFunction() {
+		document.getElementById("id_collection").value = '';
+	}
+
+</script>
+
+
+<script>
+
+// function onEachFeature(feature, layer) {
+//    // does this feature have a property named popupContent?
+//     if (feature.properties && feature.properties.popupContent) {
+//         layer.bindPopup(feature.properties.popupContent);
+//     }
+// }
+
+// the second map
+	var geojsonFeature1 = JSON.parse(document.getElementById('mapdata').textContent);
+	var map = L.map('mapid2', {scrollWheelZoom:false}).setView([52,0], 5);
+
+	var layer = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+});
+	
+	map.addLayer(layer);
+
+	// control that shows state info on hover
+	var info = L.control();
+
+	info.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info');
+		this.update();
+		return this._div;
+	};
+
+	info.update = function (props) {
+		this._div.innerHTML = '<h4>Cases per area</h4>' +  (props ?
+			'<b>' + props.location + '</b><br />' + props.count + ' cases' : 'Hover over an area');
+	};
+
+	info.addTo(map);
+
+	// get color depending on population density value
+	function getColor(d) {
+		return d > 8000 ? '#49006a' :
+			d > 6000  ? '#7a0177' :
+			d > 4000  ? '#ae017e' :
+			d > 2000  ? '#dd3497' :
+			d > 1000   ? '#f768a1' :
+			d > 500   ? '#fa9fb5' :
+			d > 100   ? '#fcc5c0' :  
+			d > 50   ? '#fde0dd' : '#fff7f3';
+	}
+
+	function style(feature) {
+		return {
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '3',
+			fillOpacity: 0.7,
+			fillColor: getColor(feature.properties.count)
+		};
+	}
+
+	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
+
+		info.update(layer.feature.properties);
+	}
+
+
+	var legend = L.control({position: 'bottomright'});
+
+	legend.onAdd = function (map) {
+
+		var div = L.DomUtil.create('div', 'info legend');
+		var grades = [0, 50, 100, 500, 1000, 2000, 4000, 6000, 8000];
+		var labels = [];
+		var from, to;
+
+		for (var i = 0; i < grades.length; i++) {
+			from = grades[i];
+			to = grades[i + 1];
+
+			labels.push(
+				'<i style="background:' + getColor(from + 1) + '"></i> ' +
+				from + (to ? '&ndash;' + to : '+'));
+		}
+
+		div.innerHTML = labels.join('<br>');
+		return div;
+	};
+
+	legend.addTo(map);
+
+
+	var geojson;
+
+	function resetHighlight(e) {
+		geojson.resetStyle(e.target);
+		info.update();
+	}
+
+	function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	}
+
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: zoomToFeature
+		});
+	}
+
+	// working with circles 2020apr26
+	geojson = L.geoJSON(geojsonFeature1, {
+
+		pointToLayer: function (feature, latlng) {
+			return L.circle(latlng, {
+				radius: 50000,
+				weight: 2,
+				opacity: 1,
+				color: 'white',
+				dashArray: '3',
+				fillOpacity: 0.7,
+				fillColor: getColor(feature.properties.count)
+			});
+		},
+		onEachFeature: onEachFeature
+	}).addTo(map);
+
+</script>
+
+
+{% endblock %}

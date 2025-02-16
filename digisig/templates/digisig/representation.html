@@ -1,0 +1,359 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<script src="{% static 'js/rtidisplay.js' %}"></script>
+<link rel="stylesheet" href="{% static 'openlime/css/skin.css' %}">
+<script src="{% static 'openlime/js/openlime.js' %}"></script>
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="mainpage" id="mainpage"></div>
+
+	<div class="main-title">
+		<h1>{{representation_dic.main_title}}</h1>
+	</div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<input id="input" class="text" name="" value="http://www.digisig.org/entity/{{representation_dic.id_representation}}" type="text" readonly>
+		</form>
+		</div>
+	</div>
+
+	<div class="entity_detail" id= "entity_detail"> 
+		<h3>Representation details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3>
+		<table>
+
+			<tr>
+				<th>Creator</th>
+				<td>{{representation_dic.contributorcreator_name}}</td>
+
+				<td rowspan="4">
+					<figure>
+						<img class="modalimage" id="modalimagebase1" src="{{representation_dic.thumb}}{{representation_dic.representation_thumbnail}}" alt="{{representation_dic.id_representation}}" onclick="image(1)">
+					</figure>
+
+						<!-- The Modal -->
+						<div id="myModal1" class="modal" style="display: none;">
+						  <span class="close" onclick="modalclose(1)">&times;</span>
+						  <img class="modal-content" id="modalimg1" src="{{representation_dic.medium}}{{representation_dic.representation_filename}}" alt="{{representation_dic.id_representation}}">
+						  <div class="modal-caption" id="caption1"><a href="{% url 'entity' representation_dic.id_representation %}">Representation details</a></div>
+						</div>
+				</td>
+			</tr>
+			
+			{% if representation_dic.representation_type != null %}
+			<tr>
+				<th>Type</th>
+				<td>{{representation_dic.representation_type}}</td>
+			</tr>
+			{% endif %}
+			
+			{% if representation_dic.datecreated != null %}
+			<tr>
+				<th>Date Created</th>
+				<td>{{representation_dic.datecreated}}</td>
+			</tr>
+			{% endif %}
+
+			{% if representation_dic.width != null %}
+			<tr>
+				<th>Dimensions</th>
+				<td>{{representation_dic.width}} x {{representation_dic.height}} pixels</td>
+			</tr>
+			{% endif %}
+
+			{% if representation_dic.collection_object != null %}
+			<tr>
+				<th>Source</th>
+				<td>{{representation_dic.collection_object.collection_fulltitle}}</td>
+			</tr>
+			{% endif %}
+
+			{% if representation_dic.rights_object != null %}
+			<tr>
+				<th>Rights Holder</th>
+				<td>{{representation_dic.rights_object}}</td>
+			</tr>
+			{% endif %}
+
+		</table>
+	</div>
+
+
+
+
+	{% if representation_dic.entity_type == 2 %}	
+	<div class="entity_seals" id="entity_seals">
+		<div class="div-caption">
+			Seal details <button id="entitybutton4" onclick="tbtoggle('entity4', 'entitybutton4')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity4" style="display:none;">
+				<tr>
+					<th colspan="2"><h4><a class="headingbtn" href="{% url 'entity' representation_dic.seal.id_seal %}">Seal details</a></h4></td>
+				</tr>
+
+				<tr>
+					<th class="indent">Date <a class="help" href="{% url 'entity' digisig_entity_number=10001357 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					<td>
+					{% if representation_dic.seal.date_origin != null %}
+						{{representation_dic.seal.date_origin}} 
+					{% else %} Not Available
+					{% endif %}
+					</td>
+				</tr>
+
+				<tr>
+					<th class="indent">Actor <a class="help" href="{% url 'entity' digisig_entity_number=10001537 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					<td><a href="{% url 'entity' representation_dic.individual_object.id_individual %}">{{representation_dic.outname}}</a></td>
+				</tr>
+
+
+				{% for description in representation_dic.sealdescription_objectset %}
+				<tr>
+					{% if forloop.first %}<th class="indent">Described in <a class="help" href="{% url 'entity' digisig_entity_number=10001527 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					{% else %}<th></th>{% endif %}
+					<td> 
+					<a href="{% url 'entity' description.id_sealdescription %}">{{description.fk_collection}}
+						{% if description.sealdescription_identifier != null %} ({{description.sealdescription_identifier}}){% endif %}
+					</a>
+					</td>
+				</tr>
+				{% endfor%}
+
+
+			</table>
+		</div>
+	</div>
+	{% endif %}
+
+	{% if representation_dic.entity_type == 2 or representation_dic.entity_type == 8 %}
+	<div class="entity_item" id="entity_item">
+		<div class="div-caption">
+			Item details <button id="entitybutton2" onclick="tbtoggle('entity2', 'entitybutton2')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity2" style="display:none;">
+				<tr>
+					<th colspan="2"><h4><a class="headingbtn" href="{% url 'entity' representation_dic.item.id_item %}">Item details</a></h4></td>
+				</tr>
+				<tr>
+					<th class="indent">Reference <a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					<td>{{representation_dic.item.fk_repository}} {{representation_dic.item.shelfmark}}</td>
+				</tr>
+
+				{% if representation_dic.event.repository_startdate != null %}
+				<tr>
+					<th class="indent">Date (Repository)</th>
+					<td>
+						{% if representation_dic.event.fk_dateapprox_repository_start != null %}
+							{{representation_dic.event.fk_dateapprox_repository_start}}
+						{% endif %}
+
+						{{representation_dic.event.repository_startdate}}
+						
+						{% if representation_dic.event.repository_enddate != null %}
+							- 
+							{% if representation_dic.event.fk_dateapprox_repository_end != null %}
+								{{representation_dic.event.fk_dateapprox_repository_end}}
+							{% endif %}
+						{{representation_dic.event.repository_enddate}}
+						{% endif %}
+					</td>
+				</tr>
+				{% endif %}
+
+				{% if representation_dic.event.startdate != null %}
+				<tr>
+					<th class="indent">Date (Digisig)</th>
+					<td>
+						{{representation_dic.event.startdate}}{% if representation_dic.event.enddate != null %} - {{representation_dic.event.enddate}}{% endif %}
+					</td>
+				</tr>
+				{% endif %}
+
+				{% for region in representation_dic.region_objectset %}
+				<tr>
+					<th class="indent">Region</th>
+					<td>{{region.region_label}}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+	{% endif %}
+
+
+	{% if representation_dic.totalrows != 0 %}
+	<div class="entity_representation" id="entity_representation">
+		<div class="div-caption">
+			Further representations <button id="entitybutton1" onclick="tbtoggle('entity1', 'entitybutton1')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity1" style="display:none;">
+			{% for representation in representation_dic.representation_objectset %}
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+					<th colspan="3"><h4><a class="headingbtn" href="{% url 'entity' representation.id_representation %}">Representation details</a></h4></td>
+				</th>
+
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+					<th class="indent">Type</th>
+					<td>{{representation.fk_representation_type}}</td>
+					<td rowspan="3"> 
+					{% if representation.representation_thumbnail != null %}
+						<figure>
+							<img class="modalimage" id="modalimagebase{{forloop.counter}}" src="{{representation.fk_connection}}{{representation.representation_thumbnail}}" alt="{{representation.id_representation}}" onclick="image({{forloop.counter}})">
+						</figure>
+						<!-- The Modal -->
+						<div id="myModal1" class="modal" style="display: none;">
+						  <span class="close" onclick="modalclose({{forloop.counter}})">&times;</span>
+						  <img class="modal-content" id="modalimg1" src="{{representation.fk_connection}}{{representation.representation_filename}}" alt="{{representation.id_representation}}">
+						  <div class="modal-caption" id="caption1"><a href="{% url 'entity' representation.id_representation %}">{{representation.id_representation}}</a></div>
+						</div>
+					{% endif %}
+					</td>
+
+				</tr>
+
+				{% if representation.fk_contributor_creator != null %}
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+					<th class="indent">Creator</th>
+					<td>{{representation.fk_contributor_creator}}</td>
+				</tr>
+				{% endif %}
+
+				{% if forloop.counter|divisibleby:2 %}<tr class="even">{% else %}<tr class="odd">{% endif %}
+					<th class="indent">Date Taken</th>
+					<td>{{representation.represenation_datecreated}}</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+	</div>
+	{% endif %}
+
+	{% if representation_dic.representation_dic.entity_type is "2" %}
+	<div class="entity_manifestations" id="entity_manifestations">
+		<div class="div-caption">
+			{{representation_dic.manifestation_object.fk_imagestate}} details <button id="entitybutton3" onclick="tbtoggle('entity3', 'entitybutton3')" class="entity">+</button>
+		</div>
+
+		<div>
+			<table id="entity3" style="display:none;">
+
+				<tr>
+					<th colspan="3"><h4><a class="headingbtn" href="{% url 'entity' representation_dic.manifestation_object.id_manifestation %}">{{representation_dic.manifestation_object.fk_imagestate}} details</a></h4></td>
+				</th>
+
+				{% if representation_dic.manifestation_object.label_manifestation_repository != null %}
+				<tr>
+					<th class="indent">Reference <a class="help" href="{% url 'entity' digisig_entity_number=10001567 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					<td>{{representation_dic.manifestation_object.label_manifestation_repository}} <a class="dig-btn" href="{{representation_dic.manifestation_object.connection}}{{representation_dic.manifestation_object.ui_manifestation_repository}}" target="_blank">External link</a></td>
+				</tr>
+				{% endif %}
+
+				<tr>
+					<th class="indent">Support Type <a class="help" href="{% url 'entity' digisig_entity_number=10001377 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					<td>{% if representation_dic.support_object.fk_nature %}{{representation_dic.support_object.fk_nature}}{% endif %}</td>
+				</tr>
+	
+				{% if representation_dic.support_object.number != 'Undetermined' %}
+				<tr>
+					<th class="indent">Position <a class="help" href="{% url 'entity' digisig_entity_number=10001447 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					<td>support {{representation_dic.support_object.fk_number_currentposition}}, {{representation_dic.manifestation_object.fk_position}}</td>
+				</tr>
+				{% endif %}
+
+				{% if representation_dic.support_object.fk_attachment != null %}
+				<tr>
+					<th class="indent">Attachment <a class="help" href="{% url 'entity' digisig_entity_number=10001427 %}" target="_blank"><i class="fas fa-question-circle"></i></a></th>
+					<td>{{representation_dic.support_object.fk_attachment}}</td>
+				</tr>
+				{% endif %}
+	
+			</table>
+		</div>
+	</div>
+	{% endif %}
+				
+	<div class="entity_main">
+		<div id="choice" hidden>{{representation_dic.id_representation}}</div>
+		<div id="RTItest" hidden>{{representation_dic.representation_type}}</div>
+		<div id="openlime"></div>
+	</div>
+
+
+
+<script>
+var choice1 = document.getElementById("choice").innerHTML;
+var choice2 = document.getElementById("RTItest").innerHTML;
+console.log(choice2);
+console.log(typeof(choice2));
+
+if (choice2=="RTI") {
+let rti = rtiselect(choice1);
+
+const 	dzi = rti[0],
+		info = rti[1];
+
+//autodetect type:
+async function autodetect() {
+	let response = await fetch(dzi);
+
+	if(response.status == 200)
+		return "deepzoom";
+
+	alert("Could not detect an RTI here");
+	return "";
+}
+
+async function autodetectNormals(layout) {
+	return false;
+}
+
+
+async function init() {
+	let layout = await autodetect();
+	let normals = await autodetectNormals(layout);
+	var lime = new OpenLIME.Viewer('#openlime', { background:'black' });
+
+
+	let layer = new OpenLIME.Layer({ 
+		layout: layout, 
+		type:'rti',
+		url: info,
+		normals: normals
+	});
+
+	lime.canvas.addLayer('RTI', layer); 
+	OpenLIME.Skin.setUrl("{% static 'openlime/skin/skin.svg' %}");
+	let ui = new OpenLIME.UIBasic(lime, { skin: 'skin.svg', showLightDirections: true });
+	ui.actions.light.active = true;
+	ui.actions.layers.display = true;
+	lime.camera.maxFixedZoom = 1;
+	window.lime = lime;
+}
+
+init();
+
+} else {
+	console.log("Not an RTI");
+}
+
+</script>
+
+
+{% endblock %}

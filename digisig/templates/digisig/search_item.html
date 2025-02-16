@@ -1,0 +1,222 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+{% block content %}
+
+
+	<div class="search-people-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>Search Items</h1>
+	</div>
+
+<div class="mainpage"></div>
+
+	<div class="guidance-bar">
+		<div class="div-caption">
+			Guidance Notes<button id="guidancebutton1" onclick="tbtoggle('guidance', 'guidancebutton1')" class="entity">+</button>
+		</div>
+	</div>
+
+	<div class="guidance" id="guidance" style="display:none;">
+		Under construction
+	</div>
+
+	<div class="results-bar">
+		<div class="div-caption">
+			Results ({{totaldisplay}} of {{totalrows}})<button id="resultsbutton1" onclick="tbtoggle('results', 'resultsbutton1')" class="entity">-</button>
+		</div>
+	</div>
+
+	<div class="results" id="results">
+		<div class="searchfilter">		
+			<div class="filter">
+				<h2>Filter</h2>
+				<form id="form" action="/search/items" method="post">
+			    	{% csrf_token %}
+					{{ form.non_field_errors }}
+					<div style="display: none" class="fieldWrapper">
+						{{ form.pagination.errors }}
+						<label for="{{ form.pagination.id_for_label }}">pagination</label>
+						{{ form.pagination}}
+					</div>
+					<div class="fieldWrapper">		
+						{{ form.repository.errors }}
+						<label for="{{ form.repository.id_for_label }}">Repositories</label>
+						{{ form.repository }}
+					</div>
+					<div class="fieldWrapper" >		
+						{{ form.series.errors }}
+						<label for="{{ form.series.id_for_label }}">Series</label>
+						{{ form.series }}
+					</div>
+					<div class="fieldWrapper">		
+						{{ form.shelfmark.errors }}
+						<label for="{{ form.shelfmark.id_for_label }}">Shelfmark</label>
+						{{ form.shelfmark }}
+					</div>
+					<div class="fieldWrapper">		
+						{{ form.searchphrase.errors }}
+						<label for="{{ form.searchphrase.id_for_label }}">Phrase</label>
+						{{ form.searchphrase }}
+					</div>
+					<div class="fieldWrapper">
+				    	<input class="submit" type="submit" value="Submit">
+			    	</div>
+			    	<div class="fieldWrapper">
+			    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
+			    	</div>
+				</form>
+			</div>
+			
+			<div>
+				<div>
+					<h2>Results</h2>
+				</div>
+				<div>
+					<table>
+						{% if Repositorycases > 0 %}
+							<tr>
+								<td>Repository: {{Repositorycases}}</td>
+							</tr>
+						{% endif %}
+						{% if Seriescases > 0 %}
+							<tr>
+								<td>Series: {{Seriescases}}</td>
+							</tr>
+						{% endif %}
+						{% if Shelfmarkcases > 0 %}
+							<tr>
+								<td>Shelfmark: {{Shelfmarkcases}}</td>
+							</tr>
+						{% endif %}
+						{% if Phrasecases > 0 %}
+							<tr>
+								<td>Phrase: {{Phrasecases}}</td>
+							</tr>
+						{% endif %}
+					</table>
+				</div>
+			</div>
+		</div>	
+
+		<div class="searchresults">
+			{% for item in itemset.values %}
+			<div>
+				<a href="{% url 'item_page' digisig_entity_number=item.id_item %}">{{item.repository}}, {{item.shelfmark}}</a>
+			</div>
+			<div>
+				{% if item.connection != null %}
+				<figure>
+					<img class="modalimage" id="modalimagebaseitem{{forloop.counter}}" src="{{item.connection}}{{item.thumb}}" alt="{{item.id_representation}}" onclick="image2({{forloop.counter}}, 'item')">
+				</figure>
+
+				<!-- The Modal -->
+				<div id="myModalitem{{forloop.counter}}" class="modal" style="display: none;">
+				  <span class="close" onclick="modalclose2({{forloop.counter}}, 'item')">&times;</span>
+				  <img class="modal-content" id="modalimgitem{{forloop.counter}}" src="{{item.connection}}{{item.thumb}}" alt="{{item.id_representation}}" loading="lazy">
+				  <div class="modal-caption" id="captionitem{{forloop.counter}}">
+				  		<a href="{% url 'representation_page' digisig_entity_number=item.id_representation %}">Representation details</a>
+				  </div>
+				</div>
+				{% endif %}
+			</div>
+			{% endfor %}
+
+			<div>
+			{% if totalrows > 9 %}
+				<div class= "pagination" style="float: right;">
+					{% if pagecountercurrent > 1 %}
+					<button id="page_button_previous" onclick="page_button(-1)">Previous</button>
+						{% endif %}
+					<button id="page_button_1" onclick="page_button(1)">{{pagecountercurrent}}</button>
+					<button id="page_button_2" onclick="page_button(2)">{{pagecounternext}}</button>
+					<button id="page_button_2" onclick="page_button(3)">{{pagecounternextnext}}</button>
+					<button id="page_button_next" onclick="page_button(1)">Next</button>
+				</div>
+			{% endif %}
+			</div>
+		</div>
+	
+	</div>
+
+<script>
+
+
+// if the form data is changed then reset the page counter back to 1
+	document.getElementById("form").addEventListener("input", formupdate_event);
+	function formupdate_event() {
+		document.getElementById("id_pagination").value = 1;
+	}
+
+// clear all user inputs from the select boxes in the form 
+	function myFunction() {
+		document.getElementById("id_pagination").value = 1; 
+		document.getElementById("id_repository").value = '';
+		document.getElementById("id_series").value = '';
+		document.getElementById("id_shelfmark").value = '';
+		document.getElementById("id_searchphrase").value = ''; 
+	}
+
+// allow the user to progress to the subsequent page 
+	function page_button(numberofpages) {
+		var pagevalue = document.getElementById("id_pagination").value;
+		pagevalue = parseInt(pagevalue) + numberofpages;
+		document.getElementById("id_pagination").value = pagevalue;
+		document.getElementById("form").submit(); 
+	}
+
+
+// the set of series and repository numbers
+	const series_data = JSON.parse('{{ series_object|safe }}');
+	
+// action on selection of a repository -- should limit options from series list and make series available
+	document.getElementById("id_repository").onchange = function () {
+    //check to see if form has a value
+    var statusrepository = document.getElementById('id_repository').value;
+
+    if (statusrepository = "") {
+        document.getElementById('series_label').style="opacity:0.6";
+    } else {
+      // as a repository has been selected, enable the series form
+      // document.getElementById("series_label").style="opacity:1";
+      // document.getElementById("series_options").style="opacity:1";
+      // document.getElementById("series_options").disabled = false;      
+
+      //find number of options and limit series list
+      var seriesoptionslength = document.getElementById('id_series').options.length;
+          var x = document.getElementById('id_series');
+
+
+        //console.log(series_data[0].fields.fk_repository);
+        //console.log(series_data[0].pk);
+
+          for (var j = 0; j < seriesoptionslength; j++) {
+          document.getElementById("id_series").options[j].hidden = true;
+          var t = document.getElementById("id_series").options[j].value;
+        var statusrepository = document.getElementById('id_repository').value;
+
+        for (var key in series_data) {
+          if (series_data[key].pk == t) {
+            var repositorynumber = series_data[key].fields.fk_repository;
+          }
+        }
+
+          // var repositorynumber = series_data[j].fields.fk_repository;
+          // var seriesnumber2 = series_data[j].pk;
+        var repositorynumber2 = Number(repositorynumber);
+
+          if (repositorynumber2 == statusrepository) {
+            document.getElementById("id_series").options[j].hidden = false;
+          }
+
+      }             
+    }
+    } 
+
+
+</script>
+
+{% endblock %}

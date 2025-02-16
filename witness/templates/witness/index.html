@@ -1,0 +1,18 @@
+{% extends "witness/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+    <div class="home-banner"></div> 
+    <div class="sidepanel-left"></div>
+    <div class="sidepanel-right"></div>
+
+    <div class="centerpanel">
+        <ul>
+            <li><a class="centerpanel" href="{% url 'search' searchtype='parish' %}">Parish</a></li>
+            <li><a class="centerpanel" href="{% url 'search' searchtype='person' %}">Person</a> </li>
+        </ul>
+    </div>
+
+{% endblock %}

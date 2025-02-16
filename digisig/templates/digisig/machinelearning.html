@@ -1,0 +1,164 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1"></script>
+
+
+	<div class="home-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>Seal Matrix Date Predictions</h1>
+	</div>
+
+	<div class="mainpage" id="mainpage"> </div>
+
+	<div class="entity-permalink" id="entity-permalink">
+		<div class="permalinkinfo" id="permalinkinfo">
+		Permalink
+		<button onclick="toggle('entity-permalink')" class="closebutton">X</button>
+		<form action="#">
+			<label>Copy this URL to link to this page:</label>
+			<!-- <input id="input" class="text" name="" value="http://www.digisig.org/entity/{{collection.id_collection}}" type="text" readonly> -->
+		</form>
+		</div>
+	</div>
+
+	<div class="entity_detail" id="entity_detail">
+		<h3>Collection details <button onclick="toggle('entity-permalink')" class="permalink">Permalink</button></h3> 
+			<div class="filter">
+				<h2>Select</h2>
+
+				<form id="form" action="/information/machinelearning" method="post">
+			    	{% csrf_token %}
+			    	{{ form.non_field_errors }}
+			    	<div class="fieldWrapper">
+					    {{ form.collection2.errors }}
+					    <label for="{{ form.collection2.id_for_label }}">Collection <a class="help" href="{% url 'entity' digisig_entity_number=10001607 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+					    {{ form.collection2 }}
+					</div>
+				<h2>Filter</h2>
+					<div class="fieldWrapper">
+					    {{ form.classification.errors }}
+					    <label for="{{ form.classification.id_for_label }}">Classification <a class="help" href="{% url 'entity' digisig_entity_number=10001497 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+					    {{ form.classification }}
+					</div>
+					<div class="fieldWrapper">
+			    		<input class="submit" type="submit" value="Submit">
+			    	</div>
+				</form>
+				
+		    	<div class="fieldWrapper">
+			    		<button id="filterclear_button" onclick="myFunction()">Clear filter</button>
+		    	</div>
+			</div>
+
+
+
+		<table>
+			<tr>
+				<th>{{facenumbercount}}</th>
+			</tr>
+
+		</table>
+	</div>
+
+	<div class="entity_seals" id="entity_seals">
+		<div class="div-caption">
+			Predictions compared to catalogue dates<button id="entitybutton1" onclick="tbtoggle('Chart2', 'entitybutton1')" class="entity">-</button>
+		</div>
+		<div>
+			<canvas id="Chart2"></canvas>
+		</div>
+	</div>
+
+
+<script>
+
+var ctx2 = document.getElementById('Chart2').getContext('2d');
+
+// const xValues = ["Italy", "France", "Spain", "USA", "Argentina"];
+// const yValues = [[155, 179], [149,189], [144, 201], [124, 200], [115, 200]];
+// const barColors = ["red", "green","blue","orange","brown"];
+
+
+const xValues = [ {% for i in labels %} {{i}}, {% endfor %} ];
+const yValues = [ {% for i in data1 %} {{i}}, {% endfor %} ];
+const zValues = [ {% for i in data2 %} {{i}}, {% endfor %} ];
+
+var chart2 = new Chart(ctx2, {
+  type: "bar",
+  data: {
+	labels: xValues,
+    datasets: [{
+    	label: 'Catalogue date span',
+      backgroundColor: "red",
+      data: yValues,
+      order: 2
+    }, {
+    	label: 'Predicted date span',
+      // type: 'line',
+      backgroundColor: "blue",
+      data: zValues,
+      order: 1
+    }]
+  },
+  options: {
+  	locale: 'fr',
+  	scales: {
+  		y: {
+  			min:1200,
+  		}
+  	},
+    legend: {display: false},
+    title: {
+      display: true,
+      text: "Comparison of predicted dates to catalogue dates"
+    }
+  }
+});
+
+
+
+
+// var chart2 = new Chart(ctx2, {
+//   type: "bar",
+//   data: {
+//     labels: xValues,
+//     datasets: [{
+//       backgroundColor: "red",
+//       data: yValues
+//     }]
+//   },
+//   options: {
+//     legend: {display: false},
+//     title: {
+//       display: true,
+//       text: "World Wine Production 2018"
+//     }
+//   }
+// });
+
+
+
+
+
+
+
+
+// clear all user inputs from the select boxes in the form 
+	function myFunction() {
+		document.getElementById("id_collection").value = '';
+	}
+
+</script>
+
+
+{% endblock %}
+

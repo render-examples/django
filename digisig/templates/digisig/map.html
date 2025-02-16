@@ -1,0 +1,352 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<!--leaflet -->		
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!--Mapping --> 
+<script type="text/javascript" src="https://stamen-maps.a.ssl.fastly.net/js/tile.stamen.js?v1.3.0"></script>
+
+
+
+	<div class="search-advanced-banner"></div>	
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>{{pagetitle}}</h1>
+	</div>
+
+	<div class="mainpage" id="mainpage"> </div>
+
+	<div class="entity_chartfilter" id="entity_chartfilter">
+		<div>
+			<h2>Select</h2>		
+			<form id="form" action="/discover/map" method="post">
+		    	{% csrf_token %}
+		    	{{ form.non_field_errors }}
+		    	<div class="fieldWrapper">
+				    {{ form.collection.errors }}
+				    <label for="{{ form.collection.id_for_label }}">Collection <a class="help" href="{% url 'entity' digisig_entity_number=10001607 %}" target="_blank"><i class="fas fa-question-circle"></i></a></label>
+				    {{ form.collection }}
+				</div>
+				<div class="fieldWrapper">
+				    {{ form.mapchoice.errors }}
+				    <label for="{{ form.mapchoice.id_for_label }}">Map type</label>
+				    {{ form.mapchoice }}
+				</div>
+				<div class="fieldWrapper">
+		    		<input class="submit" type="submit" value="Submit">
+		    	</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="entity_chart" id="entity_chart">
+		<div id="mapid1"></div>
+	</div>
+
+	{{ location_dict|json_script:"mapdata1" }}
+	{{ counties_dict|json_script:"mapdata2" }}
+	{{ region_dict|json_script:"mapdata3" }}
+
+
+<script>
+// This code could be rendered much more concise -- plenty of duplication here -- May/2022
+
+function onEachFeature(feature, layer) {
+    // does this feature have a property named popupContent?
+    if (feature.properties && feature.properties.popupContent) {
+        layer.bindPopup(feature.properties.popupContent);
+    }
+	}
+
+	var geojsonFeature1 = JSON.parse(document.getElementById('mapdata1').textContent);
+	var placeslen = Object.keys(geojsonFeature1).length;
+
+	if (placeslen > 1) { 
+		var map1 = L.map('mapid1', {scrollWheelZoom:false}).setView([45,15], 4);
+		var layer1 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+});
+	
+		map1.addLayer(layer1);
+		L.geoJSON(geojsonFeature1, {onEachFeature: onEachFeature}).addTo(map1);
+	}
+
+	//map 2
+
+	var geojsonFeature2 = JSON.parse(document.getElementById('mapdata2').textContent);
+	var countieslen = Object.keys(geojsonFeature2).length;
+
+	if (countieslen > 1) { 
+
+	var map1 = L.map('mapid1', {scrollWheelZoom:false}).setView([52.5,-2], 7);
+var layer2 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+});
+	
+
+
+	map1.addLayer(layer2);
+
+	L.geoJSON(geojsonFeature2, {style: style}).addTo(map1);
+
+	// control that shows state info on hover
+	var info2 = L.control();
+
+	info2.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info');
+		this.update();
+		return this._div;
+	};
+
+	info2.update = function (props) {
+		this._div.innerHTML = '<h4>Cases per County</h4>' +  (props ?
+			'<b>' + props.NAME + '</b><br />' + props.cases + ' cases' : 'Hover over a County');
+	};
+
+	info2.addTo(map1);
+
+	// get color depending on population density value
+	function getColor(d) {
+		return d > 5000 ? '#49006a' :
+			d > 1000  ? '#7a0177' :
+			d > 500  ? '#ae017e' :
+			d > 200  ? '#dd3497' :
+			d > 100   ? '#f768a1' :
+			d > 50   ? '#fa9fb5' :
+			d > 20   ? '#fcc5c0' :  
+			d > 10   ? '#fde0dd' : '#fff7f3';
+	}
+
+	function style(feature) {
+		return {
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '3',
+			fillOpacity: 0.7,
+			fillColor: getColor(feature.properties.cases)
+		};
+	}
+
+	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
+
+		info2.update(layer.feature.properties);
+	}
+
+	var geojson2;
+
+	function resetHighlight(e) {
+		geojson2.resetStyle(e.target);
+		info2.update();
+	}
+
+	function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	}
+
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: zoomToFeature
+		});
+	}
+
+	/* global statesData */
+	geojson2 = L.geoJson(geojsonFeature2, {
+		style: style,
+		onEachFeature: onEachFeature
+	}).addTo(map1);
+
+	map1.attributionControl.addAttribution('');
+
+	var legend2 = L.control({position: 'bottomright'});
+
+	legend2.onAdd = function (map) {
+
+		var div = L.DomUtil.create('div', 'info legend');
+		var grades = [0, 10, 20, 50, 100, 200, 500, 1000, 5000];
+		var labels = [];
+		var from, to;
+
+		for (var i = 0; i < grades.length; i++) {
+			from = grades[i];
+			to = grades[i + 1];
+
+			labels.push(
+				'<i style="background:' + getColor(from + 1) + '"></i> ' +
+				from + (to ? '&ndash;' + to : '+'));
+		}
+
+		div.innerHTML = labels.join('<br>');
+		return div;
+	};
+
+	legend2.addTo(map1);
+
+}
+
+
+// the third map
+	var geojsonFeature3 = JSON.parse(document.getElementById('mapdata3').textContent);
+
+	var regionslen = Object.keys(geojsonFeature3).length;
+
+	if (regionslen > 1) { 
+
+	var map = L.map('mapid1', {scrollWheelZoom:false}).setView([52,0], 5);
+
+	var layer3 = new L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+});
+	
+	map.addLayer(layer3);
+
+	// control that shows state info on hover
+	var info3 = L.control();
+
+	info3.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info3');
+		this.update();
+		return this._div;
+	};
+
+	info3.update = function (props) {
+		this._div.innerHTML = '<h4>Cases per area</h4>' +  (props ?
+			'<b>' + props.location + '</b><br />' + props.count + ' cases' : 'Hover over an area');
+	};
+
+	info3.addTo(map);
+
+	// get color depending on population density value
+	function getColor(d) {
+		return d > 8000 ? '#49006a' :
+			d > 6000  ? '#7a0177' :
+			d > 4000  ? '#ae017e' :
+			d > 2000  ? '#dd3497' :
+			d > 1000   ? '#f768a1' :
+			d > 500   ? '#fa9fb5' :
+			d > 100   ? '#fcc5c0' :  
+			d > 50   ? '#fde0dd' : '#fff7f3';
+	}
+
+	function style(feature) {
+		return {
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '3',
+			fillOpacity: 0.7,
+			fillColor: getColor(feature.properties.count)
+		};
+	}
+
+	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer3.bringToFront();
+		}
+
+		info3.update(layer.feature.properties);
+	}
+
+
+	var legend3 = L.control({position: 'bottomright'});
+
+	legend3.onAdd = function (map) {
+
+		var div = L.DomUtil.create('div', 'info3 legend');
+		var grades = [0, 50, 100, 500, 1000, 2000, 4000, 6000, 8000];
+		var labels = [];
+		var from, to;
+
+		for (var i = 0; i < grades.length; i++) {
+			from = grades[i];
+			to = grades[i + 1];
+
+			labels.push(
+				'<i style="background:' + getColor(from + 1) + '"></i> ' +
+				from + (to ? '&ndash;' + to : '+'));
+		}
+
+		div.innerHTML = labels.join('<br>');
+		return div;
+	};
+
+	legend3.addTo(map);
+
+
+	var geojson3;
+
+	function resetHighlight(e) {
+		geojson3.resetStyle(e.target);
+		info3.update();
+	}
+
+	function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	}
+
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: zoomToFeature
+		});
+	}
+
+	// working with circles 2020apr26
+	geojson3 = L.geoJSON(geojsonFeature3, {
+
+		pointToLayer: function (feature, latlng) {
+			return L.circle(latlng, {
+				radius: 50000,
+				weight: 2,
+				opacity: 1,
+				color: 'white',
+				dashArray: '3',
+				fillOpacity: 0.7,
+				fillColor: getColor(feature.properties.count)
+			});
+		},
+		onEachFeature: onEachFeature
+	}).addTo(map);
+
+	}
+</script>
+
+{% endblock %}

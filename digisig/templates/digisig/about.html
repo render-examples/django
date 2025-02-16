@@ -1,0 +1,83 @@
+{% extends "digisig/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="search-banner"></div>
+	<div class="sidepanel-left"></div>
+	<div class="sidepanel-right"></div>
+
+	<div class="main-title">
+		<h1>About</h1>
+	</div>
+
+	<div class="mainpage"> </div>
+
+		<div class="entity_main">
+<h2>About the project</h2>
+<p>The Digitial Sigillography Resource (<a href="{% url 'collection_page' digisig_entity_number=30000287 %}">Digisig</a>) enables scholars and members of the public to search sigillographic reference works (<a href="{% url 'information' infotype='collections' %}">collections</a>).</p> <p>Scholars, archivists, archaeologists and museum curators have recorded tens of thousands of British seals. Those records are now indispensable information sources for scholars—but they are heterogenous in both form and content, and dispersed across many different reference works. To assist researchers to perform searches that span multiple repositories' holdings, the Digisig project assembles those records and standardizes their information.</p> <p>Digisig fosters the study of seals, particularly from Medieval Europe, by enhancing access to this important cultural legacy.</p>
+
+<H2>About the designer</H2>
+<p>This site is designed and programmed by <a href="https://orcid.org/0000-0002-9225-4934">John McEwan</a>. The site uses the open-source Python-based web framework <a href="https://www.djangoproject.com/">Django</a> and a <a href="https://www.postgresql.org/">Postgresql</a> database.</p> 
+
+<p>The site went public in 2020 and it remains a work in <a href="{% url 'information' infotype='changelog' %}">progress</a>.</p>
+
+<p>I do the programming for this site in my spare time, when my current job in the Saint Louis University Center for Digital Humanities allows. I trained as a medieval historian, but to build this site I've had to acquire a working knowledge of HTML, CSS, JavaScript, SQL, and Python. It's been a fascinating journey.</p>
+
+<p>As a non-profit research project, Digisig operates with little funding. The on-going costs of running the site include storage for images, secure backup for the dataset, and server costs. If the project has been useful to you, please consider making a <a href="https://www.paypal.com/donate/?business=B6V6EZXPFCVV2&no_recurring=0&item_name=Help+keep+this+resource+free+and+accessible+by+making+a+donation.&currency_code=USD"> donation </a> and help keep this resource free and accessible.</p>
+
+<h2>History of the project</h2>
+<p>The Digisig project follows on from <i>Seals in Medieval Wales and the Welsh Marches, 1200-1500</i> (2012), funded by the UK's Arts and Humanities Research Council (AH/G010994/1), which I worked on as a researcher. This project's legacy included a remarkable dataset, but in 2012, when the project concluded, there was no platform available to enable the general public to query it. This seemed like a shame to me, so to enable public access, I started working on what would eventually become the first version of Digisig.</p>
+
+<p>I built the first version of Digisig, in PHP, as a postdoc at the Saint Louis University Center for Digital Humanities, Missouri, in 2014-15. When Digisig launched, I included data from the Seals in Medieval Wales Project, and also a number of other datasets, drawn from archives and museums. The dataset is still growing today, and further contributions are always welcome.</p>
+
+<p>You can still find the original site <a href="http://165.134.241.74/digisig">here</a>. That site was refined with further support from fellowships offered by the Huntington Library, California (John Brockway Huntington Foundation Fellowship), Göttingen Centre for Digital Humanities, Germany (CENDARI Fellowship), and Durham University, UK (Institute of Medieval and Early Modern Studies Library Fellowship). However, it had limitations and when in 2020 it became clear that it had come to the end of its useful life, I decided I would make a new version based on the lessons of the first.</p>
+
+<p>This version of Digisig (2020-) is a rebuild of the 2014 version.</p>
+
+<p>A very wide variety of people have contributed to this project over many years. Some have provided inspiration, others mentorship, and many people have contributed data.</p>
+
+<p>What has made this project possible is the kind generosity of innumerable archivists, who have patiently shared the seals in their custody with the author. Without them, this project would not exist.</p>
+
+<h2>Related publications</h2>
+
+<p>'<a href="https://doi.org/10.1515/9781802700152-004" target="_blank">New approaches to old questions: digital technology, sigillography and Digisig</a>', In <i>Digital Medieval Studies: Practice and Preservation</i>, edited by Laura K. Morreale, Gilsdorf, S. (Leeds, 2022), 33-48.</p> 
+<p>‘<a href="https://doi.org/10.1111/hic3.12477" target="_blank">Reflectance transformation imaging and the future of medieval sigillography</a>’, History Compass, iss. e12477 (2018).</p>
+<p>‘<a href="https://doi.org/10.1080/23257962.2017.1353412" target="_blank">The past, present and future of sigillography: towards a new structural standard for seal catalogues</a>’, Archives and Records, vol. 39, iss. 2 (2018), pp.224-243.</p>
+<p>‘<a href="https://doi.org/10.1108/JD-12-2013-0163" target="_blank">The challenge of the visual: making medieval seals accessible in the digital age</a>’, Journal of Documentation, vol. 71, iss. 5 (2015), 999-1028.
+</p>
+
+<h2>Additional publications</h2>
+<p>
+'Does size matter? Seals in England and Wales, ca.1200-1500', in <i>A Companion to Seals in the Middle Ages</i>, edited by Laura Whatley (Leiden, 2019), 103-128.
+</p>
+
+<p>'Tout and seals', in <i>Thomas Frederick Tout: Refashioning History in the 20th Century</i>, edited by Joel T. Rosenthal and Caroline M. Barron (London, 2019), 185–198.</p>
+
+<p>'Seals in medieval Wales and its neighbouring counties: trends in motifs', in <i>Seals and Society in Medieval Wales and its Border Region</i>, edited by Elizabeth A. New and Phillipp R. Schofield (Cardiff, 2016), 13-34.</p>
+
+<p><i>Seals in Medieval London, 1050-1300: A Catalogue</i> (London, 2016).</p>
+
+<p>'Formation of a sealing society: London in the twelfth century', in <i>Medieval Coins and Seals: Constructing Identity, Signifying Power</i>, edited by Susan Solway (Turnhout, 2015), 319-330.</p>
+
+<p>'Making a mark in medieval London: the social and economic standing of seal-makers', in <i>Seals and their Context in the Middle Ages</i>, edited by Phillipp R. Schofield (Oxford, 2015), 77-88.</p>
+
+<p>'Occupation and identity in Medieval London', in <i>The Medieval Merchant</i>, edited by Caroline M. Barron and Anne F. Sutton (Donington, 2014), 350-363.</p>
+
+<p>'The seals of London’s governing elite in the thirteenth century', in <i>Thirteenth Century England XIV</i>, edited by Janet E. Burton, Phillipp R. Schofield, Karen Stober and Bjorn K. U. Weiler (Aberystwyth, 2013).</p>
+
+<p>'The development of an identity in thirteenth century London: the personal seals of Simon FitzMary', In <i>Pourquoi les Sceaux? La Sigillographie, Nouvel Enjeu de l'Histoire de l'Art</i>, edited by Marc Gil and Jean-Luc Chassel (Lille, 2011), 255-74.</p>
+
+<p>'Horses, horsemen and hunting: leading Londoners and equestrian seals in the late twelfth and early thirteenth-centuries', Essays in Medieval Studies 22 (2005).</p>
+
+<br>
+<br>
+John McEwan 
+<div itemscope itemtype="https://schema.org/Person"><a itemprop="sameAs" content="https://orcid.org/0000-0002-9225-4934" href="https://orcid.org/0000-0002-9225-4934" target="orcid.widget" rel="me noopener noreferrer" style="vertical-align:top;"><img src="https://orcid.org/sites/default/files/images/orcid_16x16.png" style="width:1em;margin-right:.5em;" alt="ORCID iD icon">https://orcid.org/0000-0002-9225-4934</a></div>
+</div>
+
+</div>
+
+
+{% endblock %}
